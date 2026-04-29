@@ -124,8 +124,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     } else {
       // 반경 내 공실 없음 → 동네 이름 기반 일반 메시지
       setLocalFeeds([
-        { user: `${dong} 주민`, text: `${dong}의 빈 공간을 발견하셨나요? 지도에 첫 번째로 등록해보세요! 📍`, color: "bg-amber-600" },
-        { user: `${dong} 탐험가`, text: `${dong} 이웃들과 함께 우리 동네 상권을 만들어가요 🏘️`, color: "bg-emerald-500" },
+        { user: `${dong} 주민`, text: `${dong}의 빈 공간을 발견하셨나요? 지도에 첫 번째로 등록해보세요! 📍`, color: "bg-amber-600" }
       ]);
     }
   }, [filteredVacancies, userProfile]);
@@ -197,7 +196,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     setVotedIds([]);
 
     const timer = setInterval(() => {
-      setFeedIndex((prev) => (prev + 1) % 4);
+      setFeedIndex((prev) => prev + 1);
     }, 6000);
 
     return () => clearInterval(timer);
@@ -492,12 +491,15 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       </div>
 
       <div className="absolute top-[88px] left-4 right-4 z-50 pointer-events-none transition-all duration-500">
-        {localFeeds.length > 0 && (
-          <div key={feedIndex} className="bg-white px-4 py-2.5 rounded-2xl shadow-xl border border-white/20 flex items-center gap-3 w-fit mx-auto pointer-events-auto animate-[fadeIn_0.5s_ease-out]">
-            <div className={`w-8 h-8 rounded-xl ${localFeeds[feedIndex].color} flex items-center justify-center text-white shadow-sm`}><MessageSquare size={14} fill="currentColor" /></div>
-            <div><p className="text-[11px] font-black text-slate-900 leading-tight tracking-tight"><span className="text-amber-600 mr-2">새소식</span>{localFeeds[feedIndex].text}</p></div>
-          </div>
-        )}
+        {localFeeds.length > 0 && (() => {
+          const currentFeed = localFeeds[feedIndex % localFeeds.length];
+          return (
+            <div key={feedIndex} className="bg-white px-4 py-2.5 rounded-2xl shadow-xl border border-white/20 flex items-center gap-3 w-fit mx-auto pointer-events-auto animate-[fadeIn_0.5s_ease-out]">
+              <div className={`w-8 h-8 rounded-xl ${currentFeed.color} flex items-center justify-center text-white shadow-sm`}><MessageSquare size={14} fill="currentColor" /></div>
+              <div><p className="text-[11px] font-black text-slate-900 leading-tight tracking-tight"><span className="text-amber-600 mr-2">새소식</span>{currentFeed.text}</p></div>
+            </div>
+          );
+        })()}
       </div>
 
       <div className="absolute right-6 bottom-56 flex flex-col gap-4 z-[100]">
