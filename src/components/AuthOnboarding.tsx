@@ -196,8 +196,11 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             setIsLocating(false);
             setStep(2); 
           } else {
-            setLocationError("카카오 API 응답 오류 (데이터 없음).");
+            // 해외 접속(오슬로 등)으로 카카오에서 주소를 찾지 못하는 경우를 위한 폴백(Fallback)
+            setNeighborhood("성수동 (테스트)");
+            setCoords({ lat: 37.5445, lng: 127.0560 }); // 성수동 좌표
             setIsLocating(false);
+            setStep(2);
           }
         } catch (e: any) {
           console.error("역지오코딩 실패:", e);
