@@ -57,6 +57,14 @@ export async function fetchComments(vacancyId: string, currentUserId?: string) {
       is_liked: commentLikes.some(l => l.user_id === currentUserId),
       reports_count: commentReports.length,
     };
+  })
+  .sort((a: any, b: any) => {
+    // 1. Sort by likes count (descending)
+    if (b.likes_count !== a.likes_count) {
+      return b.likes_count - a.likes_count;
+    }
+    // 2. Then by date (descending)
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   }) as Comment[];
 }
 
