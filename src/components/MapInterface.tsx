@@ -406,6 +406,15 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   };
 
   if (loading) return null;
+  if (error) return (
+    <div className="flex flex-col items-center justify-center w-full h-screen bg-slate-950 text-white p-8 text-center">
+      <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-4 text-red-500">
+        <span className="text-3xl">⚠️</span>
+      </div>
+      <h2 className="text-xl font-black mb-2">지도 로딩 실패</h2>
+      <p className="text-slate-400 text-sm">카카오 JavaScript 키가 올바르지 않거나 허용된 도메인이 아닙니다.</p>
+    </div>
+  );
   const votedVacancies = filteredVacancies.filter(v => votedIds.includes(v.id));
 
   // ─ 중복 공실 판정: 같은 주소 + 같은 층 (주소없으면 50m 폴백) ────────────────────────────────
@@ -490,7 +499,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           })()}
           {isPinpointing && (<MapMarker position={pinLocation} draggable={true} onDragEnd={(marker) => setPinLocation({ lat: marker.getPosition().getLat(), lng: marker.getPosition().getLng() })} image={{ src: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA2MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBkPSJNMzAgNzRMMTQgNTJDNyA0MyAzIDM1IDMgMjdDMyAxMiAxNSAwIDMwIDBDNDUgMCA1NyAxMiA1NyAyN0M1NyAzNSA1MyA0MyA0NiA1MkwzMCA3NFoiIGZpbGw9IiMwMjA2MTciIHN0cm9rZT0iI0Y1OUUwQiIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPGNpcmNsZSBjeD0iMzAiIGN5PSIyNyIgcj0iMTIiIGZpbGw9IiNGNTlFMEIiLz4KICA8cGF0aCBkPSJNMzAgMTlMMzAgMzVNMjMgMjZMMzcgMjZNMjUgMjNMMzUgMjMiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAyMDYxNyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+", size: { width: 50, height: 65 }, options: { offset: { x: 25, y: 65 } } }} />)}
         </Map>
-        <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(2,6,23,0.8)] z-1" />
       </div>
 
       <div className="absolute top-[88px] left-4 right-4 z-50 pointer-events-none">
