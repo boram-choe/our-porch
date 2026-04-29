@@ -186,17 +186,10 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             }));
             setVacancies(converted);
           } else {
-            // DB에 데이터 없으면 더미 데이터로 시작
-            setVacancies([
-              { id: "v1", address: "서울시 중구 을지로1가 16", landmark: "서울시청 1층 공간", floor: "1층", lat: 37.5665, lng: 126.9780, price: "500 / 6,500", size: "15평 (1층)", status: "available", tags: ["시청상권", "유동인구최다"], currentVotes: [{ categoryId: "cafe", brand: "블루보틀", label: "카페", logo: "https://logo.clearbit.com/bluebottlecoffee.com", count: 24 }] },
-              { id: "v2", address: "서울시 마포구 연남동 223-11", landmark: "연트럴파크 1층 공간", floor: "1층", lat: 37.5615, lng: 126.9248, price: "350 / 4,200", size: "12평 (1층)", status: "available", tags: ["층고높음", "테라스가능"], currentVotes: [{ categoryId: "store", brand: "소품샵", label: "상점/생활", logo: "https://ui-avatars.com/api/?name=S&background=random", count: 12 }] }
-            ]);
+            setVacancies([]); // 더미 데이터 제거
           }
         }).catch(() => {
-          // 네트워크 오류 시 더미 데이터 폴백
-          setVacancies([
-            { id: "v1", address: "서울시 중구 을지로1가 16", landmark: "서울시청 1층 공간", floor: "1층", lat: 37.5665, lng: 126.9780, price: "500 / 6,500", size: "15평 (1층)", status: "available", tags: ["시청상권", "유동인구최다"], currentVotes: [{ categoryId: "cafe", brand: "블루보틀", label: "카페", logo: "https://logo.clearbit.com/bluebottlecoffee.com", count: 24 }] },
-          ]);
+          setVacancies([]); // 네트워크 오류 시 더미 데이터 제거
         });
       }
     }
