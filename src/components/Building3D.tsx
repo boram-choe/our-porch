@@ -121,8 +121,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
   const groupedVotes = useMemo(() => {
     const groups: Record<string, { total: number, items: VoteItem[], label: string, icon: any }> = {};
+    const votes = vacancy.currentVotes || [];
     
-    vacancy.currentVotes?.forEach(vote => {
+    votes.forEach(vote => {
       const catId = vote.categoryId || 'etc';
       const categoryInfo = CATEGORIES.find(c => c.id === catId);
       
@@ -144,7 +145,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   }, [vacancy.currentVotes]);
 
   const sortedVotes = useMemo(() => {
-    return [...(vacancy.currentVotes || [])].sort((a,b) => b.count - a.count);
+    const votes = vacancy.currentVotes || [];
+    return [...votes].sort((a,b) => b.count - a.count);
   }, [vacancy.currentVotes]);
 
   const handleVoteSubmit = async (e?: React.FormEvent) => {
