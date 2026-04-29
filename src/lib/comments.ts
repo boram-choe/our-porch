@@ -17,20 +17,15 @@ export interface Comment {
 }
 
 export async function fetchComments(vacancyId: string, currentUserId?: string) {
+  // 1. Fetch comments with their counts
   const { data, error } = await supabase
     .from("comments")
     .select(`
       *,
-      profiles:user_profiles (
+      user_profiles (
         nickname,
         neighborhood,
         persona_label
-      ),
-      likes:comment_likes (
-        user_id
-      ),
-      reports:comment_reports (
-        id
       )
     `)
     .eq("vacancy_id", vacancyId)
@@ -41,12 +36,27 @@ export async function fetchComments(vacancyId: string, currentUserId?: string) {
     return [];
   }
 
-  return (data || []).map((comment: any) => ({
-    ...comment,
-    likes_count: comment.likes?.length || 0,
-    is_liked: comment.likes?.some((l: any) => l.user_id === currentUserId) || false,
-    reports_count: comment.reports?.length || 0,
-  })) as Comment[];
+  // 2. Fetch likes and reports separately to ensure accuracy
+  const { data: likesData } = await supabase
+    .from("comment_likes")
+    .select("comment_id, user_id");
+
+  const { data: reportsData } = await supabase
+    .from("comment_reports")
+    .select("comment_id");
+
+  return (data || []).map((comment: any) => {
+    const commentLikes = (likesData || []).filter(l => l.comment_id === comment.id);
+    const commentReports = (reportsData || []).filter(r => r.comment_id === comment.id);
+    
+    return {
+      ...comment,
+      profiles: comment.user_profiles, // Map user_profiles to profiles
+      likes_count: commentLikes.length,
+      is_liked: commentLikes.some(l => l.user_id === currentUserId),
+      reports_count: commentReports.length,
+    };
+  }) as Comment[];
 }
 
 export async function addComment(vacancyId: string, userId: string, content: string) {
