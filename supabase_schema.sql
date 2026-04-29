@@ -45,12 +45,30 @@ CREATE TABLE IF NOT EXISTS public.votes (
   UNIQUE(vacancy_id, user_id, category)  -- 동일 공실에 동일 업종 중복 투표 방지
 );
 
+-- 4. 댓글 테이블
+CREATE TABLE IF NOT EXISTS public.comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  vacancy_id UUID NOT NULL REFERENCES public.vacancies(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.user_profiles(id),
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. 댓글 좋아요 테이블
+CREATE TABLE IF NOT EXISTS public.comment_likes (
+  comment_id UUID NOT NULL REFERENCES public.comments(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.user_profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (comment_id, user_id)
+);
+
 -- =====================================================
 -- 인덱스: 빠른 조회를 위해
 -- =====================================================
 CREATE INDEX IF NOT EXISTS idx_vacancies_neighborhood ON public.vacancies(neighborhood);
 CREATE INDEX IF NOT EXISTS idx_votes_vacancy_id ON public.votes(vacancy_id);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_neighborhood ON public.user_profiles(neighborhood);
+CREATE INDEX IF NOT EXISTS idx_comments_vacancy_id ON public.comments(vacancy_id);
 
 -- =====================================================
 -- RLS (Row Level Security): 보안 정책
@@ -58,15 +76,23 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_neighborhood ON public.user_profile
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.vacancies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.comment_likes ENABLE ROW LEVEL SECURITY;
 
 -- 누구나 읽기 가능 (공개 데이터)
 CREATE POLICY "Anyone can read profiles" ON public.user_profiles FOR SELECT USING (TRUE);
 CREATE POLICY "Anyone can read vacancies" ON public.vacancies FOR SELECT USING (TRUE);
 CREATE POLICY "Anyone can read votes" ON public.votes FOR SELECT USING (TRUE);
+CREATE POLICY "Anyone can read comments" ON public.comments FOR SELECT USING (TRUE);
+CREATE POLICY "Anyone can read comment_likes" ON public.comment_likes FOR SELECT USING (TRUE);
 
--- 쓰기는 anon 포함 누구나 허용 (MVP 단계: 소셜 로그인 없이도 등록 가능하게)
+-- 쓰기는 anon 포함 누구나 허용 (MVP 단계)
 CREATE POLICY "Anyone can insert profiles" ON public.user_profiles FOR INSERT WITH CHECK (TRUE);
 CREATE POLICY "Anyone can insert vacancies" ON public.vacancies FOR INSERT WITH CHECK (TRUE);
 CREATE POLICY "Anyone can insert votes" ON public.votes FOR INSERT WITH CHECK (TRUE);
 CREATE POLICY "Anyone can update votes" ON public.votes FOR UPDATE USING (TRUE);
 CREATE POLICY "Anyone can delete votes" ON public.votes FOR DELETE USING (TRUE);
+CREATE POLICY "Anyone can insert comments" ON public.comments FOR INSERT WITH CHECK (TRUE);
+CREATE POLICY "Anyone can delete comments" ON public.comments FOR DELETE USING (TRUE);
+CREATE POLICY "Anyone can insert comment_likes" ON public.comment_likes FOR INSERT WITH CHECK (TRUE);
+CREATE POLICY "Anyone can delete comment_likes" ON public.comment_likes FOR DELETE USING (TRUE);

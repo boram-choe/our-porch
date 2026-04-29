@@ -6,6 +6,8 @@ import { X, AlertTriangle, CheckCircle2, ChevronDown, Sparkles, ShoppingBag, Cof
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "@/components/MyPage";
 import { saveVote } from "@/lib/db";
+import { Comment, fetchComments, addComment, toggleCommentLike } from "@/lib/comments";
+import { MessageSquare, Heart, Send } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
@@ -60,6 +62,48 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   const [votingStep, setVotingStep] = useState<"category" | "detail" | "results">(hasVoted ? "results" : "category");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+
+  // 댓글 관련 상태
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  useEffect(() => {
+    if (showComments) {
+      loadComments();
+    }
+  }, [showComments, vacancy.id]);
+
+  const loadComments = async () => {
+    const userId = localStorage.getItem("gongsil_user_id") || undefined;
+    const data = await fetchComments(vacancy.id, userId);
+    setComments(data);
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    const userId = localStorage.getItem("gongsil_user_id");
+    if (!userId) return;
+
+    setIsSubmittingComment(true);
+    const added = await addComment(vacancy.id, userId, newComment.trim());
+    if (added) {
+      setNewComment("");
+      await loadComments();
+    }
+    setIsSubmittingComment(false);
+  };
+
+  const handleLike = async (commentId: string, isLiked: boolean) => {
+    const userId = localStorage.getItem("gongsil_user_id");
+    if (!userId) return;
+
+    const success = await toggleCommentLike(commentId, userId, isLiked);
+    if (success) {
+      await loadComments();
+    }
+  };
 
   const groupedVotes = useMemo(() => {
     const groups: Record<string, { total: number, items: VoteItem[], label: string, icon: any }> = {};
@@ -430,6 +474,13 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                            <Sparkles size={18} className="group-hover:animate-spin" /> 내가 원하는 건 리스트에 없어요
                          </button>
                        )}
+                       
+                       <button 
+                         onClick={() => setShowComments(true)} 
+                         className="w-full py-5 bg-slate-800 text-white rounded-[2rem] text-sm font-black shadow-lg hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4 border border-white/5"
+                       >
+                         <MessageSquare size={18} className="text-amber-500" /> 이웃들의 의견 보기
+                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -481,6 +532,106 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                 )}
               </AnimatePresence>
             </div>
+          </motion.div>
+        )}
+
+        {/* 댓글 Bottom Sheet */}
+        {showComments && (
+          <motion.div 
+            key="comments-sheet" 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[180] flex items-end justify-center"
+          >
+            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setShowComments(false)} />
+            <motion.div 
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="relative z-10 w-full max-w-2xl bg-white rounded-t-[3rem] shadow-2xl flex flex-col max-h-[85vh]"
+            >
+              <div className="flex flex-col items-center pt-3 pb-6 px-8">
+                <div className="w-12 h-1 bg-slate-200 rounded-full mb-6" />
+                <div className="w-full flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-amber-500 rounded-2xl flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/30">
+                      <MessageSquare size={20} fill="currentColor" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-950 tracking-tight">이웃들의 한마디</h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">상세 의견 {comments.length}개</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowComments(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-8 pb-32 no-scrollbar">
+                {comments.length === 0 ? (
+                  <div className="text-center py-20">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <MessageSquare size={24} className="text-slate-200" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-400">아직 남겨진 의견이 없어요.<br/>첫 의견을 남겨보세요!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {comments.map((comment) => (
+                      <div key={comment.id} className="group">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-[11px] font-black text-slate-900">{comment.profiles?.nickname || "익명 이웃"}</span>
+                              <span className="text-[10px] font-bold text-slate-400">{comment.profiles?.neighborhood}</span>
+                              <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                              <span className="text-[10px] font-bold text-slate-300">
+                                {new Date(comment.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="bg-slate-50 rounded-2xl rounded-tl-none p-4 border border-slate-100 shadow-sm group-hover:border-amber-200 transition-colors">
+                              <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => handleLike(comment.id, comment.is_liked)}
+                            className={`mt-6 flex flex-col items-center gap-1 transition-all ${comment.is_liked ? "text-amber-500 scale-110" : "text-slate-300 hover:text-slate-400"}`}
+                          >
+                            <Heart size={20} fill={comment.is_liked ? "currentColor" : "none"} strokeWidth={comment.is_liked ? 0 : 2.5} />
+                            <span className="text-[10px] font-black">{comment.likes_count}</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 입력창 (하단 고정) */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-white border-t border-slate-100">
+                <div className="relative flex items-center gap-3">
+                  <div className="flex-1 relative">
+                    <input 
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddComment(); } }}
+                      placeholder="이웃들에게 상세 의견을 나눠주세요..." 
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/20 transition-all text-slate-800 placeholder-slate-400"
+                    />
+                  </div>
+                  <button 
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim() || isSubmittingComment}
+                    className="w-14 h-14 bg-slate-950 text-white rounded-2xl flex items-center justify-center hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-xl active:scale-90"
+                  >
+                    {isSubmittingComment ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Send size={20} fill="currentColor" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
