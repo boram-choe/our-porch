@@ -426,7 +426,40 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         return sameAddr && v.floor === newSpaceFloor;
       })
     : undefined;
-  const isDuplicate = !!duplicateVacancy;
+  const mapMarkers = useMemo(() => {
+    if (isPinpointing) return null;
+    const seen = new Set<string>();
+    const groups: Vacancy[][] = [];
+    filteredVacancies.forEach(v => {
+      if (seen.has(v.id)) return;
+      const group = filteredVacancies.filter(other =>
+        (v.address && other.address)
+          ? other.address === v.address
+          : haversineKm(v.lat, v.lng, other.lat, other.lng) <= 0.05
+      );
+      group.forEach(g => seen.add(g.id));
+      groups.push(group);
+    });
+    return groups.map(group => {
+      const rep = group[0];
+      const hasVoted = group.some(v => votedIds.includes(v.id));
+      const multiFloor = group.length > 1;
+      return (
+        <CustomOverlayMap key={`${rep.id}-${hasVoted}`} position={{ lat: rep.lat, lng: rep.lng }}>
+          <button onClick={() => handlePinClick(rep)} className="relative group">
+            <div className={`relative w-12 h-12 rounded-[1.5rem] flex items-center justify-center border-2 shadow-md transition-all duration-300 ${hasVoted ? "bg-amber-500 text-slate-950 border-white scale-110" : "bg-slate-950 text-white border-white/20 hover:border-white/50"}`}>
+              <Lightbulb size={24} fill="currentColor" />
+            </div>
+            {multiFloor && (
+              <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-400 rounded-full border-2 border-white flex items-center justify-center shadow">
+                <span className="text-[9px] font-black text-slate-950">{group.length}</span>
+              </div>
+            )}
+          </button>
+        </CustomOverlayMap>
+      );
+    });
+  }, [filteredVacancies, isPinpointing, votedIds]);
 
   return (
     <div className="relative w-full h-screen bg-slate-950 font-sans overflow-hidden subpixel-antialiased text-slate-900">
@@ -460,43 +493,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       <div className="absolute inset-0 z-0">
         <Map center={mapCenter} style={{ width: "100%", height: "100%" }} level={3} ref={mapRef} onDragStart={() => setShowDashboard(false)}>
           {/* 주소 기준으로 같은 건물 공실을 하나의 핀으로 묶어 표시 */}
-          {!isPinpointing && (() => {
-            const seen = new Set<string>();
-            const groups: Vacancy[][] = [];
-            filteredVacancies.forEach(v => {
-              if (seen.has(v.id)) return;
-              const group = filteredVacancies.filter(other =>
-                // 주소 있으면 주소 일치, 없으면 50m 폴백
-                (v.address && other.address)
-                  ? other.address === v.address
-                  : haversineKm(v.lat, v.lng, other.lat, other.lng) <= 0.05
-              );
-              group.forEach(g => seen.add(g.id));
-              groups.push(group);
-            });
-            return groups.map(group => {
-              const rep = group[0]; // 대표 공실
-              const hasVoted = group.some(v => votedIds.includes(v.id));
-              const multiFloor = group.length > 1;
-              return (
-                <CustomOverlayMap key={rep.id} position={{ lat: rep.lat, lng: rep.lng }}>
-                  <button
-                    onClick={() => handlePinClick(rep)}
-                    className="relative group"
-                  >
-                    <div className={`relative w-12 h-12 rounded-[1.5rem] flex items-center justify-center border-2 shadow-xl transition-all duration-300 ${hasVoted ? "bg-amber-500 text-slate-950 border-white scale-110" : "bg-slate-950 text-white border-white/20 hover:border-white/50"}`}>
-                      <Lightbulb size={24} fill="currentColor" />
-                    </div>
-                    {multiFloor && (
-                      <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-400 rounded-full border-2 border-white flex items-center justify-center shadow">
-                        <span className="text-[9px] font-black text-slate-950">{group.length}</span>
-                      </div>
-                    )}
-                  </button>
-                </CustomOverlayMap>
-              );
-            });
-          })()}
+          {mapMarkers}
           {isPinpointing && (<MapMarker position={pinLocation} draggable={true} onDragEnd={(marker) => setPinLocation({ lat: marker.getPosition().getLat(), lng: marker.getPosition().getLng() })} image={{ src: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA2MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBkPSJNMzAgNzRMMTQgNTJDNyA0MyAzIDM1IDMgMjdDMyAxMiAxNSAwIDMwIDBDNDUgMCA1NyAxMiA1NyAyN0M1NyAzNSA1MyA0MyA0NiA1MkwzMCA3NFoiIGZpbGw9IiMwMjA2MTciIHN0cm9rZT0iI0Y1OUUwQiIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPGNpcmNsZSBjeD0iMzAiIGN5PSIyNyIgcj0iMTIiIGZpbGw9IiNGNTlFMEIiLz4KICA8cGF0aCBkPSJNMzAgMTlMMzAgMzVNMjMgMjZMMzcgMjZNMjUgMjNMMzUgMjMiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAyMDYxNyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+", size: { width: 50, height: 65 }, options: { offset: { x: 25, y: 65 } } }} />)}
         </Map>
       </div>
@@ -526,7 +523,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
       {!isPinpointing && !selectedVacancy && (
         <div className="absolute bottom-10 left-0 right-0 px-6 z-10 pointer-events-none">
-          <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white p-6 rounded-[3rem] shadow-[0_20px_40px_rgba(0,0,0,0.2)] border border-slate-100 pointer-events-auto overflow-hidden relative">
+          <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white p-6 rounded-[3rem] shadow-xl border border-slate-100 pointer-events-auto overflow-hidden relative">
              <button onClick={() => setShowDashboard(false)} className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
              <div className="flex items-center justify-between mb-4 mt-2 relative z-10">
                 <div className="flex items-center gap-3"><div className="w-10 h-10 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-lg"><History size={18} /></div><h2 className="text-base font-black text-slate-950 tracking-tight">나의 상상 조각들 <span className="text-amber-600 ml-1">{votedIds.length}</span></h2></div>
@@ -557,7 +554,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         {showAddModal && (
           <div className="fixed inset-0 z-[200] flex items-start justify-center p-6 overflow-y-auto pt-10 pb-20">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/90" onClick={() => setShowAddModal(false)} />
-            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }} className="bg-white w-full max-w-lg rounded-[4rem] shadow-[0_60px_100px_rgba(0,0,0,0.5)] relative z-10 overflow-hidden border border-white/20">
+            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }} className="bg-white w-full max-w-lg rounded-[4rem] shadow-2xl relative z-10 overflow-hidden border border-slate-100">
                <div className="p-12 pt-16">
                  <div className="mb-12 relative">
                     <div className="absolute -top-6 -left-2 opacity-10 scale-150 pointer-events-none"><Building2 size={80} className="text-amber-500" /></div>
@@ -648,7 +645,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               transition={{ type: "spring", damping: 28, stiffness: 260 }}
               className="relative z-10 w-full max-w-lg mx-4 mb-8"
             >
-              <div className="bg-white rounded-[2.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.4)] overflow-hidden">
+              <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100">
                 {/* 헤더 */}
                 <div className="px-8 pt-8 pb-4">
                   <button onClick={() => setFloorPickerGroup(null)} className="absolute top-4 left-1/2 -translate-x-1/2 w-10 h-1 bg-slate-200 rounded-full" />
@@ -728,7 +725,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
       <AnimatePresence>
         {showSuccessToast && (
-          <motion.div initial={{ y: -100, opacity: 0, x: "-50%" }} animate={{ y: 40, opacity: 1, x: "-50%" }} exit={{ y: -100, opacity: 0, x: "-50%" }} className="fixed top-0 left-1/2 z-[300] bg-slate-900 px-8 py-5 rounded-[2rem] border border-slate-700 shadow-[0_30px_60px_rgba(0,0,0,0.4)] flex items-center gap-4 min-w-[320px]">
+          <motion.div initial={{ y: -100, opacity: 0, x: "-50%" }} animate={{ y: 40, opacity: 1, x: "-50%" }} exit={{ y: -100, opacity: 0, x: "-50%" }} className="fixed top-0 left-1/2 z-[300] bg-slate-900 px-8 py-5 rounded-[2rem] border border-slate-700 shadow-2xl flex items-center gap-4 min-w-[320px]">
             <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)]"><Check size={20} strokeWidth={4} /></div>
             <div><p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-0.5">상상 현실화 완료</p><p className="text-sm font-black text-white">{showSuccessToast}</p></div>
             <button onClick={() => setShowSuccessToast(null)} className="ml-4 text-slate-500 hover:text-white transition-colors"><X size={18} /></button>
@@ -763,7 +760,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               transition={{ type: "spring", damping: 28, stiffness: 260, delay: 0.1 }}
               className="relative z-10 w-full max-w-lg mx-4 mb-8"
             >
-              <div className="bg-white rounded-[2.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.2)] overflow-hidden border border-slate-200">
+              <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200">
                 {/* 헤더 */}
                 <div className="px-8 pt-8 pb-5">
                   <div className="flex items-center gap-3 mb-1">
