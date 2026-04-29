@@ -615,7 +615,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             </div>
 
             <button 
-              disabled={selectedPersonaIds.length === 0} onClick={() => setStep(4)}
+              disabled={selectedPersonaIds.length === 0} onClick={() => setStep(5)}
               className="w-full bg-amber-400 text-slate-950 py-5 rounded-2xl text-xl font-black shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 transition-all"
             >
               선택 완료
@@ -623,7 +623,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
           </motion.div>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <motion.div 
             key="done" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             className="w-full max-w-md p-10 text-center relative z-10"
