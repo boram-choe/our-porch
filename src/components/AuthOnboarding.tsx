@@ -55,7 +55,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
   const [neighborhood, setNeighborhood] = useState("");
   const [coords, setCoords] = useState({ lat: 37.5665, lng: 126.9780 });
   const [isLocating, setIsLocating] = useState(false);
-  const [locationError, setLocationError] = useState<"denied" | "failed" | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [selectedPersonaIds, setSelectedPersonaIds] = useState<string[]>([]);
   const [customPersona, setCustomPersona] = useState("");
   const [gender, setGender] = useState<"male" | "female" | undefined>(undefined);
@@ -161,9 +161,9 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
     setLocationError(null);
 
     if (!("geolocation" in navigator)) {
-      setLocationError("denied");
+      setLocationError("GPS 기능을 지원하지 않는 브라우저입니다.");
       setIsLocating(false);
-      return; // ← 위치 기반 서비스: GPS 불가 시 진행 차단
+      return; 
     }
 
     navigator.geolocation.getCurrentPosition(
@@ -172,7 +172,6 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
         setCoords({ lat: latitude, lng: longitude });
 
         try {
-          // Kakao REST API로 역지오코딩 (JS SDK 로드 불필요)
           const res = await fetch(
             `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`,
             { headers: { Authorization: "KakaoAK 9c22db1b29e60d62cc2ab57c67c8b87c" } }
@@ -188,33 +187,30 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               "";
 
             if (!dong) {
-              // 동 이름을 못 받아온 경우: 에러 표시, 진행 차단
-              setLocationError("failed");
+              setLocationError("카카오 지도에서 동 이름을 찾을 수 없습니다.");
               setIsLocating(false);
               return;
             }
 
             setNeighborhood(dong);
             setIsLocating(false);
-            setStep(2); // ← 성공 시에만 다음 단계로
+            setStep(2); 
           } else {
-            setLocationError("failed");
+            setLocationError("카카오 API 응답 오류 (데이터 없음).");
             setIsLocating(false);
           }
-        } catch (e) {
+        } catch (e: any) {
           console.error("역지오코딩 실패:", e);
-          setLocationError("failed");
+          setLocationError(`카카오 API 호출 실패: ${e.message}`);
           setIsLocating(false);
         }
       },
       (err) => {
         console.error("GPS 위치 획득 실패:", err.message);
-        // 권한 거부(code 1)와 일반 오류 구분
-        setLocationError(err.code === 1 ? "denied" : "failed");
+        setLocationError(err.code === 1 ? "denied" : `GPS 에러 (${err.code}): ${err.message}`);
         setIsLocating(false);
-        // ← 실패 시 절대 step 2로 넘어가지 않음
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 15000, enableHighAccuracy: false } // 타임아웃 15초로 연장, 빠른 응답을 위해 고정밀 모드 해제
     );
   };
 
@@ -464,12 +460,12 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                 </p>
               </div>
             )}
-            {locationError === "failed" && (
+            {locationError && locationError !== "denied" && (
               <div className="mt-4 p-4 bg-orange-500/10 border border-orange-500/30 rounded-2xl text-left">
                 <p className="text-orange-400 font-black text-sm mb-1">📍 위치 확인에 실패했어요</p>
                 <p className="text-orange-300/70 text-xs font-bold leading-relaxed">
-                  GPS 신호가 약하거나 서버 오류가 발생했습니다.<br/>
-                  잠시 후 다시 시도해 주세요.
+                  {locationError}<br/>
+                  (잠시 후 다시 시도해 주세요)
                 </p>
               </div>
             )}
