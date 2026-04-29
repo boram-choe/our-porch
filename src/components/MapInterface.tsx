@@ -423,17 +423,17 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     <div className="relative w-full h-screen bg-slate-950 font-sans overflow-hidden subpixel-antialiased text-slate-900">
       <div className="absolute top-6 left-0 right-0 px-4 z-[100] pointer-events-none">
         <div className="flex items-center gap-3 w-full">
-          <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-2 bg-slate-950/80 backdrop-blur-2xl px-4 py-2.5 rounded-2xl border border-white/10 shadow-xl">
+          <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-2 bg-slate-950/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 shadow-xl">
             <div className="w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center text-slate-950"><Lightbulb size={18} fill="currentColor" /></div>
             <h1 className="text-sm font-black text-white tracking-tighter">여긴뭐가</h1>
           </motion.div>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 pointer-events-auto">
-            <div className="bg-slate-950/80 backdrop-blur-2xl p-1.5 rounded-2xl border border-white/10 flex gap-1 shadow-2xl">
+            <div className="bg-slate-950/90 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 flex gap-1 shadow-2xl">
               <button onClick={() => switchLocation('home')} className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${userProfile?.activeLocationType === 'home' ? "bg-amber-500 text-slate-950 shadow-lg" : "text-slate-400 hover:text-white"}`}><Home size={14} /> 우리 동네</button>
               <button onClick={() => switchLocation('work')} className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${userProfile?.activeLocationType === 'work' ? "bg-amber-500 text-slate-950 shadow-lg" : "text-slate-400 hover:text-white"}`}><Briefcase size={14} /> 나의 일터</button>
             </div>
           </motion.div>
-          <motion.button initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} onClick={() => setShowMyPage(true)} className="w-12 h-12 bg-slate-950/80 backdrop-blur-2xl rounded-2xl border border-white/10 flex items-center justify-center text-white shadow-xl pointer-events-auto hover:bg-slate-900"><User size={20} /></motion.button>
+          <motion.button initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} onClick={() => setShowMyPage(true)} className="w-12 h-12 bg-slate-950/90 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-center text-white shadow-xl pointer-events-auto hover:bg-slate-900"><User size={20} /></motion.button>
         </div>
         {/* 필터 반경 안내 뱄지 */}
         {userProfile && (
@@ -476,7 +476,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
                     className="relative group"
                   >
-                    <div className={`absolute -inset-6 rounded-full blur-2xl transition-all duration-700 ${hasVoted ? "bg-amber-500/40 animate-pulse" : "bg-white/10"}`} />
+                    <div className={`absolute -inset-6 rounded-full blur-md transition-all duration-700 ${hasVoted ? "bg-amber-500/40 animate-pulse" : "bg-white/10"}`} />
                     <div className={`relative w-12 h-12 rounded-[1.5rem] flex items-center justify-center border-2 shadow-2xl transition-all duration-300 ${hasVoted ? "bg-amber-500 text-slate-950 border-white scale-110" : "bg-slate-950 text-white border-white/20 hover:border-white/50"}`}>
                       <Lightbulb size={24} fill="currentColor" className={hasVoted ? "animate-bounce" : ""} />
                     </div>
@@ -499,7 +499,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       <div className="absolute top-[88px] left-4 right-4 z-50 pointer-events-none">
         <AnimatePresence mode="wait">
           {localFeeds.length > 0 && (
-            <motion.div key={feedIndex} initial={{ y: -10, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 5, opacity: 0, scale: 0.95 }} className="bg-white/95 backdrop-blur-3xl px-4 py-2.5 rounded-2xl shadow-xl border border-white/20 flex items-center gap-3 w-fit mx-auto pointer-events-auto">
+            <motion.div key={feedIndex} initial={{ y: -10, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 5, opacity: 0, scale: 0.95 }} className="bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-white/20 flex items-center gap-3 w-fit mx-auto pointer-events-auto">
               <div className={`w-8 h-8 rounded-xl ${localFeeds[feedIndex].color} flex items-center justify-center text-white shadow-sm`}><MessageSquare size={14} fill="currentColor" /></div>
               <div><p className="text-[11px] font-black text-slate-900 leading-tight tracking-tight"><span className="text-amber-600 mr-2">새소식</span>{localFeeds[feedIndex].text}</p></div>
             </motion.div>
@@ -521,7 +521,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
       {!isPinpointing && !selectedVacancy && (
         <div className="absolute bottom-10 left-0 right-0 px-6 z-10 pointer-events-none">
-          <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white/95 backdrop-blur-3xl p-6 rounded-[3rem] shadow-[0_40px_80px_rgba(0,0,0,0.3)] border border-white pointer-events-auto overflow-hidden relative">
+          <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white/95 backdrop-blur-md p-6 rounded-[3rem] shadow-[0_40px_80px_rgba(0,0,0,0.3)] border border-white pointer-events-auto overflow-hidden relative">
              <button onClick={() => setShowDashboard(false)} className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
              <div className="flex items-center justify-between mb-4 mt-2 relative z-10">
                 <div className="flex items-center gap-3"><div className="w-10 h-10 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-lg"><History size={18} /></div><h2 className="text-base font-black text-slate-950 tracking-tight">나의 상상 조각들 <span className="text-amber-600 ml-1">{votedIds.length}</span></h2></div>
@@ -551,7 +551,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       <AnimatePresence>
         {showAddModal && (
           <div className="fixed inset-0 z-[200] flex items-start justify-center p-6 overflow-y-auto pt-10 pb-20">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-950/90 backdrop-blur-3xl" onClick={() => setShowAddModal(false)} />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-950/90 backdrop-blur-md" onClick={() => setShowAddModal(false)} />
             <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }} className="bg-white w-full max-w-lg rounded-[4rem] shadow-[0_60px_100px_rgba(0,0,0,0.5)] relative z-10 overflow-hidden border border-white/20">
                <div className="p-12 pt-16">
                  <div className="mb-12 relative">
@@ -723,7 +723,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
       <AnimatePresence>
         {showSuccessToast && (
-          <motion.div initial={{ y: -100, opacity: 0, x: "-50%" }} animate={{ y: 40, opacity: 1, x: "-50%" }} exit={{ y: -100, opacity: 0, x: "-50%" }} className="fixed top-0 left-1/2 z-[300] bg-slate-950/90 backdrop-blur-3xl px-8 py-5 rounded-[2rem] border border-white/20 shadow-[0_30px_60px_rgba(0,0,0,0.4)] flex items-center gap-4 min-w-[320px]">
+          <motion.div initial={{ y: -100, opacity: 0, x: "-50%" }} animate={{ y: 40, opacity: 1, x: "-50%" }} exit={{ y: -100, opacity: 0, x: "-50%" }} className="fixed top-0 left-1/2 z-[300] bg-slate-950/95 backdrop-blur-md px-8 py-5 rounded-[2rem] border border-white/20 shadow-[0_30px_60px_rgba(0,0,0,0.4)] flex items-center gap-4 min-w-[320px]">
             <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)]"><Check size={20} strokeWidth={4} /></div>
             <div><p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-0.5">상상 현실화 완료</p><p className="text-sm font-black text-white">{showSuccessToast}</p></div>
             <button onClick={() => setShowSuccessToast(null)} className="ml-4 text-slate-500 hover:text-white transition-colors"><X size={18} /></button>
@@ -758,7 +758,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               transition={{ type: "spring", damping: 28, stiffness: 260, delay: 0.1 }}
               className="relative z-10 w-full max-w-lg mx-4 mb-8"
             >
-              <div className="bg-white/95 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.4)] overflow-hidden border border-white/30">
+              <div className="bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.4)] overflow-hidden border border-white/30">
                 {/* 헤더 */}
                 <div className="px-8 pt-8 pb-5">
                   <div className="flex items-center gap-3 mb-1">
