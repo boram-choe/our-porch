@@ -167,28 +167,46 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         // 피드는 filteredVacancies가 업데이트될 때 연동하여 재생성함 (아래 useEffect 참가)
 
         // Supabase에서 공실 불러오기 (동네 필터링)
-        fetchVacancies(activeLoc.neighborhood).then(dbVacancies => {
+        fetchVacancies(activeLoc.neighborhood).then(async (dbVacancies) => {
           if (dbVacancies.length > 0) {
-            // DB 데이터를 앱 포맷으로 변환
-            const converted: Vacancy[] = dbVacancies.map(v => ({
-              id: v.id,
-              address: v.address || "",
-              landmark: v.landmark,
-              floor: v.floor || "1층",
-              lat: v.lat,
-              lng: v.lng,
-              price: "정보 대기 중",
-              size: `${v.floor || "1층"}`,
-              status: "available" as const,
-              tags: ["이웃발견"],
-              currentVotes: [],
+            // 각 공실별로 실시간 투표 데이터를 가져와서 집계합니다.
+            const vacanciesWithVotes = await Promise.all(dbVacancies.map(async (v) => {
+              const { data: votes } = await supabase
+                .from("votes")
+                .select("category, category_icon")
+                .eq("vacancy_id", v.id);
+
+              // 업종별로 투표 수 집계
+              const voteCounts: Record<string, { brand: string, count: number, categoryId: string }> = {};
+              (votes || []).forEach(vote => {
+                const brand = vote.category;
+                if (!voteCounts[brand]) {
+                  voteCounts[brand] = { brand, count: 0, categoryId: 'etc' };
+                }
+                voteCounts[brand].count += 1;
+              });
+
+              return {
+                id: v.id,
+                address: v.address || "",
+                landmark: v.landmark,
+                floor: v.floor || "1층",
+                lat: v.lat,
+                lng: v.lng,
+                price: "정보 대기 중",
+                size: `${v.floor || "1층"}`,
+                status: "available" as const,
+                tags: ["이웃발견"],
+                currentVotes: Object.values(voteCounts),
+              };
             }));
-            setVacancies(converted);
+
+            setVacancies(vacanciesWithVotes);
           } else {
-            setVacancies([]); // 더미 데이터 제거
+            setVacancies([]);
           }
         }).catch(() => {
-          setVacancies([]); // 네트워크 오류 시 더미 데이터 제거
+          setVacancies([]);
         });
       }
     }
