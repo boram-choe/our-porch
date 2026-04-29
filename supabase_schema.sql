@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS public.comments (
   vacancy_id UUID NOT NULL REFERENCES public.vacancies(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES public.user_profiles(id),
   content TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(vacancy_id, user_id) -- 한 공간에 한 유저는 하나의 댓글만 가능
 );
 
 -- 5. 댓글 좋아요 테이블
@@ -60,6 +61,15 @@ CREATE TABLE IF NOT EXISTS public.comment_likes (
   user_id UUID NOT NULL REFERENCES public.user_profiles(id),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (comment_id, user_id)
+);
+
+-- 6. 댓글 신고 테이블
+CREATE TABLE IF NOT EXISTS public.comment_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  comment_id UUID NOT NULL REFERENCES public.comments(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.user_profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(comment_id, user_id) -- 중복 신고 방지
 );
 
 -- =====================================================
@@ -78,6 +88,7 @@ ALTER TABLE public.vacancies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comment_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.comment_reports ENABLE ROW LEVEL SECURITY;
 
 -- 누구나 읽기 가능 (공개 데이터)
 CREATE POLICY "Anyone can read profiles" ON public.user_profiles FOR SELECT USING (TRUE);
@@ -85,6 +96,7 @@ CREATE POLICY "Anyone can read vacancies" ON public.vacancies FOR SELECT USING (
 CREATE POLICY "Anyone can read votes" ON public.votes FOR SELECT USING (TRUE);
 CREATE POLICY "Anyone can read comments" ON public.comments FOR SELECT USING (TRUE);
 CREATE POLICY "Anyone can read comment_likes" ON public.comment_likes FOR SELECT USING (TRUE);
+CREATE POLICY "Anyone can read comment_reports" ON public.comment_reports FOR SELECT USING (TRUE);
 
 -- 쓰기는 anon 포함 누구나 허용 (MVP 단계)
 CREATE POLICY "Anyone can insert profiles" ON public.user_profiles FOR INSERT WITH CHECK (TRUE);
@@ -96,3 +108,4 @@ CREATE POLICY "Anyone can insert comments" ON public.comments FOR INSERT WITH CH
 CREATE POLICY "Anyone can delete comments" ON public.comments FOR DELETE USING (TRUE);
 CREATE POLICY "Anyone can insert comment_likes" ON public.comment_likes FOR INSERT WITH CHECK (TRUE);
 CREATE POLICY "Anyone can delete comment_likes" ON public.comment_likes FOR DELETE USING (TRUE);
+CREATE POLICY "Anyone can insert comment_reports" ON public.comment_reports FOR INSERT WITH CHECK (TRUE);

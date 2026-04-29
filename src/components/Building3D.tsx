@@ -6,8 +6,8 @@ import { X, AlertTriangle, CheckCircle2, ChevronDown, Sparkles, ShoppingBag, Cof
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "@/components/MyPage";
 import { saveVote } from "@/lib/db";
-import { Comment, fetchComments, addComment, toggleCommentLike } from "@/lib/comments";
-import { MessageSquare, Heart, Send } from "lucide-react";
+import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "@/lib/comments";
+import { MessageSquare, Heart, Send, AlertTriangle } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
@@ -101,6 +101,18 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
     const success = await toggleCommentLike(commentId, userId, isLiked);
     if (success) {
+      await loadComments();
+    }
+  };
+
+  const handleReport = async (commentId: string) => {
+    if (!confirm("이 댓글을 신고하시겠습니까?")) return;
+    const userId = localStorage.getItem("gongsil_user_id");
+    if (!userId) return;
+
+    const success = await reportComment(commentId, userId);
+    if (success) {
+      alert("신고가 접수되었습니다.");
       await loadComments();
     }
   };
@@ -576,32 +588,54 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {comments.map((comment) => (
-                      <div key={comment.id} className="group">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-[11px] font-black text-slate-900">{comment.profiles?.nickname || "익명 이웃"}</span>
-                              <span className="text-[10px] font-bold text-slate-400">{comment.profiles?.neighborhood}</span>
-                              <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                              <span className="text-[10px] font-bold text-slate-300">
-                                {new Date(comment.created_at).toLocaleDateString()}
-                              </span>
+                    {comments.map((comment) => {
+                      const isHidden = comment.reports_count >= 3;
+                      
+                      return (
+                        <div key={comment.id} className="group">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[11px] font-black text-slate-900">{comment.profiles?.nickname || "익명 이웃"}</span>
+                                <span className="text-[10px] font-bold text-slate-400">{comment.profiles?.neighborhood}</span>
+                                <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                                <span className="text-[10px] font-bold text-slate-300">
+                                  {new Date(comment.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <div className={`rounded-2xl rounded-tl-none p-4 border shadow-sm transition-all ${
+                                isHidden 
+                                ? "bg-slate-50 border-slate-100 opacity-60" 
+                                : "bg-slate-50 border-slate-100 group-hover:border-amber-200"
+                              }`}>
+                                {isHidden ? (
+                                  <p className="text-[11px] font-bold text-slate-400 italic">다수의 신고로 인해 가려진 댓글입니다.</p>
+                                ) : (
+                                  <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                                )}
+                              </div>
+                              {!isHidden && (
+                                <button 
+                                  onClick={() => handleReport(comment.id)}
+                                  className="mt-2 text-[10px] font-bold text-slate-300 hover:text-red-400 transition-colors flex items-center gap-1"
+                                >
+                                  <AlertTriangle size={10} /> 신고하기
+                                </button>
+                              )}
                             </div>
-                            <div className="bg-slate-50 rounded-2xl rounded-tl-none p-4 border border-slate-100 shadow-sm group-hover:border-amber-200 transition-colors">
-                              <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                            <div className="flex flex-col items-center gap-4">
+                              <button 
+                                onClick={() => handleLike(comment.id, comment.is_liked)}
+                                className={`flex flex-col items-center gap-1 transition-all ${comment.is_liked ? "text-amber-500 scale-110" : "text-slate-300 hover:text-slate-400"}`}
+                              >
+                                <Heart size={20} fill={comment.is_liked ? "currentColor" : "none"} strokeWidth={comment.is_liked ? 0 : 2.5} />
+                                <span className="text-[10px] font-black">{comment.likes_count}</span>
+                              </button>
                             </div>
                           </div>
-                          <button 
-                            onClick={() => handleLike(comment.id, comment.is_liked)}
-                            className={`mt-6 flex flex-col items-center gap-1 transition-all ${comment.is_liked ? "text-amber-500 scale-110" : "text-slate-300 hover:text-slate-400"}`}
-                          >
-                            <Heart size={20} fill={comment.is_liked ? "currentColor" : "none"} strokeWidth={comment.is_liked ? 0 : 2.5} />
-                            <span className="text-[10px] font-black">{comment.likes_count}</span>
-                          </button>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
