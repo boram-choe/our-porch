@@ -491,15 +491,13 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         </Map>
       </div>
 
-      <div className="absolute top-[88px] left-4 right-4 z-50 pointer-events-none">
-        <AnimatePresence mode="wait">
-          {localFeeds.length > 0 && (
-            <motion.div key={feedIndex} initial={{ y: -10, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 5, opacity: 0, scale: 0.95 }} className="bg-white px-4 py-2.5 rounded-2xl shadow-xl border border-white/20 flex items-center gap-3 w-fit mx-auto pointer-events-auto">
-              <div className={`w-8 h-8 rounded-xl ${localFeeds[feedIndex].color} flex items-center justify-center text-white shadow-sm`}><MessageSquare size={14} fill="currentColor" /></div>
-              <div><p className="text-[11px] font-black text-slate-900 leading-tight tracking-tight"><span className="text-amber-600 mr-2">새소식</span>{localFeeds[feedIndex].text}</p></div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div className="absolute top-[88px] left-4 right-4 z-50 pointer-events-none transition-all duration-500">
+        {localFeeds.length > 0 && (
+          <div key={feedIndex} className="bg-white px-4 py-2.5 rounded-2xl shadow-xl border border-white/20 flex items-center gap-3 w-fit mx-auto pointer-events-auto animate-[fadeIn_0.5s_ease-out]">
+            <div className={`w-8 h-8 rounded-xl ${localFeeds[feedIndex].color} flex items-center justify-center text-white shadow-sm`}><MessageSquare size={14} fill="currentColor" /></div>
+            <div><p className="text-[11px] font-black text-slate-900 leading-tight tracking-tight"><span className="text-amber-600 mr-2">새소식</span>{localFeeds[feedIndex].text}</p></div>
+          </div>
+        )}
       </div>
 
       <div className="absolute right-6 bottom-56 flex flex-col gap-4 z-[100]">
