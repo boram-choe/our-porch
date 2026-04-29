@@ -397,16 +397,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     }
   };
 
-  if (loading) return null;
-  if (error) return (
-    <div className="flex flex-col items-center justify-center w-full h-screen bg-slate-950 text-white p-8 text-center">
-      <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-4 text-red-500">
-        <span className="text-3xl">⚠️</span>
-      </div>
-      <h2 className="text-xl font-black mb-2">지도 로딩 실패</h2>
-      <p className="text-slate-400 text-sm">카카오 JavaScript 키가 올바르지 않거나 허용된 도메인이 아닙니다.</p>
-    </div>
-  );
+
   const votedVacancies = filteredVacancies.filter(v => votedIds.includes(v.id));
 
   // ─ 중복 공실 판정: 같은 주소 + 같은 층 (주소없으면 50m 폴백) ────────────────────────────────
@@ -454,6 +445,17 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       );
     });
   }, [filteredVacancies, isPinpointing, votedIds]);
+
+  if (loading) return null;
+  if (error) return (
+    <div className="flex flex-col items-center justify-center w-full h-screen bg-slate-950 text-white p-8 text-center">
+      <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-4 text-red-500">
+        <span className="text-3xl">⚠️</span>
+      </div>
+      <h2 className="text-xl font-black mb-2">지도 로딩 실패</h2>
+      <p className="text-slate-400 text-sm">카카오 JavaScript 키가 올바르지 않거나 허용된 도메인이 아닙니다.</p>
+    </div>
+  );
 
   return (
     <div className="relative w-full h-screen bg-slate-950 font-sans overflow-hidden subpixel-antialiased text-slate-900">
