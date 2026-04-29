@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "@/components/MyPage";
 import { saveVote } from "@/lib/db";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "@/lib/comments";
-import { MessageSquare, Heart, Send, AlertTriangle } from "lucide-react";
+import { MessageSquare, Heart, Send } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
