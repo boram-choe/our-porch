@@ -174,7 +174,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
         try {
           const res = await fetch(
             `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`,
-            { headers: { Authorization: "KakaoAK 9c22db1b29e60d62cc2ab57c67c8b87c" } }
+            { headers: { Authorization: "KakaoAK e1b3c72ed82cefa4e8e9021e352e5b5e" } }
           );
           const data = await res.json();
 
@@ -196,8 +196,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             setIsLocating(false);
             setStep(2); 
           } else {
-            // 카카오에서 무엇을 응답했는지, 좌표는 제대로 들어갔는지 정확한 원인을 화면에 출력합니다.
-            setLocationError(`응답: ${JSON.stringify(data)} / 좌표: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+            setLocationError("카카오 API 응답 오류 (데이터 없음).");
             setIsLocating(false);
           }
         } catch (e: any) {
