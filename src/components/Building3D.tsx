@@ -153,15 +153,16 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     if (e) e.preventDefault();
     if (!inputValue.trim()) return;
 
+    const currentVotes = vacancy.currentVotes || [];
     const brand = inputValue.trim();
-    const existing = vacancy.currentVotes?.find(v => v.brand === brand);
+    const existing = currentVotes.find(v => v.brand === brand);
     
     let nextVotes: VoteItem[] = [];
     if (existing) {
-      nextVotes = vacancy.currentVotes!.map(v => v.brand === brand ? { ...v, count: v.count + 1 } : v);
+      nextVotes = currentVotes.map(v => v.brand === brand ? { ...v, count: v.count + 1 } : v);
     } else {
-      nextVotes = [...(vacancy.currentVotes || []), {
-        id: Date.now().toString(),
+      nextVotes = [...currentVotes, {
+        id: Math.random().toString(36).substr(2, 9),
         brand,
         categoryId: selectedCategory || 'etc',
         logo: getBrandLogo(brand),
