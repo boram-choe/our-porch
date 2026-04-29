@@ -107,7 +107,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   };
 
   const handleReport = async (commentId: string) => {
-    if (!confirm("이 댓글을 신고하시겠습니까?") || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
+    if (!confirm("이 댓글을 신고하시겠습니까?")) return;
     const userId = localStorage.getItem("gongsil_user_id");
     if (!userId) return;
 
