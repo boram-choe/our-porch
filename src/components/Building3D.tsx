@@ -6,7 +6,7 @@ import { X, AlertTriangle, CheckCircle2, ChevronDown, Sparkles, ShoppingBag, Cof
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "@/components/MyPage";
 import { saveVote } from "@/lib/db";
-import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "@/lib/comments";
+import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "../lib/comments";
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
