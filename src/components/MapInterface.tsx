@@ -473,17 +473,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           </motion.div>
           <motion.button initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} onClick={() => setShowMyPage(true)} className="w-12 h-12 bg-slate-900 rounded-2xl border border-white/10 flex items-center justify-center text-white shadow-xl pointer-events-auto hover:bg-slate-800"><User size={20} /></motion.button>
         </div>
-        {/* 필터 반경 안내 뱄지 */}
-        {userProfile && (
-          <div className="flex justify-center mt-2 pointer-events-none">
-            <div className="flex items-center gap-1.5 bg-slate-900 px-3 py-1 rounded-full border border-white/10">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-black text-white/60 tracking-widest">
-                {userProfile.activeLocationType === 'work' ? userProfile.work?.neighborhood : userProfile.home.neighborhood} 반경 {FILTER_RADIUS_KM}km &middot; {filteredVacancies.length}수의 공간
-              </span>
-            </div>
-          </div>
-        )}
+
       </div>
 
       <div className="absolute inset-0 z-0">
