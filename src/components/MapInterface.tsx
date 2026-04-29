@@ -15,6 +15,7 @@ import MyPage from "./MyPage";
 import AdminDashboard from "./AdminDashboard";
 import { UserProfile, loadSavedProfile } from "./AuthOnboarding";
 import { fetchVacancies, saveVacancy } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 
 // ─── 위치 기반 필터링 ─────────────────────────────────────────────────────────
 const FILTER_RADIUS_KM = 2.5; // 인증 위치 기준 반경 (인접 행정동 포함)
