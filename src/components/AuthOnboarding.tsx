@@ -194,7 +194,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
 
             setNeighborhood(dong);
             setIsLocating(false);
-            setStep(2); 
+            setStep(3); 
           } else {
             setLocationError("카카오 API 응답 오류 (데이터 없음).");
             setIsLocating(false);
