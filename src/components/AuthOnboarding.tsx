@@ -615,8 +615,15 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             </div>
 
             <button 
-              disabled={selectedPersonaIds.length === 0} onClick={() => setStep(5)}
-              className="w-full bg-amber-400 text-slate-950 py-5 rounded-2xl text-xl font-black shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 transition-all"
+              disabled={
+                !gender || 
+                !ageRange || 
+                selectedActivityTimes.length === 0 || 
+                selectedPersonaIds.length === 0 || 
+                (selectedPersonaIds.includes("other") && customPersona.trim() === "")
+              } 
+              onClick={() => setStep(5)}
+              className="w-full bg-amber-400 text-slate-950 py-5 rounded-2xl text-xl font-black shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
               선택 완료
             </button>
