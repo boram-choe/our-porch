@@ -325,10 +325,9 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   const addNewSpace = async () => {
     // 중복 방어 (안전장치 — UI에서이미 차단)
     const dup = vacancies.find(v => {
-      const sameAddr = detectedAddress && v.address
-        ? v.address === detectedAddress
-        : haversineKm(pinLocation.lat, pinLocation.lng, v.lat, v.lng) <= 0.05;
-      return sameAddr && v.floor === newSpaceFloor;
+      const isClose = haversineKm(pinLocation.lat, pinLocation.lng, v.lat, v.lng) <= 0.03;
+      const sameAddr = (detectedAddress && v.address) ? v.address === detectedAddress : true;
+      return sameAddr && isClose && v.floor === newSpaceFloor;
     });
     if (dup) return;
 
