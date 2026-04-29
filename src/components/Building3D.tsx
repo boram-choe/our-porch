@@ -2,12 +2,11 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Vacancy, VoteItem } from "@/data/dummyVacancies";
-import { X, AlertTriangle, CheckCircle2, ChevronDown, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2 } from "lucide-react";
+import { X, AlertTriangle, CheckCircle2, ChevronDown, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "@/components/MyPage";
 import { saveVote } from "@/lib/db";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "@/lib/comments";
-import { MessageSquare, Heart, Send } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
