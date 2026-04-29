@@ -238,12 +238,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   // 핀 클릭: 같은 주소(동일 건물) 여러 층이면 층 선택, 1개면 바로 진입
   const handlePinClick = (clicked: Vacancy) => {
-    // 주소 동일 여부 1순위 판단, 주소없으면 50m 폴백
-    const sameBuilding = filteredVacancies.filter(v =>
-      clicked.address && v.address
-        ? v.address === clicked.address         // ← 주소 일치가 진실
-        : haversineKm(clicked.lat, clicked.lng, v.lat, v.lng) <= 0.05 // 폴백
-    );
+    // 주소 동일 여부와 30m 반경 거리 동시 판단 (대단지 아파트 내 다른 동 구분)
+    const sameBuilding = filteredVacancies.filter(v => {
+      const isClose = haversineKm(clicked.lat, clicked.lng, v.lat, v.lng) <= 0.03;
+      const sameAddr = (clicked.address && v.address) ? v.address === clicked.address : true;
+      return sameAddr && isClose;
+    });
     if (sameBuilding.length > 1) {
       setFloorPickerGroup(sameBuilding);
     } else {
@@ -400,13 +400,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   const votedVacancies = filteredVacancies.filter(v => votedIds.includes(v.id));
 
-  // ─ 중복 공실 판정: 같은 주소 + 같은 층 (주소없으면 50m 폴백) ────────────────────────────────
+  // ─ 중복 공실 판정: 같은 주소 + 30m 반경 이내 + 같은 층 (대단지 아파트 내 동 구분) ────────────────────────────────
   const duplicateVacancy = showAddModal
     ? vacancies.find(v => {
-        const sameAddr = detectedAddress && v.address
-          ? v.address === detectedAddress        // ← 주소 일치 우선
-          : haversineKm(pinLocation.lat, pinLocation.lng, v.lat, v.lng) <= 0.05; // 폴백
-        return sameAddr && v.floor === newSpaceFloor;
+        const isClose = haversineKm(pinLocation.lat, pinLocation.lng, v.lat, v.lng) <= 0.03;
+        const sameAddr = (detectedAddress && v.address) ? v.address === detectedAddress : true;
+        return sameAddr && isClose && v.floor === newSpaceFloor;
       })
     : undefined;
   const isDuplicate = !!duplicateVacancy;
@@ -417,11 +416,11 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     const groups: Vacancy[][] = [];
     filteredVacancies.forEach(v => {
       if (seen.has(v.id)) return;
-      const group = filteredVacancies.filter(other =>
-        (v.address && other.address)
-          ? other.address === v.address
-          : haversineKm(v.lat, v.lng, other.lat, other.lng) <= 0.05
-      );
+      const group = filteredVacancies.filter(other => {
+        const isClose = haversineKm(v.lat, v.lng, other.lat, other.lng) <= 0.03;
+        const sameAddr = (v.address && other.address) ? other.address === v.address : true;
+        return sameAddr && isClose;
+      });
       group.forEach(g => seen.add(g.id));
       groups.push(group);
     });
@@ -559,10 +558,9 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                           <div className="grid grid-cols-2 gap-4">
                             {["1층", "2층", "3층 이상", "지하"].map(f => {
                               const floorDup = vacancies.find(v => {
-                                const sameAddr = detectedAddress && v.address
-                                  ? v.address === detectedAddress
-                                  : haversineKm(pinLocation.lat, pinLocation.lng, v.lat, v.lng) <= 0.05;
-                                return sameAddr && v.floor === f;
+                                const isClose = haversineKm(pinLocation.lat, pinLocation.lng, v.lat, v.lng) <= 0.03;
+                                const sameAddr = (detectedAddress && v.address) ? v.address === detectedAddress : true;
+                                return sameAddr && isClose && v.floor === f;
                               });
                               return (
                                 <button key={f} onClick={() => setNewSpaceFloor(f)}
