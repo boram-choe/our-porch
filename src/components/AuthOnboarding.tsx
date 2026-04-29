@@ -508,7 +508,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               </div>
 
               <button 
-                disabled={!nicknameSuffix} onClick={() => setStep(3)}
+                disabled={!nicknameSuffix} onClick={() => setStep(4)}
                 className="w-full bg-white text-slate-950 py-5 rounded-2xl text-xl font-black shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 transition-all"
               >
                 좋아요, 이제 마지막 단계!
