@@ -418,6 +418,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         return sameAddr && v.floor === newSpaceFloor;
       })
     : undefined;
+  const isDuplicate = !!duplicateVacancy;
+
   const mapMarkers = useMemo(() => {
     if (isPinpointing) return null;
     const seen = new Set<string>();
