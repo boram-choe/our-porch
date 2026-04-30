@@ -320,7 +320,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               }
             }
 
-            // 3. Last Resort: Building Name from Geocoder
+            // 3. Building Name from Geocoder
             if (!bestName && buildingName) {
               bestName = buildingName;
               minDistance = 0;
@@ -329,12 +329,26 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
             if (bestName.includes("시청")) bestName = "서울시청";
 
-            setDetectedLandmark(bestName);
-            setLandmarkDistance(minDistance);
-            setIsFamousLandmark(isFamous);
-            
-            setIsPinpointing(false);
-            setShowAddModal(true);
+            // Priority 4: 상업 앵커 (편의점·카페·약국 등) 40m 이내
+            // landmark가 없을 때만 상업시설로 fallback하여 "xx동" 중복 방지
+            ps.keywordSearch("편의점 카페 약국 은행 부동산", (nearbyData: any, nearbyStatus: any) => {
+              if (!bestName && nearbyStatus === kakao.maps.services.Status.OK && nearbyData.length > 0) {
+                const nearest = nearbyData[0];
+                const dist = parseInt(nearest.distance);
+                if (dist < 40) {
+                  bestName = `${nearest.place_name} 근처`;
+                  minDistance = dist;
+                  isFamous = false;
+                }
+              }
+
+              setDetectedLandmark(bestName);
+              setLandmarkDistance(minDistance);
+              setIsFamousLandmark(isFamous);
+              
+              setIsPinpointing(false);
+              setShowAddModal(true);
+            }, { location: new kakao.maps.LatLng(lat, lng), radius: 50, sort: kakao.maps.services.SortBy.DISTANCE });
           }, { location: new kakao.maps.LatLng(lat, lng), radius: 250, sort: kakao.maps.services.SortBy.DISTANCE });
         }, { location: new kakao.maps.LatLng(lat, lng), radius: 400, sort: kakao.maps.services.SortBy.DISTANCE });
       }
