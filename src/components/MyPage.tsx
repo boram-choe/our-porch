@@ -8,6 +8,7 @@ import {
   Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon 
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
+import FeasibilityReport from "./FeasibilityReport";
 
 const VOTES_KEY = "gongsil_user_votes";
 
@@ -35,7 +36,13 @@ export function recordVote(brand: string, location: string) {
   }
 }
 
-export default function MyPage({ onLogout }: { onLogout: () => void }) {
+export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange }: { 
+  onLogout: () => void,
+  isEntrepreneurMode: boolean,
+  onModeChange: (val: boolean) => void
+}) {
+  const [showFeasibility, setShowFeasibility] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<"profile" | "activity" | "settings">("profile");
   const [isEditing, setIsEditing] = useState(false);
@@ -208,10 +215,10 @@ export default function MyPage({ onLogout }: { onLogout: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 font-sans">
+    <div className="min-h-screen bg-slate-50 pb-24 font-sans relative">
       {/* Header */}
-      <div className="bg-white px-6 pt-12 pb-8 rounded-b-[3rem] shadow-sm mb-6">
-        <div className="flex items-center justify-between mb-8">
+      <div className="bg-white px-6 pt-12 pb-6 rounded-b-[3rem] shadow-sm mb-6">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             나의 페이지
             {userProfile.isAdmin && <ShieldCheck className="text-amber-500" size={20} />}
@@ -219,6 +226,22 @@ export default function MyPage({ onLogout }: { onLogout: () => void }) {
           <button onClick={() => setActiveTab("settings")} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
             <Settings size={22} className="text-slate-400" />
           </button>
+        </div>
+
+        {/* Mode Switch Premium Toggle */}
+        <div className="bg-slate-100 p-1.5 rounded-2xl flex mb-8 border border-slate-200">
+           <button 
+             onClick={() => onModeChange(false)}
+             className={`flex-1 py-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${!isEntrepreneurMode ? "bg-white text-slate-950 shadow-md" : "text-slate-400 hover:text-slate-600"}`}
+           >
+             <Home size={14} /> 우리동네 주민 모드
+           </button>
+           <button 
+             onClick={() => onModeChange(true)}
+             className={`flex-1 py-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${isEntrepreneurMode ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-600"}`}
+           >
+             <Briefcase size={14} /> 예비창업자 모드
+           </button>
         </div>
 
         <div className="flex items-center gap-5">
@@ -494,7 +517,14 @@ export default function MyPage({ onLogout }: { onLogout: () => void }) {
 
         {activeTab === "activity" && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-            <h3 className="text-lg font-black text-slate-900 px-1">최근 상상 더하기 내역</h3>
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-lg font-black text-slate-900">
+                {isEntrepreneurMode ? "나의 창업 후보지" : "최근 상상 더하기 내역"}
+              </h3>
+              {isEntrepreneurMode && (
+                <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-widest">Analysis Ready</span>
+              )}
+            </div>
             {votes.length === 0 ? (
               <div className="bg-white p-12 rounded-3xl text-center border border-dashed border-slate-200">
                 <Lightbulb size={48} className="mx-auto text-slate-200 mb-4" />
@@ -503,26 +533,49 @@ export default function MyPage({ onLogout }: { onLogout: () => void }) {
             ) : (
               <div className="space-y-3">
                 {votes.map((vote) => (
-                  <div key={vote.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
-                        <Sparkles size={24} />
+                  <div key={vote.id} className={`bg-white rounded-3xl shadow-sm border transition-all ${isEntrepreneurMode ? "p-0 overflow-hidden border-blue-100 hover:border-blue-300" : "p-5 border-slate-100 flex items-center justify-between"}`}>
+                    <div className={`${isEntrepreneurMode ? "p-5 flex items-center justify-between" : "flex items-center gap-4"}`}>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${isEntrepreneurMode ? "bg-blue-600 shadow-blue-500/20" : "bg-amber-500 shadow-amber-500/20"}`}>
+                          {isEntrepreneurMode ? <Briefcase size={24} /> : <Sparkles size={24} />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-slate-900">{vote.brand}</p>
+                          <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                            <MapPin size={10} />
+                            {vote.location}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-black text-slate-900">{vote.brand}</p>
-                        <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                          <MapPin size={10} />
-                          {vote.location}
-                        </p>
+                      
+                      {!isEntrepreneurMode && (
+                        <div className="text-right">
+                           <p className="text-[10px] font-bold text-slate-300 flex items-center justify-end gap-1 mb-1">
+                             <Clock size={10} />
+                             {new Date(vote.timestamp).toLocaleDateString()}
+                           </p>
+                           <span className="text-[10px] font-black text-amber-500 bg-amber-50 px-2 py-1 rounded-full">+150P</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {isEntrepreneurMode && (
+                      <div className="bg-slate-50 p-4 border-t border-slate-100 flex items-center justify-between">
+                         <div className="flex flex-col">
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">상태</p>
+                           <p className="text-[11px] font-bold text-slate-900">창업 타당성 분석 가능</p>
+                         </div>
+                         <button 
+                           onClick={() => {
+                             setSelectedLocation(vote.location);
+                             setShowFeasibility(true);
+                           }}
+                           className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2"
+                         >
+                           <Zap size={14} fill="currentColor" /> 재무 리포트 생성
+                         </button>
                       </div>
-                    </div>
-                    <div className="text-right">
-                       <p className="text-[10px] font-bold text-slate-300 flex items-center justify-end gap-1 mb-1">
-                         <Clock size={10} />
-                         {new Date(vote.timestamp).toLocaleDateString()}
-                       </p>
-                       <span className="text-[10px] font-black text-amber-500 bg-amber-50 px-2 py-1 rounded-full">+150P</span>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -596,6 +649,32 @@ export default function MyPage({ onLogout }: { onLogout: () => void }) {
           </motion.div>
         )}
       </div>
+
+      <AnimatePresence>
+        {showFeasibility && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] bg-white overflow-y-auto"
+          >
+            <div className="p-6">
+               <button 
+                 onClick={() => setShowFeasibility(false)}
+                 className="mb-8 w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 transition-all"
+               >
+                 <X size={24} />
+               </button>
+               <FeasibilityReport 
+                 initialData={{
+                   location: selectedLocation,
+                   category: votes.find(v => v.location === selectedLocation)?.brand || ""
+                 }}
+               />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

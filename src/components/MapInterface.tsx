@@ -74,6 +74,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   const [landmarkDistance, setLandmarkDistance] = useState(0);
   const [isFamousLandmark, setIsFamousLandmark] = useState(false);
 
+  const [isEntrepreneurMode, setIsEntrepreneurMode] = useState(false);
   const [showDashboard, setShowDashboard] = useState(true);
 
   // ─── 인증 위치 기반 공실 필터링 (반경 2.5km = 인증 동 + 인접 동) ───────────
@@ -729,13 +730,26 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       <AnimatePresence>
         {selectedVacancy && (
           <motion.div key="detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[150] bg-slate-950">
-            <Building3D vacancy={selectedVacancy} hasVoted={votedIds.includes(selectedVacancy.id)} onVacancyUpdate={handleVacancyUpdate} onClose={() => setSelectedVacancy(null)} />
+            <Building3D 
+              vacancy={selectedVacancy} 
+              hasVoted={votedIds.includes(selectedVacancy.id)} 
+              isEntrepreneurMode={isEntrepreneurMode}
+              onModeSwitch={() => setIsEntrepreneurMode(true)}
+              onVacancyUpdate={handleVacancyUpdate} 
+              onClose={() => setSelectedVacancy(null)} 
+            />
           </motion.div>
         )}
         {showMyPage && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[170] shadow-2xl">
              <div className="absolute inset-0 bg-slate-900/90" onClick={() => setShowMyPage(false)} />
-             <div className="absolute top-0 right-0 bottom-0 w-full max-w-lg bg-white overflow-y-auto shadow-2xl transition-all"><MyPage onLogout={() => { localStorage.removeItem("gongsil_user_profile"); window.location.reload(); }} /></div>
+             <div className="absolute top-0 right-0 bottom-0 w-full max-w-lg bg-white overflow-y-auto shadow-2xl transition-all">
+               <MyPage 
+                 isEntrepreneurMode={isEntrepreneurMode}
+                 onModeChange={setIsEntrepreneurMode}
+                 onLogout={() => { localStorage.removeItem("gongsil_user_profile"); window.location.reload(); }} 
+               />
+             </div>
           </motion.div>
         )}
       </AnimatePresence>

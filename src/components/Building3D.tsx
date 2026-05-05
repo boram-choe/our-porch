@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Vacancy, VoteItem } from "@/data/dummyVacancies";
-import { X, AlertTriangle, CheckCircle2, ChevronDown, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send } from "lucide-react";
+import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "@/components/MyPage";
 import { saveVote } from "@/lib/db";
@@ -47,11 +47,13 @@ function getBrandLogo(brand: string) {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(brand)}&background=random&color=fff&size=128&bold=true`;
 }
 
-export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted }: { 
+export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted, isEntrepreneurMode, onModeSwitch }: { 
   vacancy: Vacancy, 
   onClose: () => void,
   onVacancyUpdate: (v: Vacancy) => void,
-  hasVoted: boolean
+  hasVoted: boolean,
+  isEntrepreneurMode?: boolean,
+  onModeSwitch?: () => void
 }) {
   const [reportMode, setReportMode] = useState<"dispute" | "movein" | null>(null);
   const [reportSubmitted, setReportSubmitted] = useState(false);
@@ -470,25 +472,67 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                                    <span className="text-[10px] font-black text-amber-500">{group.total}표</span>
                                  </div>
                                  <div className="p-3 pt-1 flex flex-wrap gap-2">
-                                   {group.items.map(item => (
-                                     <div key={item.id} className="flex items-center gap-1.5 bg-slate-950/50 px-2 py-1 rounded-lg border border-white/5">
-                                       <img src={item.logo} alt="" className="w-3 h-3 rounded-full" />
-                                       <span className="text-[9px] font-bold text-white/60">{item.brand}</span>
-                                       <span className="text-[8px] font-black text-amber-500/80">{item.count}</span>
-                                     </div>
-                                   ))}
-                                 </div>
-                               </div>
-                             ))}
-                             <button onClick={handleShare} className="w-full py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-xl text-[10px] font-black flex items-center justify-center gap-2 transition-all mt-2">
-                               <Share2 size={12} /> 상상 조각 공유하기
-                             </button>
-                           </motion.div>
-                         )}
-                       </AnimatePresence>
-                       {!hasVoted && (
-                         <button onClick={() => setVotingStep("category")} className="w-full py-5 bg-white text-slate-950 rounded-[2rem] text-sm font-black shadow-xl hover:bg-amber-400 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4">
-                           <Sparkles size={18} className="group-hover:animate-spin" /> 내가 원하는 건 리스트에 없어요
+                                  <div className="p-3 pt-1 flex flex-wrap gap-2">
+                                    {group.items.map(item => (
+                                      <div key={item.id} className="flex items-center gap-1.5 bg-slate-950/50 px-2 py-1 rounded-lg border border-white/5">
+                                        <img src={item.logo} alt="" className="w-3 h-3 rounded-full" />
+                                        <span className="text-[9px] font-bold text-white/60">{item.brand}</span>
+                                        <span className="text-[8px] font-black text-amber-500/80">{item.count}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                              <button onClick={handleShare} className="w-full py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-xl text-[10px] font-black flex items-center justify-center gap-2 transition-all mt-2">
+                                <Share2 size={12} /> 상상 조각 공유하기
+                              </button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        {!hasVoted && (
+                          <button onClick={() => setVotingStep("category")} className="w-full py-5 bg-white text-slate-950 rounded-[2rem] text-sm font-black shadow-xl hover:bg-amber-400 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4">
+                            <Sparkles size={18} className="group-hover:animate-spin" /> 내가 원하는 건 리스트에 없어요
+                          </button>
+                        )}
+                        
+                        <button 
+                          onClick={() => setShowComments(true)} 
+                          className="w-full py-5 bg-slate-800 text-white rounded-[2rem] text-sm font-black shadow-lg hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4 border border-white/5"
+                        >
+                          <MessageSquare size={18} className="text-amber-500" /> 이웃들의 의견 보기
+                        </button>
+
+                        {/* 예비사장님 환영 배너 (모드 전환 유도) */}
+                        {!isEntrepreneurMode && onModeSwitch && (
+                          <motion.button
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            onClick={() => {
+                              if(confirm("예비창업자 모드로 전환하시겠습니까?\n전환 시 해당 공실의 상세 재무 분석 리포트를 이용하실 수 있습니다.")) {
+                                onModeSwitch();
+                                alert("예비창업자 모드로 전환되었습니다. 마이페이지에서 상세 리포트를 확인해보세요!");
+                              }
+                            }}
+                            className="w-full mt-6 p-6 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] text-left relative overflow-hidden group shadow-xl shadow-blue-900/20"
+                          >
+                            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform">
+                              <Briefcase size={60} className="text-white" />
+                            </div>
+                            <div className="relative z-10">
+                              <p className="text-[10px] font-black text-blue-200 uppercase tracking-[0.2em] mb-1">Entrepreneur Opportunity</p>
+                              <h4 className="text-lg font-black text-white leading-tight">이 공간을 직접 디자인하실<br/>예비사장님들을 환영합니다! ✨</h4>
+                              <p className="text-[11px] font-medium text-blue-100/70 mt-2 flex items-center gap-1">
+                                재무 타당성 분석 리포트 확인하기 <ChevronRight size={12} />
+                              </p>
+                            </div>
+                          </motion.button>
+                        )}
+                     </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+               <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
                          </button>
                        )}
                        
