@@ -472,7 +472,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                                    <span className="text-[10px] font-black text-amber-500">{group.total}표</span>
                                  </div>
                                  <div className="p-3 pt-1 flex flex-wrap gap-2">
-                                  <div className="p-3 pt-1 flex flex-wrap gap-2">
                                     {group.items.map(item => (
                                       <div key={item.id} className="flex items-center gap-1.5 bg-slate-950/50 px-2 py-1 rounded-lg border border-white/5">
                                         <img src={item.logo} alt="" className="w-3 h-3 rounded-full" />
