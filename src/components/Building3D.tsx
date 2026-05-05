@@ -179,7 +179,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     onVacancyUpdate(updated);
     recordVote(brand, updated.landmark || updated.address);
 
-    // Supabase에 투표 데이터 저장 (비동기)
     try {
       const userId = localStorage.getItem("gongsil_user_id");
       if (userId) {
@@ -234,7 +233,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     }
   };
 
-  // 2D Building Visual Component with Dynamic Scaling
   const BuildingVisual = () => {
     const isCompact = votingStep !== "results";
     const topCategory = groupedVotes[0];
@@ -258,15 +256,12 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
         <div className="relative w-48 h-6 mb-[-4px] z-10">
           <div className="absolute inset-0 bg-slate-800 rounded-t-lg shadow-lg border-b-2 border-slate-700" />
         </div>
-
         <div className="relative w-48 h-full flex flex-col gap-2 p-1 bg-slate-900/20 backdrop-blur-sm rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl">
           <div className="absolute inset-y-0 -left-1 w-2 bg-gradient-to-r from-slate-800 to-slate-700 rounded-l-md" />
           <div className="absolute inset-y-0 -right-1 w-2 bg-gradient-to-l from-slate-800 to-slate-700 rounded-r-md" />
-
           {floors.map((f, idx) => {
             const isTarget = vacancy.floor === f.id || vacancy.floor?.includes(f.id.replace(" 이상", ""));
             const showWinner = isTarget && topCategory;
-            
             return (
               <motion.div 
                 key={f.id}
@@ -280,19 +275,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                 `}
               >
                 <div className="absolute inset-0 grid grid-cols-3 gap-2 p-3 opacity-20 pointer-events-none">
-                  {[1,2,3,4,5,6].map(i => (
-                    <div key={i} className="bg-slate-700 rounded-sm" />
-                  ))}
+                  {[1,2,3,4,5,6].map(i => <div key={i} className="bg-slate-700 rounded-sm" />)}
                 </div>
-
-                {isTarget && (
-                  <motion.div 
-                    animate={{ opacity: [0.3, 0.6, 0.3] }} 
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="absolute inset-0 bg-amber-500/10 blur-md pointer-events-none"
-                  />
-                )}
-
                 <AnimatePresence mode="wait">
                   {showWinner && (
                     <motion.div 
@@ -302,51 +286,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                       exit={{ opacity: 0 }}
                       className="relative z-20 flex flex-col items-center justify-center w-full h-full"
                     >
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: [0, 1, 1, 0] }}
-                        transition={{ duration: 3.5, times: [0, 0.1, 0.9, 1] }}
-                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                        style={{ overflow: 'visible' }}
-                      >
-                        <motion.div
-                          initial={{ x: -120 }}
-                          animate={{ x: [-120, 0, 0, 120] }}
-                          transition={{ duration: 3.5, times: [0, 0.2, 0.8, 1], ease: "easeInOut" }}
-                          className="flex items-center"
-                        >
-                          <div className="relative">
-                            <svg width="40" height="40" viewBox="0 0 60 60">
-                              <motion.rect animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.3 }} x="15" y="25" width="30" height="30" rx="10" fill="#3b82f6" />
-                              <rect x="10" y="15" width="40" height="15" rx="5" fill="#fbbf24" />
-                              <rect x="15" y="12" width="30" height="5" rx="2" fill="#f59e0b" />
-                              <circle cx="22" cy="35" r="3" fill="white" />
-                              <circle cx="38" cy="35" r="3" fill="white" />
-                            </svg>
-                            <motion.div animate={{ rotate: [0, -70, 40, -70, 40, -70, 40, 0] }} transition={{ delay: 0.7, duration: 1.5, times: [0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1] }} style={{ originX: "0%", originY: "50%" }} className="absolute top-5 right-[-2px]">
-                               <div className="w-6 h-1.5 bg-amber-900 rounded-full" />
-                            </motion.div>
-                          </div>
-                        </motion.div>
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.5, 0] }} transition={{ delay: 1, duration: 1 }} className="absolute top-[-20px] font-black text-white bg-red-600 px-3 py-1 rounded-xl italic">쿵쾅쿵쾅!</motion.div>
-                      </motion.div>
-
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0, y: 20 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        transition={{ delay: 3.2, type: "spring", stiffness: 200, damping: 15 }}
-                        className="relative flex flex-col items-center"
-                      >
-                        <div className="relative min-w-[100px] h-16 bg-white rounded-xl border-b-4 border-slate-300 shadow-2xl flex flex-col items-center justify-center p-2">
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500 rounded-t-xl" />
-                          <span className="text-2xl">{topCategory.icon}</span>
-                          <span className="text-[10px] font-black text-slate-800">{topCategory.label}</span>
-                        </div>
-                      </motion.div>
+                      <div className="relative min-w-[100px] h-16 bg-white rounded-xl border-b-4 border-slate-300 shadow-2xl flex flex-col items-center justify-center p-2">
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500 rounded-t-xl" />
+                        <span className="text-2xl">{topCategory.icon}</span>
+                        <span className="text-[10px] font-black text-slate-800">{topCategory.label}</span>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-
                 <span className={`absolute bottom-1 right-2 text-[8px] font-black tracking-tighter ${isTarget ? 'text-amber-500/60' : 'text-white/10'}`}>
                   {f.label}
                 </span>
@@ -354,7 +301,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
             );
           })}
         </div>
-        
         <div className="w-56 h-4 bg-slate-800 rounded-b-2xl shadow-xl mt-[-2px] border-t-2 border-slate-700" />
       </motion.div>
     );
@@ -378,14 +324,13 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
       </div>
 
       <AnimatePresence mode="wait">
-        {!reportMode && (
+        {!reportMode ? (
           <motion.div 
             key="voter"
             initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }}
             className="absolute bottom-0 left-0 right-0 p-4 md:p-6 pointer-events-none z-20"
           >
-            <div className={`bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-6 w-full max-w-2xl mx-auto shadow-[0_30px_70px_rgba(0,0,0,0.6)] pointer-events-auto overflow-hidden transition-all duration-500 ${votingStep !== 'results' ? 'mb-[20px]' : ''}`}>
-              
+            <div className="bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-6 w-full max-w-2xl mx-auto shadow-[0_30px_70px_rgba(0,0,0,0.6)] pointer-events-auto overflow-hidden transition-all duration-500">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
                   <Gift size={20} className="text-white" />
@@ -434,7 +379,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                         />
                         <button 
                           type="submit" 
-                          onClick={handleVoteSubmit}
                           className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-amber-500 rounded-xl flex items-center justify-center text-slate-950 hover:bg-amber-400 active:scale-90 transition-all shadow-xl shadow-amber-500/40 z-40"
                         >
                           <CheckCircle2 size={24} />
@@ -461,9 +405,10 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                              <ChevronDown size={14} className={`text-slate-500 transition-transform ${expandedCategoryId === 'all' ? 'rotate-180' : ''}`} />
                           </div>
                        </div>
+                       
                        <AnimatePresence>
                          {expandedCategoryId === 'all' && (
-                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-3 max-h-[220px] overflow-y-auto no-scrollbar pt-2 px-1">
+                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-3 max-h-[200px] overflow-y-auto no-scrollbar pt-2 px-1">
                              {groupedVotes.map((group, idx) => (
                                <div key={group.id} className="bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
                                  <div className="flex items-center gap-3 p-3 bg-white/5">
@@ -488,6 +433,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                             </motion.div>
                           )}
                         </AnimatePresence>
+
                         {!hasVoted && (
                           <button onClick={() => setVotingStep("category")} className="w-full py-5 bg-white text-slate-950 rounded-[2rem] text-sm font-black shadow-xl hover:bg-amber-400 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4">
                             <Sparkles size={18} className="group-hover:animate-spin" /> 내가 원하는 건 리스트에 없어요
@@ -501,7 +447,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                           <MessageSquare size={18} className="text-amber-500" /> 이웃들의 의견 보기
                         </button>
 
-                        {/* 예비사장님 환영 배너 (모드 전환 유도) */}
                         {!isEntrepreneurMode && onModeSwitch && (
                           <motion.button
                             initial={{ y: 20, opacity: 0 }}
@@ -527,25 +472,12 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                             </div>
                           </motion.button>
                         )}
-                     </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-               <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                         </button>
-                       )}
-                       
-                       <button 
-                         onClick={() => setShowComments(true)} 
-                         className="w-full py-5 bg-slate-800 text-white rounded-[2rem] text-sm font-black shadow-lg hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4 border border-white/5"
-                       >
-                         <MessageSquare size={18} className="text-amber-500" /> 이웃들의 의견 보기
-                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-               <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+
+              <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
                 <button onClick={() => setReportMode("dispute")} className="flex items-center gap-2 text-slate-500 hover:text-amber-400 transition-colors text-[10px] font-black uppercase tracking-widest"><AlertTriangle size={12} /> 정보 정정하기</button>
                 <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
                    <div className="flex -space-x-2">
@@ -556,8 +488,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
               </div>
             </div>
           </motion.div>
-        )}
-        {reportMode && (
+        ) : (
           <motion.div key="report" initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }} transition={{ type: "spring", damping: 25 }} className="absolute bottom-0 left-0 right-0 p-4 z-30">
             <div className="bg-white rounded-[3rem] p-10 w-full max-w-2xl mx-auto shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 to-orange-500" />
@@ -594,8 +525,10 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
             </div>
           </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* 댓글 Bottom Sheet */}
+      {/* 댓글 Bottom Sheet */}
+      <AnimatePresence>
         {showComments && (
           <motion.div 
             key="comments-sheet" 
@@ -638,7 +571,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                   <div className="space-y-6">
                     {comments.map((comment) => {
                       const isHidden = comment.reports_count >= 3;
-                      
                       return (
                         <div key={comment.id} className="group">
                           <div className="flex items-start justify-between gap-4">
@@ -688,7 +620,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                 )}
               </div>
 
-              {/* 입력창 (하단 고정) */}
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-white border-t border-slate-100">
                 <div className="relative flex items-center gap-3">
                   <div className="flex-1 relative">
