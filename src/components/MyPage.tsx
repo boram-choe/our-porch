@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   User as UserIcon, MapPin, Settings, Heart, MessageSquare, ChevronRight, LogOut, 
   Camera, Star, Award, Briefcase, Baby, Dog, Zap, HelpCircle, Edit3, Check, 
-  Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon 
+  Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon, X
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
