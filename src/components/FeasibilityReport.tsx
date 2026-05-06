@@ -79,11 +79,6 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   const spaceInfo = useMemo(() => getSpaceConditions(initialData?.location || ''), [initialData?.location]);
 
   // Inputs State
-  const [loan, setLoan] = useState(50000000);
-  const [interestRate, setInterestRate] = useState(5.5);
-  const [staffCount, setStaffCount] = useState(2);
-  const [hourlyWage, setHourlyWage] = useState(9860);
-  const [targetProfit, setTargetProfit] = useState(3000000);
 
   const initialUserIndustry = useMemo(() => {
     const cat = initialData?.category || '';
