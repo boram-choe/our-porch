@@ -4,7 +4,7 @@ import {
   DollarSign, Calculator, ChevronRight, 
   ChevronLeft, CheckCircle2, Info, X,
   ArrowDown, PieChart, Activity, Wallet,
-  Receipt, Landmark, Tool
+  Receipt, Landmark, Wrench
 } from 'lucide-react';
 
 // 업종별 전문 데이터셋 (회계사/AI 결합 데이터)
