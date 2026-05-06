@@ -6,9 +6,34 @@ import {
 } from 'lucide-react';
 
 const INDUSTRIES = {
-  cafe: { name: '카페/음료', cogsRate: 0.35, opMargin: 0.20, icon: '☕' },
-  restaurant: { name: '일반음식점', cogsRate: 0.40, opMargin: 0.15, icon: '🍱' },
-  retail: { name: '일반소매업', cogsRate: 0.55, opMargin: 0.10, icon: '🛍️' },
+  cafe: { 
+    name: '베이커리 카페', 
+    category: { large: '음식점업', medium: '커피/음료', small: '베이커리 카페' },
+    cogsRate: 0.35, 
+    opMargin: 0.20, 
+    icon: '☕' 
+  },
+  restaurant: { 
+    name: '파스타 전문점', 
+    category: { large: '음식점업', medium: '서양식', small: '파스타 전문점' },
+    cogsRate: 0.40, 
+    opMargin: 0.15, 
+    icon: '🍝' 
+  },
+  retail: { 
+    name: '디저트 편집샵', 
+    category: { large: '소매업', medium: '식품소매', small: '디저트 편집샵' },
+    cogsRate: 0.55, 
+    opMargin: 0.10, 
+    icon: '🍰' 
+  },
+  beauty: { 
+    name: '헤어 살롱', 
+    category: { large: '서비스업', medium: '미용서비스', small: '헤어 살롱' },
+    cogsRate: 0.25, 
+    opMargin: 0.25, 
+    icon: '💇' 
+  }
 };
 
 const FeasibilityReport = ({ initialData }: { initialData?: { location: string; category: string } }) => {
@@ -20,7 +45,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   const [rent, setRent] = useState(2000000);
   const [staffCount, setStaffCount] = useState(2);
   const [hourlyWage, setHourlyWage] = useState(9860);
-  const [industry, setIndustry] = useState('cafe');
+  const [industry, setIndustry] = useState(initialData?.category === '카페/음료' ? 'cafe' : initialData?.category === '일반음식점' ? 'restaurant' : 'retail');
   const [targetProfit, setTargetProfit] = useState(3000000);
 
   // Calculations
@@ -77,34 +102,54 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
               </div>
               <p className="text-[13px] text-blue-800 leading-relaxed font-medium">
                 업종에 따라 평균 원가율과 수익 구조가 다릅니다. <br/>
-                <span className="font-black">회계사 최보람의 전문 데이터셋</span>이 실시간으로 적용됩니다.
+                <span className="font-black text-blue-950">회계사의 전문성과 AI의 데이터를 결합</span>하여 <br/>내게 딱 필요한 리포트를 제공해드립니다.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-4">
-              {Object.entries(INDUSTRIES).map(([key, value]) => (
-                <button 
-                  key={key}
-                  onClick={() => setIndustry(key)}
-                  className={`p-6 rounded-[2rem] border-2 text-left transition-all ${
-                    industry === key ? 'border-blue-600 bg-blue-50/50 shadow-xl shadow-blue-900/5' : 'border-slate-100 hover:border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-5">
-                      <span className="text-4xl filter drop-shadow-sm">{value.icon}</span>
-                      <div>
-                        <h3 className="font-black text-slate-900 text-lg">{value.name}</h3>
-                        <p className="text-xs text-slate-500 font-bold">표준 영업이익률 약 {(value.opMargin * 100)}% 적용</p>
+            <div className="space-y-4">
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">비즈니스 모델 비교 선택</p>
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { id: industry, label: '나의 선택', isUser: true },
+                  { id: 'beauty', label: '지역 투표 1위', isUser: false } // 예시로 헤어 살롱을 1위로 설정
+                ].map((item) => {
+                  const data = INDUSTRIES[item.id as keyof typeof INDUSTRIES];
+                  const isSelected = industry === item.id;
+                  return (
+                    <button 
+                      key={item.id}
+                      onClick={() => setIndustry(item.id)}
+                      className={`p-6 rounded-[2.5rem] border-2 text-left transition-all relative overflow-hidden ${
+                        isSelected ? 'border-blue-600 bg-blue-50/50 shadow-xl' : 'border-slate-100 hover:border-slate-200'
+                      }`}
+                    >
+                      <div className="absolute top-0 right-0 px-4 py-1.5 bg-blue-600 text-[9px] font-black text-white rounded-bl-xl tracking-widest uppercase">
+                        {item.label}
                       </div>
-                    </div>
-                    {industry === key && (
-                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                        <CheckCircle2 className="text-white w-5 h-5" />
+                      <div className="flex items-center gap-5">
+                        <span className="text-4xl">{data.icon}</span>
+                        <div className="flex-1">
+                          <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
+                            {data.name}
+                            {isSelected && <CheckCircle2 className="text-blue-600 w-4 h-4" />}
+                          </h3>
+                          <div className="flex gap-1.5 mt-1">
+                            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">{data.category.large}</span>
+                            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">{data.category.medium}</span>
+                            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">{data.category.small}</span>
+                          </div>
+                          <p className={`text-xs mt-3 font-bold ${isSelected ? 'text-blue-600' : 'text-slate-500'}`}>
+                            표준 영업이익률 약 <span className="text-sm font-black">{(data.opMargin * 100)}%</span> 적용
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </button>
-              ))}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-slate-400 font-medium px-1 leading-relaxed">
+                * 지역 1위 업종은 해당 공간 인근 500m 이내 이웃들이 가장 필요로 하는 업종 데이터입니다. <br/>
+                어떤 비즈니스 시나리오로 분석을 진행할지 선택해 주세요.
+              </p>
             </div>
           </div>
         )}
