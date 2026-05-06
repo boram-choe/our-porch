@@ -163,7 +163,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                 })}
               </div>
               <p className="text-[11px] text-slate-400 font-medium px-1 leading-relaxed">
-                * 지역 1위 업종은 해당 공간 인근 500m 이내 이웃들이 가장 필요로 하는 업종 데이터입니다. <br/>
+                * 지역 1위 업종은 해당 공간 인근 이웃들이 가장 필요로 하는 업종 데이터입니다. <br/>
                 어떤 비즈니스 시나리오로 분석을 진행할지 선택해 주세요.
               </p>
             </div>
@@ -180,12 +180,15 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                 </label>
                 <div className="relative group">
                   <input 
-                    type="number" 
-                    className="w-full pl-12 pr-6 text-2xl font-black h-16 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] focus:border-blue-600 focus:bg-white transition-all outline-none"
-                    value={rent} 
-                    onChange={(e) => setRent(Number(e.target.value))} 
+                    type="text" 
+                    className="w-full pl-6 pr-16 text-2xl font-black h-16 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] focus:border-blue-600 focus:bg-white transition-all outline-none text-right"
+                    value={(rent / 10000).toLocaleString()} 
+                    onChange={(e) => {
+                      const val = Number(e.target.value.replace(/,/g, ''));
+                      if(!isNaN(val)) setRent(val * 10000);
+                    }} 
                   />
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 text-xl font-black">₩</span>
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-black">만원</span>
                 </div>
               </div>
 
@@ -227,12 +230,15 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                 </label>
                 <div className="relative">
                   <input 
-                    type="number" 
-                    className="w-full pl-12 pr-6 text-2xl font-black h-16 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] focus:border-blue-600 focus:bg-white transition-all outline-none"
-                    value={loan} 
-                    onChange={(e) => setLoan(Number(e.target.value))} 
+                    type="text" 
+                    className="w-full pl-6 pr-16 text-2xl font-black h-16 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] focus:border-blue-600 focus:bg-white transition-all outline-none text-right"
+                    value={(loan / 10000).toLocaleString()} 
+                    onChange={(e) => {
+                      const val = Number(e.target.value.replace(/,/g, ''));
+                      if(!isNaN(val)) setLoan(val * 10000);
+                    }} 
                   />
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 text-xl font-black">₩</span>
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-black">만원</span>
                 </div>
               </div>
 
@@ -267,12 +273,15 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
             <div className="max-w-sm mx-auto">
               <div className="relative">
                 <input 
-                  type="number" 
+                  type="text" 
                   className="w-full text-center text-5xl font-black h-24 bg-transparent border-b-4 border-blue-600 focus:border-blue-700 transition-all outline-none text-blue-600"
-                  value={targetProfit} 
-                  onChange={(e) => setTargetProfit(Number(e.target.value))} 
+                  value={(targetProfit / 10000).toLocaleString()} 
+                  onChange={(e) => {
+                    const val = Number(e.target.value.replace(/,/g, ''));
+                    if(!isNaN(val)) setTargetProfit(val * 10000);
+                  }} 
                 />
-                <div className="text-center mt-4 text-slate-300 font-black text-sm uppercase tracking-widest">Target Monthly Profit</div>
+                <div className="text-center mt-4 text-slate-400 font-black text-sm uppercase tracking-widest">만원</div>
               </div>
             </div>
           </div>
