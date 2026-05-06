@@ -102,7 +102,9 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   const [interestRate, setInterestRate] = useState(5.5);
   const [staffCount, setStaffCount] = useState(2);
   const [hourlyWage, setHourlyWage] = useState(10030); // 1만원 시대 반영
-  const [targetProfit, setTargetProfit] = useState(3000000);
+  const [targetRevenue, setTargetRevenue] = useState(30000000); // 월 목표 매출액
+  const [avgOrderValue, setAvgOrderValue] = useState(15000); // 평균 단가
+  const [dailyOrders, setDailyOrders] = useState(60); // 일 주문 수
 
   // Calculations
   const analysis = useMemo(() => {
@@ -120,24 +122,23 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
     };
     const totalFixed = Object.values(fixedCosts).reduce((a, b) => a + b, 0);
 
-    // 목표 매출액 역산 (매출 = (목표이익 + 고정비) / (1 - 변동비율))
+    // 변동비 산출 (매출액 기반)
     const totalVarRate = Object.values(data.variableRates).reduce((a, b) => a + b, 0);
-    const requiredRevenue = (targetProfit + totalFixed) / (1 - totalVarRate);
+    const totalVar = targetRevenue * totalVarRate;
 
-    // 변동비 세부 산출
     const variableCosts = {
-      material: requiredRevenue * data.variableRates.material,
-      card: requiredRevenue * data.variableRates.card,
-      utility: requiredRevenue * data.variableRates.utility,
-      platform: requiredRevenue * data.variableRates.platform
+      material: targetRevenue * data.variableRates.material,
+      card: targetRevenue * data.variableRates.card,
+      utility: targetRevenue * data.variableRates.utility,
+      platform: targetRevenue * data.variableRates.platform
     };
-    const totalVar = Object.values(variableCosts).reduce((a, b) => a + b, 0);
 
-    const preTaxProfit = requiredRevenue - totalFixed - totalVar;
+    // 세전 영업이익 (매출 - 고정비 - 변동비)
+    const preTaxProfit = targetRevenue - totalFixed - totalVar;
 
     // 세금 산출
-    const vat = requiredRevenue * 0.1; // 부가세 (단순화)
-    const monthlyIncomeTax = calculateIncomeTax(preTaxProfit * 12) / 12;
+    const vat = targetRevenue * 0.1; // 부가세
+    const monthlyIncomeTax = calculateIncomeTax(Math.max(0, preTaxProfit) * 12) / 12;
     const totalTax = vat + monthlyIncomeTax;
 
     const netIncome = preTaxProfit - totalTax;
@@ -147,22 +148,22 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
       deposit: deposit,
       interior: spaceInfo.size * data.initialInvestmentPerPyung,
       equipment: (spaceInfo.size * data.initialInvestmentPerPyung) * 0.4,
-      inventory: requiredRevenue * 0.3,
+      inventory: targetRevenue * 0.3,
       other: 5000000
     };
     const totalInvestment = Object.values(initialInvestment).reduce((a, b) => a + b, 0);
 
     return {
-      requiredRevenue,
+      targetRevenue,
       fixedCosts, totalFixed,
       variableCosts, totalVar,
       preTaxProfit,
       tax: { vat, incomeTax: monthlyIncomeTax, total: totalTax },
       netIncome,
       initialInvestment, totalInvestment,
-      repaymentMonths: totalInvestment / netIncome
+      repaymentMonths: netIncome > 0 ? totalInvestment / netIncome : Infinity
     };
-  }, [loan, interestRate, staffCount, hourlyWage, industry, targetProfit, spaceInfo]);
+  }, [loan, interestRate, staffCount, hourlyWage, industry, targetRevenue, deposit, rent, maintenance, spaceInfo]);
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, 5));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
@@ -244,7 +245,12 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">시간당 시급</label>
                   <div className="relative">
-                    <input type="text" className="w-full px-6 text-xl font-black h-14 bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] focus:border-blue-600 focus:bg-white outline-none text-right pr-12" value={hourlyWage.toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setHourlyWage(val); }} />
+                    <input 
+                      type="text" 
+                      className="w-full px-6 text-xl font-black h-14 bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] focus:border-blue-600 focus:bg-white outline-none text-right pr-12" 
+                      value={Number(hourlyWage).toLocaleString()} 
+                      onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setHourlyWage(val); }} 
+                    />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">원</span>
                   </div>
                   <p className="text-[10px] text-rose-500 font-bold px-1">* 2026년 최저시급은 10,030원입니다.</p>
@@ -309,12 +315,47 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
         )}
 
         {step === 4 && (
-          <div className="space-y-10 py-4">
-            <div className="text-center space-y-4">
-              <div className="bg-blue-600 w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto shadow-xl shadow-blue-200"><DollarSign className="text-white w-10 h-10" /></div>
-              <div className="space-y-2"><h2 className="text-2xl font-black text-slate-900 leading-tight">월 목표 순이익을 설정하세요</h2><p className="text-slate-400 text-[13px] font-medium leading-relaxed">이자/세금 제외 모든 비용을 공제한 <br/>실질적인 '나의 수입' 목표입니다.</p></div>
+          <div className="space-y-8 py-2">
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-black text-slate-900 leading-tight">월 목표 매출액을 설정하세요</h2>
+              <p className="text-slate-400 text-[12px] font-medium leading-relaxed">단가와 주문 수를 고려하여 <br/>현실적인 매출 목표를 세워보세요.</p>
             </div>
-            <div className="max-w-sm mx-auto"><div className="relative"><input type="text" className="w-full text-center text-5xl font-black h-24 bg-transparent border-b-4 border-blue-600 focus:border-blue-700 outline-none text-blue-600" value={(targetProfit / 10000).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setTargetProfit(val * 10000); }} /><div className="text-center mt-4 text-slate-400 font-black text-sm uppercase tracking-widest">만원</div></div></div>
+
+            {/* 매출액 메인 입력 */}
+            <div className="max-w-xs mx-auto text-center border-b-2 border-slate-100 pb-4">
+              <div className="relative">
+                <input type="text" className="w-full text-center text-4xl font-black h-16 bg-transparent outline-none text-blue-600" value={(targetRevenue / 10000).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setTargetRevenue(val * 10000); }} />
+                <span className="text-sm font-black text-slate-400 ml-2">만원</span>
+              </div>
+            </div>
+
+            {/* 매출 계산기 헬퍼 */}
+            <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Calculator size={14} className="text-blue-600" />
+                <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">매출 시뮬레이션 헬퍼</h4>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">평균 객단가 (원)</label>
+                  <input type="text" className="w-full h-12 bg-white border border-slate-200 rounded-xl text-center font-black text-slate-800" value={Number(avgOrderValue).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setAvgOrderValue(val); }} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">일 평균 주문수 (건)</label>
+                  <input type="text" className="w-full h-12 bg-white border border-slate-200 rounded-xl text-center font-black text-slate-800" value={Number(dailyOrders).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setDailyOrders(val); }} />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-200">
+                <div className="flex justify-between items-center px-2">
+                  <span className="text-xs font-bold text-slate-500">예상 월 매출 (30일 기준)</span>
+                  <button onClick={() => setTargetRevenue(avgOrderValue * dailyOrders * 30)} className="text-sm font-black text-blue-600 hover:underline">
+                    {((avgOrderValue * dailyOrders * 30) / 10000).toLocaleString()}만원 적용하기
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
