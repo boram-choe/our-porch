@@ -243,7 +243,10 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">시간당 시급</label>
-                  <input type="number" className="w-full px-6 text-xl font-black h-14 bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] focus:border-blue-600 focus:bg-white outline-none text-center" value={hourlyWage} onChange={(e) => setHourlyWage(Number(e.target.value))} />
+                  <div className="relative">
+                    <input type="text" className="w-full px-6 text-xl font-black h-14 bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] focus:border-blue-600 focus:bg-white outline-none text-right pr-12" value={hourlyWage.toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setHourlyWage(val); }} />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">원</span>
+                  </div>
                   <p className="text-[10px] text-rose-500 font-bold px-1">* 2026년 최저시급은 10,030원입니다.</p>
                 </div>
               </div>
