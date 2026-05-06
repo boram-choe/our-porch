@@ -98,16 +98,27 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
 
   const [industry, setIndustry] = useState(initialUserIndustry);
 
+  // Inputs State (툇마루 데이터로 초기화하되 수정 가능)
+  const [deposit, setDeposit] = useState(spaceInfo.deposit);
+  const [rent, setRent] = useState(spaceInfo.rent);
+  const [maintenance, setMaintenance] = useState(spaceInfo.maintenance);
+  
+  const [loan, setLoan] = useState(50000000);
+  const [interestRate, setInterestRate] = useState(5.5);
+  const [staffCount, setStaffCount] = useState(2);
+  const [hourlyWage, setHourlyWage] = useState(9860);
+  const [targetProfit, setTargetProfit] = useState(3000000);
+
   // Calculations
   const analysis = useMemo(() => {
     const data = INDUSTRIES[industry as keyof typeof INDUSTRIES];
     const monthlyInterest = (loan * (interestRate / 100)) / 12;
     const monthlyLabor = staffCount * hourlyWage * 209;
     
-    // 고정비 (임대료, 관리비, 인건비, 이자)
+    // 고정비 (수정된 상태값 반영)
     const fixedCosts = {
-      rent: spaceInfo.rent,
-      maintenance: spaceInfo.maintenance,
+      rent: rent,
+      maintenance: maintenance,
       labor: monthlyLabor,
       interest: monthlyInterest
     };
@@ -137,6 +148,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
 
     // 초기 투자비용
     const initialInvestment = {
+      deposit: deposit,
       interior: spaceInfo.size * data.initialInvestmentPerPyung,
       equipment: (spaceInfo.size * data.initialInvestmentPerPyung) * 0.4,
       inventory: requiredRevenue * 0.3,
@@ -225,28 +237,57 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
 
         {step === 2 && (
           <div className="space-y-8">
-            <div className="p-6 bg-amber-50 rounded-[1.5rem] border border-amber-100 mb-4">
-              <h4 className="text-xs font-black text-amber-700 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <Home size={14} /> 툇마루단 조사 임대 조건
-              </h4>
-              <p className="text-[13px] text-amber-900 leading-relaxed font-medium">
-                해당 공간({initialData?.location})의 <span className="font-black text-amber-600">임대 조건은 이미 자동 반영</span>되었습니다. <br/>
-                인건비와 목표 수익을 조정해 보세요.
-              </p>
-              <div className="mt-4 grid grid-cols-3 gap-4 border-t border-amber-200 pt-4">
-                <div><p className="text-[10px] text-amber-600 font-bold">보증금</p><p className="text-sm font-black">{formatMan(spaceInfo.deposit)}만원</p></div>
-                <div><p className="text-[10px] text-amber-600 font-bold">월 임대료</p><p className="text-sm font-black">{formatMan(spaceInfo.rent)}만원</p></div>
-                <div><p className="text-[10px] text-amber-600 font-bold">관리비</p><p className="text-sm font-black">{formatMan(spaceInfo.maintenance)}만원</p></div>
+            {/* 상단: 인건비 설정 */}
+            <div className="space-y-4">
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">운영 인력 설정</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Users className="w-3 h-3 text-blue-600" /> 예상 고용 인원</label>
+                  <input type="number" className="w-full px-6 text-xl font-black h-14 bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] focus:border-blue-600 focus:bg-white outline-none text-center" value={staffCount} onChange={(e) => setStaffCount(Number(e.target.value))} />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">시간당 시급</label>
+                  <input type="number" className="w-full px-6 text-xl font-black h-14 bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] focus:border-blue-600 focus:bg-white outline-none text-center" value={hourlyWage} onChange={(e) => setHourlyWage(Number(e.target.value))} />
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Users className="w-3 h-3 text-blue-600" /> 예상 고용 인원</label>
-                <input type="number" className="w-full px-6 text-xl font-black h-14 bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] focus:border-blue-600 focus:bg-white outline-none text-center" value={staffCount} onChange={(e) => setStaffCount(Number(e.target.value))} />
+
+            {/* 하단: 임대 조건 설정 (툇마루 데이터 연동) */}
+            <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-6">
+              <div className="space-y-2">
+                <h4 className="text-xs font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
+                  <Home size={14} /> 임대 조건 설정
+                </h4>
+                <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                  * 본 정보는 <span className="font-black text-blue-600">툇마루단이 직접 현장을 확인</span>하고 입력한 내역입니다. <br/>
+                  협상 예정인 금액이 있다면 직접 수정해 보세요.
+                </p>
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">시간당 시급</label>
-                <input type="number" className="w-full px-6 text-xl font-black h-14 bg-slate-50 border-2 border-slate-100 rounded-[1.2rem] focus:border-blue-600 focus:bg-white outline-none text-center" value={hourlyWage} onChange={(e) => setHourlyWage(Number(e.target.value))} />
+              
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">보증금</label>
+                  <div className="relative">
+                    <input type="text" className="w-full pl-4 pr-12 h-12 bg-white border border-slate-200 rounded-xl text-right font-black text-slate-800" value={(deposit / 10000).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setDeposit(val * 10000); }} />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">만원</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">월 임대료</label>
+                    <div className="relative">
+                      <input type="text" className="w-full pl-4 pr-12 h-12 bg-white border border-slate-200 rounded-xl text-right font-black text-slate-800" value={(rent / 10000).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setRent(val * 10000); }} />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">만원</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">월 관리비</label>
+                    <div className="relative">
+                      <input type="text" className="w-full pl-4 pr-12 h-12 bg-white border border-slate-200 rounded-xl text-right font-black text-slate-800" value={(maintenance / 10000).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setMaintenance(val * 10000); }} />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">만원</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -359,6 +400,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                </div>
                {expandedSection === 'investment' && (
                  <div className="space-y-2 pt-2 border-t border-blue-200">
+                    <div className="flex justify-between text-xs"><span>임대 보증금 (회수 가능 자산)</span><span className="font-bold">{formatMan(deposit)}만원</span></div>
                     <div className="flex justify-between text-xs"><span>인테리어 ({spaceInfo.size}평 기준)</span><span className="font-bold">{formatMan(analysis.initialInvestment.interior)}만원</span></div>
                     <div className="flex justify-between text-xs"><span>주방/매장 장비 및 설비</span><span className="font-bold">{formatMan(analysis.initialInvestment.equipment)}만원</span></div>
                     <div className="flex justify-between text-xs"><span>초도 재고 물량</span><span className="font-bold">{formatMan(analysis.initialInvestment.inventory)}만원</span></div>
