@@ -360,41 +360,64 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
         )}
 
         {step === 5 && (
-          <div className="space-y-4">
-            {/* 최종 공식 헤더 */}
-            <div className="bg-slate-950 p-6 rounded-[2rem] text-white shadow-2xl border border-slate-800 relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-4 opacity-10"><Calculator size={100} /></div>
-               <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-1">CPA Final Assessment</p>
-               <h2 className="text-lg font-black mb-4">비즈니스 재무 리포트</h2>
-               
-               <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                  <div className="text-center">
-                    <p className="text-[10px] text-slate-500 font-bold">월 매출</p>
-                    <p className="text-lg font-black">{formatMan(analysis.targetRevenue)}</p>
+          <div className="space-y-6">
+            {/* 최종 손익 흐름 헤더 (세로형 + 블루 테마) */}
+            <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-blue-100 border border-blue-50 space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50" />
+              
+              <div className="relative space-y-4">
+                <div className="flex justify-between items-end border-b border-slate-100 pb-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Monthly Profit & Loss</p>
+                    <h3 className="text-2xl font-black text-slate-900">비즈니스 재무 리포트</h3>
                   </div>
-                  <div className="text-slate-600 font-black">−</div>
-                  <div className="text-center group cursor-pointer" onClick={() => setExpandedSection(expandedSection === 'fixed' ? null : 'fixed')}>
-                    <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1 justify-center">고정비 <ArrowDown size={8} /></p>
-                    <p className="text-lg font-black text-rose-400">{formatMan(analysis.totalFixed)}</p>
+                  <div className="bg-blue-600 px-4 py-1 rounded-full"><span className="text-[10px] font-black text-white uppercase">CPA Insight</span></div>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  {/* 월 매출 */}
+                  <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <span className="text-sm font-bold text-slate-600">월 목표 매출액</span>
+                    <span className="text-xl font-black text-slate-900">{Math.round(analysis.targetRevenue / 10000).toLocaleString()} <span className="text-xs">만원</span></span>
                   </div>
-                  <div className="text-slate-600 font-black">−</div>
-                  <div className="text-center group cursor-pointer" onClick={() => setExpandedSection(expandedSection === 'var' ? null : 'var')}>
-                    <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1 justify-center">변동비 <ArrowDown size={8} /></p>
-                    <p className="text-lg font-black text-amber-400">{formatMan(analysis.totalVar)}</p>
+
+                  <div className="flex justify-center -my-2 relative z-10"><div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center border border-rose-100 text-rose-500 font-black text-sm">−</div></div>
+
+                  {/* 고정비 */}
+                  <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'fixed' ? null : 'fixed')}>
+                    <span className="text-sm font-bold text-slate-600 flex items-center gap-2">고정비 <ArrowDown size={12} className="text-slate-400" /></span>
+                    <span className="text-xl font-black text-rose-600">{Math.round(analysis.totalFixed / 10000).toLocaleString()} <span className="text-xs">만원</span></span>
                   </div>
-               </div>
-               
-               <div className="flex items-center justify-between mt-4 bg-white/5 p-4 rounded-xl">
-                  <div className="text-center group cursor-pointer" onClick={() => setExpandedSection(expandedSection === 'tax' ? null : 'tax')}>
-                    <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1 justify-center">세금 <ArrowDown size={8} /></p>
-                    <p className="text-lg font-black text-slate-400">{formatMan(analysis.tax.total)}</p>
+
+                  <div className="flex justify-center -my-2 relative z-10"><div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center border border-rose-100 text-rose-500 font-black text-sm">−</div></div>
+
+                  {/* 변동비 */}
+                  <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'variable' ? null : 'variable')}>
+                    <span className="text-sm font-bold text-slate-600 flex items-center gap-2">변동비 <ArrowDown size={12} className="text-slate-400" /></span>
+                    <span className="text-xl font-black text-amber-600">{Math.round(analysis.totalVar / 10000).toLocaleString()} <span className="text-xs">만원</span></span>
                   </div>
-                  <div className="text-slate-600 font-black">=</div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest">Net Monthly Profit</p>
-                    <p className="text-3xl font-black text-green-400">{formatMan(analysis.netIncome)}<span className="text-sm ml-1 text-white/50">만원</span></p>
+
+                  <div className="flex justify-center -my-2 relative z-10"><div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-500 font-black text-sm">−</div></div>
+
+                  {/* 세금 */}
+                  <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'tax' ? null : 'tax')}>
+                    <span className="text-sm font-bold text-slate-600 flex items-center gap-2">예상 세금 <ArrowDown size={12} className="text-slate-400" /></span>
+                    <span className="text-xl font-black text-slate-500">{Math.round(analysis.tax.total / 10000).toLocaleString()} <span className="text-xs">만원</span></span>
                   </div>
-               </div>
+
+                  <div className="flex justify-center -my-2 relative z-10"><div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200 text-white font-black text-sm">=</div></div>
+
+                  {/* 최종 순수익 */}
+                  <div className="bg-blue-600 p-6 rounded-3xl shadow-lg shadow-blue-200 text-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+                    <p className="text-[11px] font-black text-blue-100 uppercase tracking-widest mb-1">Estimated Net Monthly Profit</p>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-4xl font-black text-white">{Math.round(analysis.netIncome / 10000).toLocaleString()}</span>
+                      <span className="text-lg font-bold text-blue-100">만원 / 월</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* 상세 드릴다운 내역 */}
