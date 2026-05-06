@@ -44,7 +44,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange }: {
   const [showFeasibility, setShowFeasibility] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<"profile" | "activity" | "settings">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "activity" | "settings">(isEntrepreneurMode ? "activity" : "profile");
   const [isEditing, setIsEditing] = useState(false);
   const [editNickname, setEditNickname] = useState("");
   const [votes, setVotes] = useState<VoteRecord[]>([]);
@@ -240,7 +240,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange }: {
              onClick={() => onModeChange(true)}
              className={`flex-1 py-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${isEntrepreneurMode ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-600"}`}
            >
-             <Briefcase size={14} /> 예비창업자 모드
+             <Briefcase size={14} /> 예비사장님 모드
            </button>
         </div>
 
@@ -250,7 +250,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange }: {
           </div>
           <div>
             <p className="text-xs text-amber-600 font-bold mb-0.5">
-              {userProfile.personaLabel || `${userProfile.home?.neighborhood || "우리동네"} 활동 이웃`}
+              {isEntrepreneurMode ? "성장을 꿈꾸는 예비사장님" : (userProfile.personaLabel || `${userProfile.home?.neighborhood || "우리동네"} 활동 이웃`)}
             </p>
             <h2 className="text-xl font-black text-slate-900">{userProfile.nickname}</h2>
           </div>
@@ -260,15 +260,15 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange }: {
       <div className="px-6 space-y-6">
         {/* Tabs */}
         <div className="flex p-1 bg-slate-200/50 rounded-2xl">
-          {(["profile", "activity", "settings"] as const).map((tab) => (
+          {(!isEntrepreneurMode ? ["profile", "activity", "settings"] : ["activity", "settings"]).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(tab as any)}
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
                 activeTab === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
               }`}
             >
-              {tab === "profile" ? "내 정보" : tab === "activity" ? "활동 내역" : "설정"}
+              {tab === "profile" ? "내 정보" : tab === "activity" ? (isEntrepreneurMode ? "관심공간" : "활동 내역") : "설정"}
             </button>
           ))}
         </div>
@@ -519,7 +519,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange }: {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex items-center justify-between px-1">
               <h3 className="text-lg font-black text-slate-900">
-                {isEntrepreneurMode ? "나의 창업 후보지" : "최근 상상 더하기 내역"}
+                {isEntrepreneurMode ? "관심공간" : "최근 상상 더하기 내역"}
               </h3>
               {isEntrepreneurMode && (
                 <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-widest">Analysis Ready</span>

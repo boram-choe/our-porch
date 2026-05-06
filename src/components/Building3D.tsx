@@ -453,9 +453,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.5 }}
                             onClick={() => {
-                              if(confirm("예비창업자 모드로 전환하시겠습니까?\n전환 시 해당 공실의 상세 재무 분석 리포트를 이용하실 수 있습니다.")) {
+                              if(confirm("예비사장님 모드로 전환하시겠습니까?\n전환 시 해당 공실의 상세 재무 분석 리포트를 이용하실 수 있습니다.")) {
                                 onModeSwitch();
-                                alert("예비창업자 모드로 전환되었습니다. 마이페이지에서 상세 리포트를 확인해보세요!");
+                                alert("예비사장님 모드로 활성화되었습니다! 마이페이지에서 상세 리포트를 확인해 보세요.");
                               }
                             }}
                             className="w-full mt-6 p-6 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] text-left relative overflow-hidden group shadow-xl shadow-blue-900/20"
@@ -464,8 +464,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                               <Briefcase size={60} className="text-white" />
                             </div>
                             <div className="relative z-10">
-                              <p className="text-[10px] font-black text-blue-200 uppercase tracking-[0.2em] mb-1">Entrepreneur Opportunity</p>
-                              <h4 className="text-lg font-black text-white leading-tight">이 공간을 직접 디자인하실<br/>예비사장님들을 환영합니다! ✨</h4>
+                              <p className="text-[10px] font-black text-blue-200 uppercase tracking-[0.2em] mb-1">Founder Opportunity</p>
+                              <h4 className="text-lg font-black text-white leading-tight">이 공간을 직접 경영하실<br/>예비사장님을 기다립니다! ✨</h4>
                               <p className="text-[11px] font-medium text-blue-100/70 mt-2 flex items-center gap-1">
                                 재무 타당성 분석 리포트 확인하기 <ChevronRight size={12} />
                               </p>
