@@ -479,52 +479,30 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
               </div>
             </div>
           );
-        })()}
-              {expandedSection === 'var' && (
-                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 animate-in slide-in-from-top-2 duration-300">
-                  <h4 className="text-xs font-black text-slate-500 uppercase flex items-center gap-2"><PieChart size={14} className="text-amber-600" /> 세부 변동비 내역 (매출 비례)</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm"><span>원부재료비 ({Math.round(INDUSTRIES[industry as keyof typeof INDUSTRIES].variableRates.material * 100)}%)</span><span className="font-bold">{formatMan(analysis.variableCosts.material)}만원</span></div>
-                    <div className="flex justify-between text-sm"><span>카드/결제 수수료 (1.5%)</span><span className="font-bold">{formatMan(analysis.variableCosts.card)}만원</span></div>
-                    <div className="flex justify-between text-sm"><span>광고/플랫폼 수수료 ({Math.round(INDUSTRIES[industry as keyof typeof INDUSTRIES].variableRates.platform * 100)}%)</span><span className="font-bold">{formatMan(analysis.variableCosts.platform)}만원</span></div>
-                    <div className="flex justify-between text-sm"><span>수도/광열비 (변동분)</span><span className="font-bold">{formatMan(analysis.variableCosts.utility)}만원</span></div>
-                  </div>
-                </div>
-              )}
-              {expandedSection === 'tax' && (
-                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 animate-in slide-in-from-top-2 duration-300">
-                  <h4 className="text-xs font-black text-slate-500 uppercase flex items-center gap-2"><Receipt size={14} className="text-slate-600" /> 세금 산출 근거</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm"><span>부가가치세 (매출의 약 10%)</span><span className="font-bold">{formatMan(analysis.tax.vat)}만원</span></div>
-                    <div className="flex justify-between text-sm"><span>종합소득세 (누진세율 적용)</span><span className="font-bold">{formatMan(analysis.tax.incomeTax)}만원</span></div>
-                    <p className="text-[10px] text-slate-400 mt-2">* 부가가치세는 매입 세액 공제에 따라 달라질 수 있습니다.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 초기 투자비용 정보 */}
-            <div className="p-5 bg-blue-50 rounded-[2rem] border border-blue-100 space-y-4">
-               <div className="flex justify-between items-center group cursor-pointer" onClick={() => setExpandedSection(expandedSection === 'investment' ? null : 'investment')}>
-                  <h4 className="text-xs font-black text-blue-700 uppercase flex items-center gap-2"><Wallet size={14} /> 예상 초기 투자비용</h4>
-                  <p className="text-sm font-black text-blue-900">{formatMan(analysis.totalInvestment)}만원 <ArrowDown size={10} className={`inline transition-transform ${expandedSection === 'investment' ? 'rotate-180' : ''}`} /></p>
-               </div>
-               {expandedSection === 'investment' && (
-                 <div className="space-y-2 pt-2 border-t border-blue-200">
-                    <div className="flex justify-between text-xs"><span>임대 보증금 (회수 가능 자산)</span><span className="font-bold">{formatMan(deposit)}만원</span></div>
-                    <div className="flex justify-between text-xs"><span>인테리어 ({spaceInfo.size}평 기준)</span><span className="font-bold">{formatMan(analysis.initialInvestment.interior)}만원</span></div>
-                    <div className="flex justify-between text-xs"><span>주방/매장 장비 및 설비</span><span className="font-bold">{formatMan(analysis.initialInvestment.equipment)}만원</span></div>
-                    <div className="flex justify-between text-xs"><span>초도 재고 물량</span><span className="font-bold">{formatMan(analysis.initialInvestment.inventory)}만원</span></div>
-                    <div className="flex justify-between text-xs"><span>기타 (마케팅/가맹비 등)</span><span className="font-bold">{formatMan(analysis.initialInvestment.other)}만원</span></div>
+              {/* 초기 투자비용 정보 (반올림 적용) */}
+              <div className="p-6 bg-blue-50 rounded-[2.5rem] border border-blue-100 space-y-4">
+                 <div className="flex justify-between items-center group cursor-pointer" onClick={() => setExpandedSection(expandedSection === 'investment' ? null : 'investment')}>
+                    <h4 className="text-[11px] font-black text-blue-700 uppercase tracking-widest flex items-center gap-2"><Wallet size={14} /> 예상 초기 투자비용</h4>
+                    <p className="text-lg font-black text-blue-900">{Math.round(analysis.totalInvestment / 10000).toLocaleString()}만원 <ArrowDown size={14} className={`inline transition-transform ${expandedSection === 'investment' ? 'rotate-180' : ''}`} /></p>
                  </div>
-               )}
+                 {expandedSection === 'investment' && (
+                   <div className="space-y-3 pt-4 border-t border-blue-200 animate-in slide-in-from-top-2">
+                      <div className="flex justify-between text-sm"><span>임대 보증금 (회수 가능 자산)</span><span className="font-bold">{Math.round(deposit / 10000).toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>인테리어 ({spaceInfo.size}평 기준)</span><span className="font-bold">{Math.round(analysis.initialInvestment.interior / 10000).toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>주방/매장 장비 및 설비</span><span className="font-bold">{Math.round(analysis.initialInvestment.equipment / 10000).toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>초도 재고 물량</span><span className="font-bold">{Math.round(analysis.initialInvestment.inventory / 10000).toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>기타 (마케팅/가맹비 등)</span><span className="font-bold">{Math.round(analysis.initialInvestment.other / 10000).toLocaleString()}만원</span></div>
+                   </div>
+                 )}
+              </div>
+              
+              <div className="py-6 text-center border-t border-slate-100">
+                <p className="text-[12px] text-slate-400 font-medium">CPA 분석 결과 회수 기간: 약 <span className="text-blue-600 font-black text-lg">{Math.ceil(analysis.repaymentMonths)}개월</span></p>
+                <p className="text-[10px] text-slate-300 mt-1">* 업종별 평균 감가상각 및 시장 상황에 따라 변동될 수 있습니다.</p>
+              </div>
             </div>
-            
-            <div className="p-4 text-center">
-              <p className="text-[11px] text-slate-400 font-medium">분석 결과 회수 기간: 약 <span className="text-blue-600 font-black">{Math.ceil(analysis.repaymentMonths)}개월</span></p>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Navigation Buttons */}
