@@ -359,80 +359,127 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
           </div>
         )}
 
-        {step === 5 && (
-          <div className="space-y-6">
-            {/* 최종 손익 흐름 헤더 (세로형 + 블루 테마) */}
-            <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-blue-100 border border-blue-50 space-y-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50" />
-              
-              <div className="relative space-y-4">
-                <div className="flex justify-between items-end border-b border-slate-100 pb-4">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Monthly Profit & Loss</p>
-                    <h3 className="text-2xl font-black text-slate-900">비즈니스 재무 리포트</h3>
-                  </div>
-                  <div className="bg-blue-600 px-4 py-1 rounded-full"><span className="text-[10px] font-black text-white uppercase">CPA Insight</span></div>
-                </div>
+        {step === 5 && (() => {
+          // 수치 일치성을 위해 모든 항목을 만원 단위로 먼저 반올림
+          const rFixed = {
+            rent: Math.round(analysis.fixedCosts.rent / 10000),
+            maintenance: Math.round(analysis.fixedCosts.maintenance / 10000),
+            labor: Math.round(analysis.fixedCosts.labor / 10000),
+            interest: Math.round(analysis.fixedCosts.interest / 10000)
+          };
+          const totalFixedRounded = rFixed.rent + rFixed.maintenance + rFixed.labor + rFixed.interest;
 
-                <div className="space-y-4 pt-2">
-                  {/* 월 매출 */}
-                  <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <span className="text-sm font-bold text-slate-600">월 목표 매출액</span>
-                    <span className="text-xl font-black text-slate-900">{Math.round(analysis.targetRevenue / 10000).toLocaleString()} <span className="text-xs">만원</span></span>
-                  </div>
+          const rVar = {
+            material: Math.round(analysis.variableCosts.material / 10000),
+            card: Math.round(analysis.variableCosts.card / 10000),
+            utility: Math.round(analysis.variableCosts.utility / 10000),
+            platform: Math.round(analysis.variableCosts.platform / 10000)
+          };
+          const totalVarRounded = rVar.material + rVar.card + rVar.utility + rVar.platform;
 
-                  <div className="flex justify-center -my-2 relative z-10"><div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center border border-rose-100 text-rose-500 font-black text-sm">−</div></div>
+          const rTax = {
+            vat: Math.round(analysis.tax.vat / 10000),
+            incomeTax: Math.round(analysis.tax.incomeTax / 10000)
+          };
+          const totalTaxRounded = rTax.vat + rTax.incomeTax;
 
-                  {/* 고정비 */}
-                  <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'fixed' ? null : 'fixed')}>
-                    <span className="text-sm font-bold text-slate-600 flex items-center gap-2">고정비 <ArrowDown size={12} className="text-slate-400" /></span>
-                    <span className="text-xl font-black text-rose-600">{Math.round(analysis.totalFixed / 10000).toLocaleString()} <span className="text-xs">만원</span></span>
-                  </div>
+          const netIncomeRounded = Math.round(analysis.targetRevenue / 10000) - totalFixedRounded - totalVarRounded - totalTaxRounded;
 
-                  <div className="flex justify-center -my-2 relative z-10"><div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center border border-rose-100 text-rose-500 font-black text-sm">−</div></div>
-
-                  {/* 변동비 */}
-                  <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'variable' ? null : 'variable')}>
-                    <span className="text-sm font-bold text-slate-600 flex items-center gap-2">변동비 <ArrowDown size={12} className="text-slate-400" /></span>
-                    <span className="text-xl font-black text-amber-600">{Math.round(analysis.totalVar / 10000).toLocaleString()} <span className="text-xs">만원</span></span>
-                  </div>
-
-                  <div className="flex justify-center -my-2 relative z-10"><div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-500 font-black text-sm">−</div></div>
-
-                  {/* 세금 */}
-                  <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'tax' ? null : 'tax')}>
-                    <span className="text-sm font-bold text-slate-600 flex items-center gap-2">예상 세금 <ArrowDown size={12} className="text-slate-400" /></span>
-                    <span className="text-xl font-black text-slate-500">{Math.round(analysis.tax.total / 10000).toLocaleString()} <span className="text-xs">만원</span></span>
+          return (
+            <div className="space-y-6">
+              {/* 최종 손익 흐름 헤더 */}
+              <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-blue-100 border border-blue-50 space-y-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50" />
+                
+                <div className="relative space-y-4">
+                  <div className="flex justify-between items-end border-b border-slate-100 pb-4">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Monthly Profit & Loss</p>
+                      <h3 className="text-2xl font-black text-slate-900">비즈니스 재무 리포트</h3>
+                    </div>
+                    <div className="bg-blue-600 px-4 py-1 rounded-full"><span className="text-[10px] font-black text-white uppercase">CPA Insight</span></div>
                   </div>
 
-                  <div className="flex justify-center -my-2 relative z-10"><div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200 text-white font-black text-sm">=</div></div>
+                  <div className="space-y-3 pt-2">
+                    {/* 월 매출 */}
+                    <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <span className="text-sm font-bold text-slate-600">월 목표 매출액</span>
+                      <span className="text-xl font-black text-slate-900">{(Math.round(analysis.targetRevenue / 10000)).toLocaleString()} <span className="text-xs">만원</span></span>
+                    </div>
 
-                  {/* 최종 순수익 */}
-                  <div className="bg-blue-600 p-6 rounded-3xl shadow-lg shadow-blue-200 text-center relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-                    <p className="text-[11px] font-black text-blue-100 uppercase tracking-widest mb-1">Estimated Net Monthly Profit</p>
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-4xl font-black text-white">{Math.round(analysis.netIncome / 10000).toLocaleString()}</span>
-                      <span className="text-lg font-bold text-blue-100">만원 / 월</span>
+                    {/* 고정비 */}
+                    <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'fixed' ? null : 'fixed')}>
+                      <span className="text-sm font-bold text-slate-600 flex items-center gap-2">(-) 고정비 <ArrowDown size={12} className={expandedSection === 'fixed' ? 'rotate-180' : ''} /></span>
+                      <span className="text-xl font-black text-rose-600">{totalFixedRounded.toLocaleString()} <span className="text-xs">만원</span></span>
+                    </div>
+
+                    {/* 변동비 */}
+                    <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'variable' ? null : 'variable')}>
+                      <span className="text-sm font-bold text-slate-600 flex items-center gap-2">(-) 변동비 <ArrowDown size={12} className={expandedSection === 'variable' ? 'rotate-180' : ''} /></span>
+                      <span className="text-xl font-black text-amber-600">{totalVarRounded.toLocaleString()} <span className="text-xs">만원</span></span>
+                    </div>
+
+                    {/* 세금 */}
+                    <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => setExpandedSection(expandedSection === 'tax' ? null : 'tax')}>
+                      <span className="text-sm font-bold text-slate-600 flex items-center gap-2">(-) 예상 세금 <ArrowDown size={12} className={expandedSection === 'tax' ? 'rotate-180' : ''} /></span>
+                      <span className="text-xl font-black text-slate-500">{totalTaxRounded.toLocaleString()} <span className="text-xs">만원</span></span>
+                    </div>
+
+                    <div className="flex justify-center -my-1"><div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200 text-white font-black text-sm">=</div></div>
+
+                    {/* 최종 순수익 */}
+                    <div className="bg-blue-600 p-6 rounded-3xl shadow-lg shadow-blue-200 text-center relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+                      <p className="text-[11px] font-black text-blue-100 uppercase tracking-widest mb-1">Estimated Net Monthly Profit</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-4xl font-black text-white">{netIncomeRounded.toLocaleString()}</span>
+                        <span className="text-lg font-bold text-blue-100">만원 / 월</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* 상세 드릴다운 내역 */}
-            <div className="space-y-3">
-              {expandedSection === 'fixed' && (
-                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 animate-in slide-in-from-top-2 duration-300">
-                  <h4 className="text-xs font-black text-slate-500 uppercase flex items-center gap-2"><Home size={14} className="text-blue-600" /> 세부 고정비 내역</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm"><span>임대료 (툇마루 조사값)</span><span className="font-bold">{formatMan(analysis.fixedCosts.rent)}만원</span></div>
-                    <div className="flex justify-between text-sm"><span>관리비 (툇마루 조사값)</span><span className="font-bold">{formatMan(analysis.fixedCosts.maintenance)}만원</span></div>
-                    <div className="flex justify-between text-sm"><span>인건비 ({staffCount}명 / 보험료·주휴 포함)</span><span className="font-bold">{formatMan(analysis.fixedCosts.labor)}만원</span></div>
-                    <div className="flex justify-between text-sm"><span>금융비용 (대출 이자)</span><span className="font-bold">{formatMan(analysis.fixedCosts.interest)}만원</span></div>
+              {/* 상세 드릴다운 내역 */}
+              <div className="space-y-3">
+                {expandedSection === 'fixed' && (
+                  <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-200 space-y-4 animate-in slide-in-from-top-2">
+                    <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Home size={14} className="text-blue-600" /> 세부 고정비 내역</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm"><span>임대료</span><span className="font-bold">{rFixed.rent.toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>관리비</span><span className="font-bold">{rFixed.maintenance.toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>인건비 (4대보험/주휴 포함)</span><span className="font-bold">{rFixed.labor.toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>금융비용 (대출이자)</span><span className="font-bold">{rFixed.interest.toLocaleString()}만원</span></div>
+                      <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-blue-600"><span>고정비 합계</span><span>{totalFixedRounded.toLocaleString()}만원</span></div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+                {expandedSection === 'variable' && (
+                  <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-200 space-y-4 animate-in slide-in-from-top-2">
+                    <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Activity size={14} className="text-amber-600" /> 세부 변동비 내역</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm"><span>재료비 (원가율 반영)</span><span className="font-bold">{rVar.material.toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>카드수수료</span><span className="font-bold">{rVar.card.toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>수도광열비 (공과금)</span><span className="font-bold">{rVar.utility.toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>플랫폼/배달수수료</span><span className="font-bold">{rVar.platform.toLocaleString()}만원</span></div>
+                      <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-amber-600"><span>변동비 합계</span><span>{totalVarRounded.toLocaleString()}만원</span></div>
+                    </div>
+                  </div>
+                )}
+                {expandedSection === 'tax' && (
+                  <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-200 space-y-4 animate-in slide-in-from-top-2">
+                    <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Receipt size={14} className="text-slate-600" /> 예상 세금 내역</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm"><span>부가가치세 (예상분)</span><span className="font-bold">{rTax.vat.toLocaleString()}만원</span></div>
+                      <div className="flex justify-between text-sm"><span>종합소득세 (누진율 반영)</span><span className="font-bold">{rTax.incomeTax.toLocaleString()}만원</span></div>
+                      <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-slate-600"><span>세금 합계</span><span>{totalTaxRounded.toLocaleString()}만원</span></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
               {expandedSection === 'var' && (
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 animate-in slide-in-from-top-2 duration-300">
                   <h4 className="text-xs font-black text-slate-500 uppercase flex items-center gap-2"><PieChart size={14} className="text-amber-600" /> 세부 변동비 내역 (매출 비례)</h4>
