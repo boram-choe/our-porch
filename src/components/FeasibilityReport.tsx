@@ -370,7 +370,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                <div className="flex items-center justify-between border-t border-white/10 pt-4">
                   <div className="text-center">
                     <p className="text-[10px] text-slate-500 font-bold">월 매출</p>
-                    <p className="text-lg font-black">{formatMan(analysis.requiredRevenue)}</p>
+                    <p className="text-lg font-black">{formatMan(analysis.targetRevenue)}</p>
                   </div>
                   <div className="text-slate-600 font-black">−</div>
                   <div className="text-center group cursor-pointer" onClick={() => setExpandedSection(expandedSection === 'fixed' ? null : 'fixed')}>
