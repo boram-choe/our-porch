@@ -113,9 +113,10 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   const analysis = useMemo(() => {
     const data = INDUSTRIES[industry as keyof typeof INDUSTRIES];
     const monthlyInterest = (loan * (interestRate / 100)) / 12;
-    const monthlyLabor = staffCount * hourlyWage * 209;
+    const grossSalary = staffCount * hourlyWage * 209; // 주휴수당 포함 급여
+    const monthlyLabor = grossSalary * 1.11; // 4대 보험 및 부대비용(약 11%) 포함 실부담액
     
-    // 고정비 (수정된 상태값 반영)
+    // 고정비 (임대료, 관리비, 인건비, 이자)
     const fixedCosts = {
       rent: rent,
       maintenance: maintenance,
@@ -365,7 +366,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm"><span>임대료 (툇마루 조사값)</span><span className="font-bold">{formatMan(analysis.fixedCosts.rent)}만원</span></div>
                     <div className="flex justify-between text-sm"><span>관리비 (툇마루 조사값)</span><span className="font-bold">{formatMan(analysis.fixedCosts.maintenance)}만원</span></div>
-                    <div className="flex justify-between text-sm"><span>인건비 ({staffCount}명)</span><span className="font-bold">{formatMan(analysis.fixedCosts.labor)}만원</span></div>
+                    <div className="flex justify-between text-sm"><span>인건비 ({staffCount}명 / 보험료·주휴 포함)</span><span className="font-bold">{formatMan(analysis.fixedCosts.labor)}만원</span></div>
                     <div className="flex justify-between text-sm"><span>금융비용 (대출 이자)</span><span className="font-bold">{formatMan(analysis.fixedCosts.interest)}만원</span></div>
                   </div>
                 </div>
