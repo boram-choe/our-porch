@@ -45,7 +45,13 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   const [rent, setRent] = useState(2000000);
   const [staffCount, setStaffCount] = useState(2);
   const [hourlyWage, setHourlyWage] = useState(9860);
-  const [industry, setIndustry] = useState(initialData?.category === '카페/음료' ? 'cafe' : initialData?.category === '일반음식점' ? 'restaurant' : 'retail');
+  const initialUserIndustry = useMemo(() => {
+    if (initialData?.category === '카페/음료') return 'cafe';
+    if (initialData?.category === '일반음식점') return 'restaurant';
+    return 'retail';
+  }, []);
+
+  const [industry, setIndustry] = useState(initialUserIndustry);
   const [targetProfit, setTargetProfit] = useState(3000000);
 
   // Calculations
@@ -83,7 +89,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
           <span className="text-xs text-slate-400 font-black tracking-widest">STEP {step}/5</span>
         </div>
         
-        {/* Custom Progress Bar */}
+        {/* Progress Bar */}
         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
           <div 
             className="h-full bg-blue-600 transition-all duration-500 ease-out"
@@ -109,8 +115,8 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
               <p className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">비즈니스 모델 비교 선택</p>
               <div className="grid grid-cols-1 gap-4">
                 {[
-                  { id: industry, label: '나의 선택', isUser: true },
-                  { id: 'beauty', label: '지역 투표 1위', isUser: false } // 예시로 헤어 살롱을 1위로 설정
+                  { id: initialUserIndustry, label: '나의 선택', isUser: true },
+                  { id: 'beauty', label: '지역 투표 1위', isUser: false }
                 ].map((item) => {
                   const data = INDUSTRIES[item.id as keyof typeof INDUSTRIES];
                   const isSelected = industry === item.id;
