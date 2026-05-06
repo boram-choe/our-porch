@@ -6,33 +6,35 @@ import {
 } from 'lucide-react';
 
 const INDUSTRIES = {
-  cafe: { 
+  '카페/음료': { 
     name: '베이커리 카페', 
     category: { large: '음식점업', medium: '커피/음료', small: '베이커리 카페' },
-    cogsRate: 0.35, 
-    opMargin: 0.20, 
-    icon: '☕' 
+    cogsRate: 0.35, opMargin: 0.20, icon: '☕' 
   },
-  restaurant: { 
+  '일반음식점': { 
     name: '파스타 전문점', 
     category: { large: '음식점업', medium: '서양식', small: '파스타 전문점' },
-    cogsRate: 0.40, 
-    opMargin: 0.15, 
-    icon: '🍝' 
+    cogsRate: 0.40, opMargin: 0.15, icon: '🍝' 
   },
-  retail: { 
+  '일식': { 
+    name: '일식 전문점', 
+    category: { large: '음식점업', medium: '일식', small: '초밥/라멘' },
+    cogsRate: 0.42, opMargin: 0.18, icon: '🍣' 
+  },
+  '치킨/피자': { 
+    name: '프랜차이즈 치킨', 
+    category: { large: '음식점업', medium: '치킨/피자', small: '치킨전문점' },
+    cogsRate: 0.50, opMargin: 0.12, icon: '🍗' 
+  },
+  '일반소매업': { 
     name: '디저트 편집샵', 
     category: { large: '소매업', medium: '식품소매', small: '디저트 편집샵' },
-    cogsRate: 0.55, 
-    opMargin: 0.10, 
-    icon: '🍰' 
+    cogsRate: 0.55, opMargin: 0.10, icon: '🍰' 
   },
-  beauty: { 
+  '헤어살롱': { 
     name: '헤어 살롱', 
     category: { large: '서비스업', medium: '미용서비스', small: '헤어 살롱' },
-    cogsRate: 0.25, 
-    opMargin: 0.25, 
-    icon: '💇' 
+    cogsRate: 0.25, opMargin: 0.25, icon: '💇' 
   }
 };
 
@@ -45,11 +47,19 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   const [rent, setRent] = useState(2000000);
   const [staffCount, setStaffCount] = useState(2);
   const [hourlyWage, setHourlyWage] = useState(9860);
+
   const initialUserIndustry = useMemo(() => {
-    if (initialData?.category === '카페/음료') return 'cafe';
-    if (initialData?.category === '일반음식점') return 'restaurant';
-    return 'retail';
-  }, []);
+    const cat = initialData?.category || '';
+    if (INDUSTRIES[cat as keyof typeof INDUSTRIES]) return cat;
+    
+    // 키워드 기반 유사 매칭
+    if (cat.includes('카페') || cat.includes('커피')) return '카페/음료';
+    if (cat.includes('음식') || cat.includes('파스타')) return '일반음식점';
+    if (cat.includes('일식') || cat.includes('초밥')) return '일식';
+    if (cat.includes('치킨')) return '치킨/피자';
+    if (cat.includes('미용') || cat.includes('헤어')) return '헤어살롱';
+    return '일반소매업';
+  }, [initialData?.category]);
 
   const [industry, setIndustry] = useState(initialUserIndustry);
   const [targetProfit, setTargetProfit] = useState(3000000);
@@ -116,7 +126,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
               <div className="grid grid-cols-1 gap-4">
                 {[
                   { id: initialUserIndustry, label: '나의 선택', isUser: true },
-                  { id: 'beauty', label: '지역 투표 1위', isUser: false }
+                  { id: '헤어살롱', label: '지역 투표 1위', isUser: false }
                 ].map((item) => {
                   const data = INDUSTRIES[item.id as keyof typeof INDUSTRIES];
                   const isSelected = industry === item.id;
