@@ -394,8 +394,8 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                 <div className="relative space-y-4">
                   <div className="flex justify-between items-end border-b border-slate-100 pb-4">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Monthly Profit & Loss</p>
-                      <h3 className="text-2xl font-black text-slate-900">비즈니스 재무 리포트</h3>
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Profit Preview</p>
+                      <h3 className="text-2xl font-black text-slate-900">창업 수익 미리보기</h3>
                     </div>
                     <div className="bg-blue-600 px-4 py-1 rounded-full"><span className="text-[10px] font-black text-white uppercase">CPA Insight</span></div>
                   </div>
