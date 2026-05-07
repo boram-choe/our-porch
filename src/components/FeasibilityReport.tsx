@@ -98,7 +98,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   const [rent, setRent] = useState(spaceInfo.rent);
   const [maintenance, setMaintenance] = useState(spaceInfo.maintenance);
   
-  const [loan, setLoan] = useState(50000000);
+  const [myCapital, setMyCapital] = useState(50000000); // 사장님 보유 자금
   const [interestRate, setInterestRate] = useState(5.5);
   const [staffCount, setStaffCount] = useState(2);
   const [hourlyWage, setHourlyWage] = useState(10030); // 1만원 시대 반영
@@ -109,7 +109,20 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   // Calculations
   const analysis = useMemo(() => {
     const data = INDUSTRIES[industry as keyof typeof INDUSTRIES];
-    const monthlyInterest = (loan * (interestRate / 100)) / 12;
+    
+    // 1. 초기 투자비 산출 (보증금 포함)
+    const initialInvestment = {
+      interior: spaceInfo.size * data.initialInvestmentPerPyung,
+      equipment: (spaceInfo.size * data.initialInvestmentPerPyung) * 0.4,
+      inventory: targetRevenue * 0.3,
+      other: 5000000
+    };
+    const totalInvestment = Object.values(initialInvestment).reduce((a, b) => a + b, 0) + deposit;
+    
+    // 2. 필요 차입금 산출 (총 투자비 - 내 자금)
+    const calculatedLoan = Math.max(0, totalInvestment - myCapital);
+    const monthlyInterest = (calculatedLoan * (interestRate / 100)) / 12;
+    
     const grossSalary = staffCount * hourlyWage * 209; // 주휴수당 포함 급여
     const monthlyLabor = grossSalary * 1.11; // 4대 보험 및 부대비용(약 11%) 포함 실부담액
     
@@ -161,9 +174,10 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
       tax: { vat, incomeTax: monthlyIncomeTax, total: totalTax },
       netIncome,
       initialInvestment, totalInvestment,
+      calculatedLoan,
       repaymentMonths: netIncome > 0 ? totalInvestment / netIncome : Infinity
     };
-  }, [loan, interestRate, staffCount, hourlyWage, industry, targetRevenue, deposit, rent, maintenance, spaceInfo]);
+  }, [myCapital, interestRate, staffCount, hourlyWage, industry, targetRevenue, deposit, rent, maintenance, spaceInfo]);
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, 5));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
@@ -301,14 +315,51 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
 
         {step === 3 && (
           <div className="space-y-8">
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-black text-slate-900 leading-tight">자금 조달 계획을 세워보세요</h2>
+              <p className="text-slate-400 text-[11px] font-medium leading-relaxed">사장님의 자금과 필요한 대출 규모를 <br/>확인하여 현실적인 이자 비용을 산출합니다.</p>
+            </div>
+
+            <div className="p-6 bg-blue-50 rounded-[2.5rem] border border-blue-100 space-y-4 shadow-inner">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-black text-blue-700 uppercase tracking-widest flex items-center gap-2"><Wallet size={14} /> 예상 총 초기 투자비</span>
+                <span className="text-lg font-black text-blue-900">{(analysis.totalInvestment / 10000).toLocaleString()}만원</span>
+              </div>
+              <p className="text-[10px] text-blue-500 font-bold">* 보증금 {Math.round(deposit/10000).toLocaleString()}만원이 포함된 금액입니다.</p>
+            </div>
+
             <div className="space-y-6">
               <div className="space-y-3">
-                <label className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-600" /> 총 초기 차입금 (대출)</label>
-                <div className="relative"><input type="text" className="w-full pl-6 pr-16 text-2xl font-black h-16 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] focus:border-blue-600 outline-none text-right" value={(loan / 10000).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setLoan(val * 10000); }} /><span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-black">만원</span></div>
+                <label className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><DollarSign className="w-4 h-4 text-blue-600" /> 사장님 보유 자금 (내 자금)</label>
+                <div className="relative">
+                  <input type="text" className="w-full pl-6 pr-16 text-2xl font-black h-16 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] focus:border-blue-600 outline-none text-right" value={(myCapital / 10000).toLocaleString()} onChange={(e) => { const val = Number(e.target.value.replace(/,/g, '')); if(!isNaN(val)) setMyCapital(val * 10000); }} />
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-black">만원</span>
+                </div>
               </div>
-              <div className="space-y-3">
-                <label className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-4 h-4 text-blue-600" /> 예상 연 이자율 (%)</label>
-                <input type="number" step="0.1" className="w-full px-6 text-2xl font-black h-16 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] focus:border-blue-600 outline-none" value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value))} />
+
+              <div className="flex justify-center -my-2"><div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-black text-xs">▼</div></div>
+
+              <div className="p-6 bg-slate-900 rounded-[2rem] space-y-3 shadow-xl">
+                 <div className="flex justify-between items-center">
+                   <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Landmark size={14} className="text-amber-500" /> 부족한 필요 차입금</span>
+                   <span className="text-xl font-black text-amber-500">{(analysis.calculatedLoan / 10000).toLocaleString()}만원</span>
+                 </div>
+                 <div className="flex items-center gap-4 pt-2 border-t border-slate-800">
+                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest shrink-0">예상 연 이자율</label>
+                    <div className="flex-1 relative">
+                      <input type="number" step="0.1" className="w-full bg-transparent text-white text-right font-black outline-none border-b border-slate-700 pb-1" value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value))} />
+                      <span className="absolute right-0 bottom-1 text-[11px] font-bold text-slate-500 ml-1">%</span>
+                    </div>
+                 </div>
+              </div>
+              
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex gap-3">
+                <Info size={16} className="text-slate-400 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+                  실제 차입 규모와 이자율은 금융기관과의 상담을 통해 결정됩니다. <br/>
+                  <span className="text-blue-600 font-bold">위 수치는 신용점수 850점 기준의 예상치</span>이며, <br/>
+                  소상공인 정책자금 지원 여부에 따라 변동될 수 있습니다.
+                </p>
               </div>
             </div>
           </div>
