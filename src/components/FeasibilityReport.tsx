@@ -396,7 +396,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                     <div className="space-y-1">
                       <h3 className="text-2xl font-black text-slate-900">창업 수익 미리보기</h3>
                     </div>
-                    <div className="bg-blue-600 px-4 py-1 rounded-full"><span className="text-[10px] font-black text-white uppercase">CPA 전문 분석</span></div>
+                    <div className="bg-blue-600 px-4 py-1 rounded-full"><span className="text-[10px] font-black text-white uppercase">재무전문가 분석</span></div>
                   </div>
 
                   <div className="space-y-3 pt-2">
@@ -494,7 +494,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                 </div>
                 
                 <div className="py-6 text-center border-t border-slate-100">
-                  <p className="text-[12px] text-slate-400 font-medium">CPA 분석 결과 회수 기간: 약 <span className="text-blue-600 font-black text-lg">{Math.ceil(analysis.repaymentMonths)}개월</span></p>
+                  <p className="text-[12px] text-slate-400 font-medium">재무전문가 분석 결과 회수 기간: 약 <span className="text-blue-600 font-black text-lg">{Math.ceil(analysis.repaymentMonths)}개월</span></p>
                   <p className="text-[10px] text-slate-300 mt-1">* 업종별 평균 감가상각 및 시장 상황에 따라 변동될 수 있습니다.</p>
                 </div>
               </div>
