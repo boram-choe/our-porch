@@ -190,9 +190,8 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
       <div className="space-y-4">
         <div className="flex justify-between items-end">
           <div>
-            <h2 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-1">Financial Assessment</h2>
             <h1 className="text-2xl font-black text-slate-900 leading-tight">
-              재무 타당성 분석 <br/>
+              창업 수익 미리보기 <br/>
               <span className="text-blue-600 text-lg">{initialData?.location || "이 공간"}의 비즈니스 시나리오</span>
             </h1>
           </div>
