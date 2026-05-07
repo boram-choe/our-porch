@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useDeferredValue } from 'react';
 import { 
   TrendingUp, Users, Home, CreditCard, 
   DollarSign, Calculator, ChevronRight, 
@@ -106,6 +106,16 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
   const [avgOrderValue, setAvgOrderValue] = useState(15000); // 평균 단가
   const [dailyOrders, setDailyOrders] = useState(60); // 일 주문 수
 
+  // 지연된 값 (성능 최적화용)
+  const deferredMyCapital = useDeferredValue(myCapital);
+  const deferredInterestRate = useDeferredValue(interestRate);
+  const deferredRevenue = useDeferredValue(targetRevenue);
+  const deferredStaff = useDeferredValue(staffCount);
+  const deferredWage = useDeferredValue(hourlyWage);
+  const deferredDeposit = useDeferredValue(deposit);
+  const deferredRent = useDeferredValue(rent);
+  const deferredMaint = useDeferredValue(maintenance);
+
   // Calculations
   const analysis = useMemo(() => {
     const data = INDUSTRIES[industry as keyof typeof INDUSTRIES];
@@ -114,22 +124,22 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
     const initialInvestment = {
       interior: spaceInfo.size * data.initialInvestmentPerPyung,
       equipment: (spaceInfo.size * data.initialInvestmentPerPyung) * 0.4,
-      inventory: targetRevenue * 0.3,
+      inventory: deferredRevenue * 0.3,
       other: 5000000
     };
-    const totalInvestment = Object.values(initialInvestment).reduce((a, b) => a + b, 0) + deposit;
+    const totalInvestment = Object.values(initialInvestment).reduce((a, b) => a + b, 0) + deferredDeposit;
     
     // 2. 필요 차입금 산출 (총 투자비 - 내 자금)
-    const calculatedLoan = Math.max(0, totalInvestment - myCapital);
-    const monthlyInterest = (calculatedLoan * (interestRate / 100)) / 12;
+    const calculatedLoan = Math.max(0, totalInvestment - deferredMyCapital);
+    const monthlyInterest = (calculatedLoan * (deferredInterestRate / 100)) / 12;
     
-    const grossSalary = staffCount * hourlyWage * 209; // 주휴수당 포함 급여
+    const grossSalary = deferredStaff * deferredWage * 209; // 주휴수당 포함 급여
     const monthlyLabor = grossSalary * 1.11; // 4대 보험 및 부대비용(약 11%) 포함 실부담액
     
     // 고정비 (임대료, 관리비, 인건비, 이자)
     const fixedCosts = {
-      rent: rent,
-      maintenance: maintenance,
+      rent: deferredRent,
+      maintenance: deferredMaint,
       labor: monthlyLabor,
       interest: monthlyInterest
     };
@@ -137,27 +147,27 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
 
     // 변동비 산출 (매출액 기반)
     const totalVarRate = Object.values(data.variableRates).reduce((a, b) => a + b, 0);
-    const totalVar = targetRevenue * totalVarRate;
+    const totalVar = deferredRevenue * totalVarRate;
 
     const variableCosts = {
-      material: targetRevenue * data.variableRates.material,
-      card: targetRevenue * data.variableRates.card,
-      utility: targetRevenue * data.variableRates.utility,
-      platform: targetRevenue * data.variableRates.platform
+      material: deferredRevenue * data.variableRates.material,
+      card: deferredRevenue * data.variableRates.card,
+      utility: deferredRevenue * data.variableRates.utility,
+      platform: deferredRevenue * data.variableRates.platform
     };
 
     // 세전 영업이익 (매출 - 고정비 - 변동비)
-    const preTaxProfit = targetRevenue - totalFixed - totalVar;
+    const preTaxProfit = deferredRevenue - totalFixed - totalVar;
 
     // 세금 산출
-    const vat = targetRevenue * 0.1; // 부가세
+    const vat = deferredRevenue * 0.1; // 부가세
     const monthlyIncomeTax = calculateIncomeTax(Math.max(0, preTaxProfit) * 12) / 12;
     const totalTax = vat + monthlyIncomeTax;
 
     const netIncome = preTaxProfit - totalTax;
 
     return {
-      targetRevenue,
+      targetRevenue: deferredRevenue,
       fixedCosts, totalFixed,
       variableCosts, totalVar,
       preTaxProfit,
@@ -167,7 +177,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
       calculatedLoan,
       repaymentMonths: netIncome > 0 ? totalInvestment / netIncome : Infinity
     };
-  }, [myCapital, interestRate, staffCount, hourlyWage, industry, targetRevenue, deposit, rent, maintenance, spaceInfo]);
+  }, [deferredMyCapital, deferredInterestRate, deferredStaff, deferredWage, industry, deferredRevenue, deferredDeposit, deferredRent, deferredMaint, spaceInfo]);
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, 5));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
