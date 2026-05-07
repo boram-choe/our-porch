@@ -156,16 +156,6 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
 
     const netIncome = preTaxProfit - totalTax;
 
-    // 초기 투자비용
-    const initialInvestment = {
-      deposit: deposit,
-      interior: spaceInfo.size * data.initialInvestmentPerPyung,
-      equipment: (spaceInfo.size * data.initialInvestmentPerPyung) * 0.4,
-      inventory: targetRevenue * 0.3,
-      other: 5000000
-    };
-    const totalInvestment = Object.values(initialInvestment).reduce((a, b) => a + b, 0);
-
     return {
       targetRevenue,
       fixedCosts, totalFixed,
