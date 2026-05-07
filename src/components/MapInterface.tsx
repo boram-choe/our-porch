@@ -747,6 +747,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                <MyPage 
                  isEntrepreneurMode={isEntrepreneurMode}
                  onModeChange={setIsEntrepreneurMode}
+                 onClose={() => setShowMyPage(false)}
                  onLogout={() => { localStorage.removeItem("gongsil_user_profile"); window.location.reload(); }} 
                />
              </div>

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   User as UserIcon, MapPin, Settings, Heart, MessageSquare, ChevronRight, LogOut, 
   Camera, Star, Award, Briefcase, Baby, Dog, Zap, HelpCircle, Edit3, Check, 
-  Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon, X
+  Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon, X, ArrowLeft
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
@@ -36,10 +36,11 @@ export function recordVote(brand: string, location: string) {
   }
 }
 
-export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange }: { 
+export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onClose }: { 
   onLogout: () => void,
   isEntrepreneurMode: boolean,
-  onModeChange: (val: boolean) => void
+  onModeChange: (val: boolean) => void,
+  onClose?: () => void
 }) {
   const [showFeasibility, setShowFeasibility] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -219,10 +220,17 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange }: {
       {/* Header */}
       <div className="bg-white px-6 pt-12 pb-6 rounded-b-[3rem] shadow-sm mb-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            나의 페이지
-            {userProfile.isAdmin && <ShieldCheck className="text-amber-500" size={20} />}
-          </h1>
+          <div className="flex items-center gap-3">
+            {onClose && (
+              <button onClick={onClose} className="p-2 -ml-2 hover:bg-slate-100 rounded-xl transition-all">
+                <ArrowLeft size={22} className="text-slate-900" />
+              </button>
+            )}
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              나의 페이지
+              {userProfile.isAdmin && <ShieldCheck className="text-amber-500" size={20} />}
+            </h1>
+          </div>
           <button onClick={() => setActiveTab("settings")} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
             <Settings size={22} className="text-slate-400" />
           </button>
