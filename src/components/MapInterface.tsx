@@ -244,9 +244,37 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   };
 
   const moveToMyLocation = () => {
-    if (mapRef.current && userProfile) {
-      const activeLoc = userProfile.activeLocationType === 'home' ? userProfile.home : (userProfile.work || userProfile.home);
-      mapRef.current.panTo(new kakao.maps.LatLng(activeLoc.lat, activeLoc.lng));
+    if (!mapRef.current) return;
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const moveLatLng = new kakao.maps.LatLng(lat, lng);
+          
+          // 지도를 현재 GPS 위치로 부드럽게 이동
+          mapRef.current?.panTo(moveLatLng);
+          setMapCenter({ lat, lng });
+        },
+        (err) => {
+          console.warn("GPS 위치를 가져올 수 없어 설정된 동네 위치로 이동합니다.", err);
+          // GPS 실패 시 기존처럼 설정된 동네/일터 위치로 이동
+          if (userProfile) {
+            const activeLoc = userProfile.activeLocationType === 'home' ? userProfile.home : (userProfile.work || userProfile.home);
+            mapRef.current?.panTo(new kakao.maps.LatLng(activeLoc.lat, activeLoc.lng));
+            setMapCenter({ lat: activeLoc.lat, lng: activeLoc.lng });
+          }
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    } else {
+      // Geolocation 미지원 시 백업
+      if (userProfile) {
+        const activeLoc = userProfile.activeLocationType === 'home' ? userProfile.home : (userProfile.work || userProfile.home);
+        mapRef.current?.panTo(new kakao.maps.LatLng(activeLoc.lat, activeLoc.lng));
+        setMapCenter({ lat: activeLoc.lat, lng: activeLoc.lng });
+      }
     }
   };
 
