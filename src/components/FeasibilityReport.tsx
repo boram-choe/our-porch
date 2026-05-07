@@ -394,10 +394,9 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                 <div className="relative space-y-4">
                   <div className="flex justify-between items-end border-b border-slate-100 pb-4">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Profit Preview</p>
                       <h3 className="text-2xl font-black text-slate-900">창업 수익 미리보기</h3>
                     </div>
-                    <div className="bg-blue-600 px-4 py-1 rounded-full"><span className="text-[10px] font-black text-white uppercase">CPA Insight</span></div>
+                    <div className="bg-blue-600 px-4 py-1 rounded-full"><span className="text-[10px] font-black text-white uppercase">CPA 전문 분석</span></div>
                   </div>
 
                   <div className="space-y-3 pt-2">
@@ -430,7 +429,7 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
                     {/* 최종 순수익 */}
                     <div className="bg-blue-600 p-6 rounded-3xl shadow-lg shadow-blue-200 text-center relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-                      <p className="text-[11px] font-black text-blue-100 uppercase tracking-widest mb-1">Estimated Net Monthly Profit</p>
+                      <p className="text-[11px] font-black text-blue-100 uppercase tracking-widest mb-1">예상 월 순수익</p>
                       <div className="flex items-center justify-center gap-2">
                         <span className="text-4xl font-black text-white">{netIncomeRounded.toLocaleString()}</span>
                         <span className="text-lg font-bold text-blue-100">만원 / 월</span>
