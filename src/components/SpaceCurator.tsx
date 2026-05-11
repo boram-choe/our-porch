@@ -4,7 +4,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, ArrowRight, Check, Heart, Coffee, Utensils, Dumbbell, BookOpen, Music, ShoppingBag, Baby, Users } from "lucide-react";
 
+import { UserProfile } from "./AuthOnboarding";
+
 interface SpaceCuratorProps {
+  userProfile: UserProfile | null;
   onClose: () => void;
   onComplete: (recommendedCategory: string) => void;
 }
@@ -122,7 +125,7 @@ export default function SpaceCurator({ onClose, onComplete }: SpaceCuratorProps)
             <h2 className="text-5xl font-black tracking-tighter mb-8">"{getResult()}"</h2>
             
             <p className="text-slate-400 text-lg mb-12 leading-relaxed">
-              대표님께 딱 어울리는 이 공간을<br/>
+              {userProfile?.nickname || "대표님"}께 딱 어울리는 이 공간을<br/>
               우리 동네 어디에 세워볼까요?
             </p>
 

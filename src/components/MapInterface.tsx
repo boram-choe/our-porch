@@ -775,9 +775,11 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         {selectedVacancy && (
           <motion.div key="detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[150] bg-slate-950">
             <Building3D 
+              userProfile={userProfile}
               vacancy={selectedVacancy} 
               hasVoted={votedIds.includes(selectedVacancy.id)} 
               isEntrepreneurMode={isEntrepreneurMode}
+              recommendedCategory={recommendedCategory}
               onModeSwitch={() => setIsEntrepreneurMode(true)}
               onVacancyUpdate={handleVacancyUpdate} 
               onClose={() => setSelectedVacancy(null)} 
@@ -799,6 +801,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         )}
         {showCurator && (
           <SpaceCurator 
+            userProfile={userProfile}
             onClose={() => setShowCurator(false)} 
             onComplete={(category) => {
               setRecommendedCategory(category);

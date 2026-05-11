@@ -47,13 +47,17 @@ function getBrandLogo(brand: string) {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(brand)}&background=random&color=fff&size=128&bold=true`;
 }
 
-export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted, isEntrepreneurMode, onModeSwitch }: { 
+import { UserProfile } from "./AuthOnboarding";
+
+export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted, isEntrepreneurMode, onModeSwitch, userProfile, recommendedCategory }: { 
   vacancy: Vacancy, 
   onClose: () => void,
   onVacancyUpdate: (v: Vacancy) => void,
   hasVoted: boolean,
   isEntrepreneurMode?: boolean,
-  onModeSwitch?: () => void
+  onModeSwitch?: () => void,
+  userProfile: UserProfile | null,
+  recommendedCategory: string | null
 }) {
   const [reportMode, setReportMode] = useState<"dispute" | "movein" | null>(null);
   const [reportSubmitted, setReportSubmitted] = useState(false);
@@ -354,13 +358,40 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
               <div className="relative">
                 <AnimatePresence mode="wait">
                   {votingStep === "category" ? (
-                    <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="grid grid-cols-4 gap-3">
-                      {CATEGORIES.map((cat) => (
-                         <button key={cat.id} onClick={() => handleCategorySelect(cat.id)} className="flex flex-col items-center justify-center aspect-square bg-white/5 border border-white/10 rounded-2xl hover:bg-amber-500 active:scale-95 transition-all group">
-                           <div className="text-white group-hover:scale-110 transition-transform mb-2 scale-90">{cat.icon}</div>
-                           <span className="text-[10px] font-black text-white/70 group-hover:text-white uppercase">{cat.label}</span>
-                         </button>
-                      ))}
+                    <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
+                      {recommendedCategory && !hasVoted && (
+                        <motion.button 
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            setInputValue(recommendedCategory);
+                            handleVoteSubmit();
+                          }}
+                          className="w-full p-6 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 rounded-[2rem] border-4 border-white shadow-[0_20px_40px_rgba(245,158,11,0.3)] flex items-center justify-between group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-500 shadow-xl group-hover:rotate-12 transition-transform">
+                              <Sparkles size={24} fill="currentColor" />
+                            </div>
+                            <div className="text-left">
+                              <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest leading-none mb-1.5">{userProfile?.nickname || "대표님"}님을 위한 1순위 추천</p>
+                              <h4 className="text-xl font-black text-slate-950 tracking-tighter">"{recommendedCategory}"</h4>
+                            </div>
+                          </div>
+                          <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center text-slate-950">
+                            <ChevronRight size={20} strokeWidth={3} />
+                          </div>
+                        </motion.button>
+                      )}
+                      
+                      <div className="grid grid-cols-4 gap-3">
+                        {CATEGORIES.map((cat) => (
+                           <button key={cat.id} onClick={() => handleCategorySelect(cat.id)} className="flex flex-col items-center justify-center aspect-square bg-white/5 border border-white/10 rounded-2xl hover:bg-amber-500 active:scale-95 transition-all group">
+                             <div className="text-white group-hover:scale-110 transition-transform mb-2 scale-90">{cat.icon}</div>
+                             <span className="text-[10px] font-black text-white/70 group-hover:text-white uppercase">{cat.label}</span>
+                           </button>
+                        ))}
+                      </div>
                     </motion.div>
                   ) : votingStep === "detail" ? (
                     <motion.div key="details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
