@@ -502,6 +502,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                           <button onClick={() => setVotingStep("category")} className="w-full py-5 bg-white text-slate-950 rounded-[2rem] text-sm font-black shadow-xl hover:bg-amber-400 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4">
                             <Sparkles size={18} className="group-hover:animate-spin" /> 내가 원하는 건 리스트에 없어요
                           </button>
+                        )}
+                        
                         <button 
                           onClick={() => setShowComments(true)} 
                           className="w-full py-5 bg-slate-800 text-white rounded-[2rem] text-sm font-black shadow-lg hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4 border border-white/5"
