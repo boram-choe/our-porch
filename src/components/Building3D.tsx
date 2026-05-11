@@ -395,27 +395,24 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => {
-                            const catId = getCategoryIdFromRecommendation(recommendedCategory);
-                            handleVoteSubmit(undefined, recommendedCategory, catId);
+                            setSelectedCategory(recommendedCategory ? getCategoryIdFromRecommendation(recommendedCategory) : null);
+                            handleVoteSubmit(undefined, recommendedCategory || undefined, recommendedCategory ? getCategoryIdFromRecommendation(recommendedCategory) : undefined);
                           }}
-                          className="w-full p-6 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 rounded-[2rem] border-4 border-white shadow-[0_20px_40px_rgba(245,158,11,0.3)] flex items-center justify-between group"
+                          className="w-full p-8 bg-gradient-to-br from-amber-400 via-amber-300 to-amber-500 rounded-[2.5rem] border-4 border-white shadow-[0_25px_50px_rgba(245,158,11,0.3)] flex items-center justify-between group"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-500 shadow-xl group-hover:rotate-12 transition-transform">
-                              <Sparkles size={24} fill="currentColor" />
+                          <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 bg-slate-950 rounded-[1.5rem] flex items-center justify-center text-amber-500 shadow-2xl group-hover:rotate-12 group-hover:scale-110 transition-all duration-500">
+                              <Sparkles size={32} fill="currentColor" />
                             </div>
                             <div className="text-left">
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest leading-none">{userProfile?.nickname || "대표님"}님을 위한 추천</p>
-                                <span className="px-2 py-0.5 bg-slate-950 text-amber-500 text-[9px] font-black rounded-full uppercase tracking-tighter">
-                                  {CATEGORIES.find(c => c.id === getCategoryIdFromRecommendation(recommendedCategory))?.label || "기타"}
+                              <div className="flex items-center gap-3 mb-2">
+                                <p className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] leading-none opacity-80">{userProfile?.nickname || "대표님"}님을 위한 추천</p>
+                                <span className="px-3 py-1 bg-slate-950 text-amber-500 text-[10px] font-black rounded-full uppercase tracking-tighter shadow-lg">
+                                  {CATEGORIES.find(c => c.id === getCategoryIdFromRecommendation(recommendedCategory || ""))?.label || "기타"}
                                 </span>
                               </div>
-                              <h4 className="text-xl font-black text-slate-950 tracking-tighter">"{recommendedCategory}"</h4>
+                              <h4 className="text-3xl font-black text-slate-950 tracking-tighter leading-tight italic">"{recommendedCategory}"</h4>
                             </div>
-                          </div>
-                          <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center text-slate-950">
-                            <ChevronRight size={20} strokeWidth={3} />
                           </div>
                         </motion.button>
                       )}
@@ -594,7 +591,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
         )}
       </AnimatePresence>
 
-      {/* 댓글 Bottom Sheet */}
       <AnimatePresence>
         {showComments && (
           <motion.div 
