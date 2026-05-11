@@ -35,21 +35,21 @@ const STEPS = [
 ];
 
 const RECOMMENDATIONS: Record<string, string> = {
-  "coffee-solo": "조용한 1인 작업 카페",
-  "coffee-friends": "수다 떨기 좋은 감성 카페",
-  "coffee-family": "아이와 가기 좋은 베이커리 카페",
-  "meal-solo": "혼밥 하기 좋은 1인 식당",
-  "meal-friends": "분위기 좋은 로컬 맛집/술집",
-  "meal-family": "온 가족이 즐거운 외식 공간",
-  "active-solo": "프라이빗 헬스 & 요가 룸",
-  "active-friends": "왁자지껄 동네 탁구장/체육관",
-  "active-family": "에너지 뿜뿜! 대형 키즈 카페",
-  "life-solo": "기분 전환을 위한 감성 미용실",
-  "life-friends": "득템의 재미! 동네 소품샵",
-  "life-family": "우리 동네 믿음직한 소아과/내과",
-  "culture-solo": "취향을 담는 원데이 클래스 공방",
-  "culture-friends": "추억을 남기는 셀프 사진관",
-  "culture-family": "창의력이 쑥쑥! 어린이 미술 학원",
+  "coffee-solo": "1인 작업 카페",
+  "coffee-friends": "커피와 디저트 카페",
+  "coffee-family": "베이커리 카페",
+  "meal-solo": "1인 식당",
+  "meal-friends": "로컬 맛집/술집",
+  "meal-family": "가족 외식 공간",
+  "active-solo": "프라이빗 헬스/요가",
+  "active-friends": "동네 탁구장/체육관",
+  "active-family": "대형 키즈 카페",
+  "life-solo": "동네 미용실",
+  "life-friends": "동네 소품샵/마켓",
+  "life-family": "우리 동네 의원/약국",
+  "culture-solo": "원데이 클래스 공방",
+  "culture-friends": "셀프 사진관",
+  "culture-family": "어린이 미술 학원",
 };
 
 export default function SpaceCurator({ userProfile, onClose, onComplete }: SpaceCuratorProps) {
