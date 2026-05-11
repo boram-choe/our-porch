@@ -150,17 +150,25 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
       .sort((a, b) => b.total - a.total);
   }, [vacancy.currentVotes]);
 
-  const sortedVotes = useMemo(() => {
-    const votes = vacancy.currentVotes || [];
-    return [...votes].sort((a,b) => b.count - a.count);
-  }, [vacancy.currentVotes]);
+  const getCategoryIdFromRecommendation = (rec: string) => {
+    if (rec.includes("카페")) return "cafe";
+    if (rec.includes("식당") || rec.includes("맛집")) return "food";
+    if (rec.includes("미용실")) return "hair";
+    if (rec.includes("의원") || rec.includes("약국")) return "doctor";
+    if (rec.includes("헬스") || rec.includes("탁구장") || rec.includes("체육관") || rec.includes("키즈 카페")) return "gym";
+    if (rec.includes("소품샵") || rec.includes("마켓")) return "store";
+    if (rec.includes("학원")) return "edu";
+    if (rec.includes("공방") || rec.includes("사진관")) return "studio";
+    return "etc";
+  };
 
-  const handleVoteSubmit = async (e?: React.FormEvent) => {
+  const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
     if (e) e.preventDefault();
-    if (!inputValue.trim()) return;
+    const brand = (customBrand || inputValue).trim();
+    if (!brand) return;
 
+    const catId = customCat || selectedCategory || 'etc';
     const currentVotes = vacancy.currentVotes || [];
-    const brand = inputValue.trim();
     const existing = currentVotes.find(v => v.brand === brand);
     
     let nextVotes: VoteItem[] = [];
@@ -170,7 +178,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
       nextVotes = [...currentVotes, {
         id: Math.random().toString(36).substr(2, 9),
         brand,
-        categoryId: selectedCategory || 'etc',
+        categoryId: catId,
         logo: getBrandLogo(brand),
         count: 1
       }];
@@ -186,7 +194,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     try {
       const userId = localStorage.getItem("gongsil_user_id");
       if (userId) {
-        const catInfo = CATEGORIES.find(c => c.id === (selectedCategory || 'etc'));
+        const catInfo = CATEGORIES.find(c => c.id === catId);
         await saveVote({
           vacancyId: vacancy.id,
           userId,
@@ -364,8 +372,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => {
-                            setInputValue(recommendedCategory);
-                            handleVoteSubmit();
+                            const catId = getCategoryIdFromRecommendation(recommendedCategory);
+                            handleVoteSubmit(undefined, recommendedCategory, catId);
                           }}
                           className="w-full p-6 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 rounded-[2rem] border-4 border-white shadow-[0_20px_40px_rgba(245,158,11,0.3)] flex items-center justify-between group"
                         >
