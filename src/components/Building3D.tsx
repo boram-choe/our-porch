@@ -167,10 +167,28 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     return "etc";
   };
 
+  const getCleanName = (name: string) => {
+    return name
+      .replace("24시 ", "")
+      .replace("조용한 ", "")
+      .replace("느낌 ", "")
+      .replace("감성 ", "")
+      .replace("친절한 ", "")
+      .replace("프리미엄 ", "")
+      .replace("유기농 ", "")
+      .replace("프라이빗 ", "")
+      .replace("동네 큰 ", "")
+      .replace("로컬 ", "")
+      .trim();
+  };
+
   const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
     if (e) e.preventDefault();
-    const brand = (customBrand || inputValue).trim();
+    let brand = (customBrand || inputValue).trim();
     if (!brand) return;
+
+    // 데이터 세척: 수식어 제거
+    brand = getCleanName(brand);
 
     const catId = customCat || selectedCategory || 'etc';
     const currentVotes = vacancy.currentVotes || [];
