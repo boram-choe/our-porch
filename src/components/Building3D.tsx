@@ -405,7 +405,12 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                               <Sparkles size={24} fill="currentColor" />
                             </div>
                             <div className="text-left">
-                              <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest leading-none mb-1.5">{userProfile?.nickname || "대표님"}님을 위한 1순위 추천</p>
+                              <div className="flex items-center gap-2 mb-1.5">
+                                <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest leading-none">{userProfile?.nickname || "대표님"}님을 위한 추천</p>
+                                <span className="px-2 py-0.5 bg-slate-950 text-amber-500 text-[9px] font-black rounded-full uppercase tracking-tighter">
+                                  {CATEGORIES.find(c => c.id === getCategoryIdFromRecommendation(recommendedCategory))?.label || "기타"}
+                                </span>
+                              </div>
                               <h4 className="text-xl font-black text-slate-950 tracking-tighter">"{recommendedCategory}"</h4>
                             </div>
                           </div>
