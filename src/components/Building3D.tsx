@@ -159,9 +159,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     if (rec.includes("카페")) return "cafe";
     if (rec.includes("식당") || rec.includes("맛집")) return "food";
     if (rec.includes("미용실")) return "hair";
-    if (rec.includes("의원") || rec.includes("약국")) return "doctor";
+    if (rec.includes("의원") || rec.includes("약국") || rec.includes("소아과") || rec.includes("내과")) return "doctor";
     if (rec.includes("헬스") || rec.includes("탁구장") || rec.includes("체육관") || rec.includes("키즈 카페")) return "gym";
-    if (rec.includes("소품샵") || rec.includes("마켓")) return "store";
+    if (rec.includes("소품샵") || rec.includes("마켓") || rec.includes("식자재 마트") || rec.includes("슈퍼마켓")) return "store";
     if (rec.includes("학원")) return "edu";
     if (rec.includes("공방") || rec.includes("사진관")) return "studio";
     return "etc";
