@@ -142,6 +142,13 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     }
   }, []);
 
+  // ─── 공실 선택 시 안내 토스트 자동 제거 ──────────────────────────────────────
+  useEffect(() => {
+    if (selectedVacancy) {
+      setShowSuccessToast(null);
+    }
+  }, [selectedVacancy]);
+
   useEffect(() => {
     const profile = loadSavedProfile();
     if (profile) {
