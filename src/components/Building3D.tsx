@@ -502,8 +502,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                           <button onClick={() => setVotingStep("category")} className="w-full py-5 bg-white text-slate-950 rounded-[2rem] text-sm font-black shadow-xl hover:bg-amber-400 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4">
                             <Sparkles size={18} className="group-hover:animate-spin" /> 내가 원하는 건 리스트에 없어요
                           </button>
-                        )}
-                        
                         <button 
                           onClick={() => setShowComments(true)} 
                           className="w-full py-5 bg-slate-800 text-white rounded-[2rem] text-sm font-black shadow-lg hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4 border border-white/5"
@@ -512,7 +510,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                         </button>
 
                         {!isEntrepreneurMode && onModeSwitch && (
-                          <motion.button
+                          <motion.div 
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.5 }}
@@ -522,19 +520,18 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                                 alert("예비사장님 모드로 활성화되었습니다! 마이페이지에서 상세 리포트를 확인해 보세요.");
                               }
                             }}
-                            className="w-full mt-6 p-6 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] text-left relative overflow-hidden group shadow-xl shadow-blue-900/20"
+                            className="mt-5 p-5 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl text-white relative overflow-hidden group shadow-xl cursor-pointer"
                           >
-                            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform">
-                              <Briefcase size={60} className="text-white" />
+                            <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform">
+                              <Briefcase size={40} className="text-white" />
                             </div>
                             <div className="relative z-10">
-                              <p className="text-[10px] font-black text-blue-200 uppercase tracking-[0.2em] mb-1">Founder Opportunity</p>
-                              <h4 className="text-lg font-black text-white leading-tight">이 공간을 직접 경영하실<br/>예비사장님을 기다립니다! ✨</h4>
-                              <p className="text-[11px] font-medium text-blue-100/70 mt-2 flex items-center gap-1">
-                                재무 타당성 분석 리포트 확인하기 <ChevronRight size={12} />
+                              <h4 className="text-base font-black text-white leading-tight">이 공간을 경영하실 사장님을 기다립니다! ✨</h4>
+                              <p className="text-[11px] font-bold text-blue-100/80 mt-1.5 flex items-center gap-1">
+                                상권분석해보기 <ChevronRight size={12} />
                               </p>
                             </div>
-                          </motion.button>
+                          </motion.div>
                         )}
                     </motion.div>
                   )}
