@@ -150,6 +150,11 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
       .sort((a, b) => b.total - a.total);
   }, [vacancy.currentVotes]);
 
+  const sortedVotes = useMemo(() => {
+    const votes = vacancy.currentVotes || [];
+    return [...votes].sort((a,b) => b.count - a.count);
+  }, [vacancy.currentVotes]);
+
   const getCategoryIdFromRecommendation = (rec: string) => {
     if (rec.includes("카페")) return "cafe";
     if (rec.includes("식당") || rec.includes("맛집")) return "food";
