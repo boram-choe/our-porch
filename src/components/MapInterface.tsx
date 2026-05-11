@@ -13,6 +13,7 @@ import { Vacancy } from "@/data/dummyVacancies";
 import Building3D from "./Building3D";
 import MyPage from "./MyPage";
 import AdminDashboard from "./AdminDashboard";
+import SpaceCurator from "./SpaceCurator";
 import { UserProfile, loadSavedProfile } from "./AuthOnboarding";
 import { fetchVacancies, saveVacancy } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
@@ -59,6 +60,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   const [isPinpointing, setIsPinpointing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showCurator, setShowCurator] = useState(false);
+  const [recommendedCategory, setRecommendedCategory] = useState<string | null>(null);
   const [showSuccessToast, setShowSuccessToast] = useState<string | null>(null);
   
   const [newSpaceFloor, setNewSpaceFloor] = useState("1층");
@@ -558,6 +561,19 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
       <div className="absolute right-6 bottom-56 flex flex-col gap-4 z-[100]">
         {!isPinpointing && (
+          <motion.button 
+            initial={{ scale: 0, x: 20 }} 
+            animate={{ scale: 1, x: 0 }} 
+            whileHover={{ scale: 1.05 }}
+            onClick={() => setShowCurator(true)} 
+            className="h-14 px-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl shadow-2xl flex items-center justify-center gap-3 border-2 border-white/20 overflow-hidden relative group"
+          >
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            <Sparkles size={20} className="text-amber-400 fill-amber-400" />
+            <span className="text-[11px] font-black tracking-tighter whitespace-nowrap">나만의 취향 찾기</span>
+          </motion.button>
+        )}
+        {!isPinpointing && (
           <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} onClick={startDiscovery} className="w-16 h-16 bg-slate-950 text-amber-500 rounded-3xl shadow-2xl flex items-center justify-center border-[5px] border-amber-500 relative group overflow-hidden">
             <div className="absolute inset-0 bg-amber-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             <Plus size={36} strokeWidth={4} className="relative z-10 group-hover:text-slate-950 transition-colors" />
@@ -780,6 +796,16 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                />
              </div>
           </motion.div>
+        )}
+        {showCurator && (
+          <SpaceCurator 
+            onClose={() => setShowCurator(false)} 
+            onComplete={(category) => {
+              setRecommendedCategory(category);
+              setShowCurator(false);
+              setShowSuccessToast(`'${category}' 취향을 찾았습니다! 이제 지도의 핀을 눌러 공간을 선택해주세요.`);
+            }}
+          />
         )}
       </AnimatePresence>
 
