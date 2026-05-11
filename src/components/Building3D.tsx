@@ -528,7 +528,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                             <div className="relative z-10">
                               <h4 className="text-base font-black text-white leading-tight">이 공간을 경영하실 사장님을 기다립니다! ✨</h4>
                               <p className="text-[11px] font-bold text-blue-100/80 mt-1.5 flex items-center gap-1">
-                                상권분석해보기 <ChevronRight size={12} />
+                                수익분석 해보기 <ChevronRight size={12} />
                               </p>
                             </div>
                           </motion.div>
