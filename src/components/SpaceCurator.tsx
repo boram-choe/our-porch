@@ -127,9 +127,9 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
           <motion.div key="tournament" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full flex flex-col">
             <div className="pt-12 text-center">
               <span className="bg-amber-500/10 text-amber-500 px-6 py-2 rounded-full text-sm font-black tracking-widest uppercase mb-4 inline-block border border-amber-500/20">
-                {round === 8 ? "8강전" : round === 4 ? "4강전" : "결승전"} ({Math.floor(matchIdx/2) + 1} / {round/2})
+                {round === 8 ? "운명의 8강전" : round === 4 ? "최종 후보 결정" : "최후의 선택"} ({Math.floor(matchIdx/2) + 1} / {round/2})
               </span>
-              <h2 className="text-2xl md:text-3xl font-black tracking-tight mt-2">당신이 더 원하는 공간은?</h2>
+              <h2 className="text-2xl md:text-4xl font-black tracking-tight mt-2">우리 집 바로 앞에 생긴다면? 🏠</h2>
             </div>
 
             <div className="flex-1 flex flex-col md:flex-row gap-6 items-center justify-center p-4">
