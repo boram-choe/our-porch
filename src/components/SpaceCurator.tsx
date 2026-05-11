@@ -162,7 +162,7 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
             </div>
 
             <p className="text-slate-400 text-lg mb-12 leading-relaxed break-keep">
-              대표님이 꿈꾸시는 이 공간을<br/>
+              {userProfile?.nickname || "대표님"}님이 꿈꾸시는 이 공간을<br/>
               우리 동네 어디에 세워볼까요?
             </p>
 
@@ -170,7 +170,7 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
               onClick={() => onComplete(finalWinner?.name || "동네 공간")}
               className="w-full py-6 bg-white text-slate-950 rounded-[2.5rem] text-xl font-black shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4"
             >
-              내 우승 업종 지도로 심으러 가기 <ArrowRight size={24} strokeWidth={3} />
+              우리 동네 빈 공간 둘러보기 <ArrowRight size={24} strokeWidth={3} />
             </button>
           </motion.div>
         )}
