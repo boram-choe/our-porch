@@ -111,14 +111,14 @@ export async function saveVacancy(v: {
   neighborhood: string;
   userId?: string;
   // 툇마루단 데이터
-  imageUrl?: string;
-  deposit?: number;
-  monthlyRent?: number;
-  managementFee?: number;
-  surveyRemarks?: string;
-  realtorName?: string;
-  realtorPhone?: string;
-  area?: string;
+  imageUrl?: string | null;
+  deposit?: number | null;
+  monthlyRent?: number | null;
+  managementFee?: number | null;
+  surveyRemarks?: string | null;
+  realtorName?: string | null;
+  realtorPhone?: string | null;
+  area?: string | null;
 }): Promise<string | null> {
   const { data, error } = await supabase
     .from("vacancies")
