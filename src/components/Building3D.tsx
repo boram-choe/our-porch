@@ -345,14 +345,20 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     <div className="relative w-full h-full overflow-hidden">
       {/* 툇마루단 촬영 실사 배경 */}
       <AnimatePresence>
-        {vacancy.imageUrl && (
+        {(vacancy.images?.[0] || vacancy.imageUrl) && (
           <motion.div 
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.4 }}
-            className="absolute inset-0 z-0 pointer-events-none"
+            animate={{ opacity: 0.6 }}
+            className="absolute top-0 left-0 right-0 h-[50vh] md:h-[60vh] z-0 pointer-events-none overflow-hidden"
           >
-            <img src={vacancy.imageUrl} className="w-full h-full object-cover blur-[2px]" alt="Background" />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-transparent to-slate-950" />
+            <img 
+              src={vacancy.images?.[0] || vacancy.imageUrl || ""} 
+              className="w-full h-full object-cover" 
+              alt="Field Photo Background" 
+            />
+            {/* 자연스러운 그라데이션 오버레이 */}
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
+            <div className="absolute inset-0 backdrop-blur-[1px]" />
           </motion.div>
         )}
       </AnimatePresence>

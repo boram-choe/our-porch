@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2 } from "lucide-react";
 import { Vacancy } from "../data/dummyVacancies";
 
+import { uploadImage } from "../lib/db";
+
 interface SurveyInputProps {
   initialData?: Partial<Vacancy>;
   onClose: () => void;
@@ -22,8 +24,36 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
     surveyRemarks: initialData?.surveyRemarks || "",
     realtorName: initialData?.realtorName || "",
     realtorPhone: initialData?.realtorPhone || "",
-    imageUrl: initialData?.imageUrl || "",
+    images: initialData?.images || [],
+    area: initialData?.area || "",
   });
+
+  const [isUploading, setIsUploading] = useState<number | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(index);
+    try {
+      const url = await uploadImage(file);
+      if (url) {
+        const newImages = [...(formData.images || [])];
+        newImages[index] = url;
+        setFormData({ ...formData, images: newImages });
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+    } finally {
+      setIsUploading(null);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = [...(formData.images || [])];
+    newImages.splice(index, 1);
+    setFormData({ ...formData, images: newImages });
+  };
 
   const handleSave = () => {
     onSave(formData);
@@ -78,30 +108,41 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
           {/* 이미지 섹션 */}
           <div className="space-y-4">
             <label className="flex items-center gap-2 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
-              <Camera size={14} /> 현장 사진 (URL)
+              <Camera size={14} /> 현장 사진 (최대 5장)
             </label>
-            <div className="relative aspect-video bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden group hover:border-amber-500 transition-all">
-              {formData.imageUrl ? (
-                <>
-                  <img src={formData.imageUrl} className="w-full h-full object-cover" alt="공실 사진" />
-                  <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button onClick={() => setFormData({...formData, imageUrl: ""})} className="bg-red-500 text-white p-3 rounded-2xl shadow-xl hover:scale-110 transition-all">
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col items-center gap-3">
-                   <div className="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center text-slate-300"><Plus size={28} /></div>
-                   <input 
-                    type="text" 
-                    placeholder="이미지 주소를 입력하세요..." 
-                    className="w-3/4 bg-transparent text-center text-xs font-bold text-slate-400 focus:outline-none"
-                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                   />
+            <div className="grid grid-cols-5 gap-3">
+              {[0, 1, 2, 3, 4].map((idx) => (
+                <div key={idx} className="relative aspect-square bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden group hover:border-amber-500 transition-all">
+                  {formData.images?.[idx] ? (
+                    <>
+                      <img src={formData.images[idx]} className="w-full h-full object-cover" alt={`공실 사진 ${idx + 1}`} />
+                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button onClick={() => removeImage(idx)} className="bg-red-500 text-white p-1.5 rounded-lg shadow-xl hover:scale-110 transition-all">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      {idx === 0 && <span className="absolute top-2 left-2 bg-amber-500 text-slate-950 text-[8px] font-black px-1.5 py-0.5 rounded-md">대표</span>}
+                    </>
+                  ) : (
+                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                      {isUploading === idx ? (
+                        <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Plus size={20} className="text-slate-300 group-hover:text-amber-500 transition-colors" />
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => handleFileChange(e, idx)}
+                        disabled={isUploading !== null}
+                      />
+                    </label>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
+            <p className="text-[10px] font-bold text-slate-400 text-center italic mt-2">첫 번째 사진이 투표 화면 배경으로 사용됩니다.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-6">

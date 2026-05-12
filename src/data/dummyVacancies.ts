@@ -21,7 +21,8 @@ export interface Vacancy {
   area?: string | null;
   currentVotes?: VoteItem[];
   reports?: any[];
-  imageUrl?: string | null;
+  images?: string[];         // 현장 사진 리스트 (최대 5장)
+  imageUrl?: string | null;  // [하위 호환] 첫 번째 이미지 URL
   deposit?: number | null;       // 보증금 (단위: 만원)
   monthlyRent?: number | null;   // 월세 (단위: 만원)
   managementFee?: number | null; // 관리비 (단위: 만원)

@@ -23,6 +23,7 @@ export interface DbVacancy {
   realtor_name: string | null;
   realtor_phone: string | null;
   area: string | null;
+  images: string | null; // 다중 이미지 URL (쉼표로 구분된 문자열)
   created_at: string;
 }
 
@@ -119,6 +120,7 @@ export async function saveVacancy(v: {
   realtorName?: string | null;
   realtorPhone?: string | null;
   area?: string | null;
+  images?: string[]; // 다중 이미지 배열
 }): Promise<string | null> {
   const { data, error } = await supabase
     .from("vacancies")
@@ -139,6 +141,7 @@ export async function saveVacancy(v: {
       realtor_name: v.realtorName || null,
       realtor_phone: v.realtorPhone || null,
       area: v.area || null,
+      images: v.images && v.images.length > 0 ? v.images.join(',') : null,
     })
     .select("id")
     .single();
@@ -269,4 +272,29 @@ export async function getNeighborhoodReport(neighborhood: string): Promise<Demog
     activityTimes,
     topCategories,
   };
+}
+
+// ─── 이미지 업로드 ──────────────────────────────────────────────────────────
+
+export async function uploadImage(file: File): Promise<string | null> {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+    const filePath = `vacancies/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('vacancy-images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('vacancy-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  } catch (err) {
+    console.error('Image upload error:', err);
+    return null;
+  }
 }
