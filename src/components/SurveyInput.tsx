@@ -38,7 +38,7 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
       <div className="relative group">
         <input
           type={type}
-          value={value}
+          value={value ?? (type === "number" ? 0 : "")}
           onChange={(e) => onChange(type === "number" ? Number(e.target.value) : e.target.value)}
           placeholder={placeholder}
           className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-sm group-hover:border-slate-200"
@@ -125,7 +125,7 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
                 <MessageSquare size={14} /> 한줄평 (비고)
               </label>
               <textarea
-                value={formData.surveyRemarks}
+                value={formData.surveyRemarks || ""}
                 onChange={(e) => setFormData({...formData, surveyRemarks: e.target.value})}
                 placeholder="공실의 특징을 한줄로 요약해 주세요 (예: 층고가 높고 채광이 좋음)"
                 className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] py-5 px-6 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-sm min-h-[120px]"
