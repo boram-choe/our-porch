@@ -18,16 +18,16 @@ export interface Vacancy {
   size?: string;
   status?: string;
   tags?: string[];
-  area?: string;
+  area?: string | null;
   currentVotes?: VoteItem[];
   reports?: any[];
-  imageUrl?: string;
-  deposit?: number;       // 보증금 (단위: 만원)
-  monthlyRent?: number;   // 월세 (단위: 만원)
-  managementFee?: number; // 관리비 (단위: 만원)
-  surveyRemarks?: string; // 툇마루단 한줄평/기타사항
-  realtorName?: string;   // 담당 공인중개사 성함
-  realtorPhone?: string;  // 담당 공인중개사 연락처
+  imageUrl?: string | null;
+  deposit?: number | null;       // 보증금 (단위: 만원)
+  monthlyRent?: number | null;   // 월세 (단위: 만원)
+  managementFee?: number | null; // 관리비 (단위: 만원)
+  surveyRemarks?: string | null; // 툇마루단 한줄평/기타사항
+  realtorName?: string | null;   // 담당 공인중개사 성함
+  realtorPhone?: string | null;  // 담당 공인중개사 연락처
   isDisputed?: boolean;
   moveInInfo?: { text: string; imageUrl?: string; reportedAt: string };
 }
