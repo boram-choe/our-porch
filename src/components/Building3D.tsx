@@ -342,7 +342,21 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   };
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full overflow-hidden">
+      {/* 툇마루단 촬영 실사 배경 */}
+      <AnimatePresence>
+        {vacancy.imageUrl && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.4 }}
+            className="absolute inset-0 z-0 pointer-events-none"
+          >
+            <img src={vacancy.imageUrl} className="w-full h-full object-cover blur-[2px]" alt="Background" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-transparent to-slate-950" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <BuildingVisual />
 
       <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start pointer-events-none z-10">
@@ -385,6 +399,41 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                    </button>
                  )}
               </div>
+
+              {/* 툇마루단 소견 - 투표 첫 화면에 노출 */}
+              {votingStep === "category" && (vacancy.surveyRemarks || vacancy.deposit || vacancy.monthlyRent) && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-8 p-6 bg-white/5 rounded-3xl border border-white/10 relative overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500" />
+                  {vacancy.surveyRemarks && (
+                    <div className="mb-4">
+                      <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-2">툇마루단 한줄평</p>
+                      <p className="text-base font-bold text-white leading-relaxed italic">"{vacancy.surveyRemarks}"</p>
+                    </div>
+                  )}
+                  {(vacancy.deposit !== undefined || vacancy.monthlyRent !== undefined) && (
+                    <div className="flex items-center gap-6 pt-4 border-t border-white/10">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-slate-500 uppercase mb-1">보증금</span>
+                        <span className="text-sm font-black text-white">{vacancy.deposit?.toLocaleString()}만원</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-slate-500 uppercase mb-1">월세</span>
+                        <span className="text-sm font-black text-white">{vacancy.monthlyRent?.toLocaleString()}만원</span>
+                      </div>
+                      {vacancy.managementFee !== undefined && (
+                        <div className="flex flex-col">
+                          <span className="text-[9px] font-black text-slate-500 uppercase mb-1">관리비</span>
+                          <span className="text-sm font-black text-white">{vacancy.managementFee?.toLocaleString()}만원</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
 
               <div className="relative">
                 <AnimatePresence mode="wait">

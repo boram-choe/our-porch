@@ -22,6 +22,12 @@ export interface Vacancy {
   currentVotes?: VoteItem[];
   reports?: any[];
   imageUrl?: string;
+  deposit?: number;       // 보증금 (단위: 만원)
+  monthlyRent?: number;   // 월세 (단위: 만원)
+  managementFee?: number; // 관리비 (단위: 만원)
+  surveyRemarks?: string; // 툇마루단 한줄평/기타사항
+  realtorName?: string;   // 담당 공인중개사 성함
+  realtorPhone?: string;  // 담당 공인중개사 연락처
   isDisputed?: boolean;
   moveInInfo?: { text: string; imageUrl?: string; reportedAt: string };
 }

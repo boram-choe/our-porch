@@ -71,12 +71,22 @@ const calculateIncomeTax = (annualProfit: number) => {
   return 15900000 + (annualProfit - 88000000) * 0.35;
 };
 
-const FeasibilityReport = ({ initialData }: { initialData?: { location: string; category: string } }) => {
+const FeasibilityReport = ({ initialData }: { initialData?: { location: string; category: string; vacancy?: any } }) => {
   const [step, setStep] = useState(1);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   
-  // 툇마루단 조사 데이터 적용
-  const spaceInfo = useMemo(() => getSpaceConditions(initialData?.location || ''), [initialData?.location]);
+  // 툇마루단 조사 데이터 적용 (vacancy 객체가 있으면 실제 데이터 사용, 없으면 매퍼/기본값 사용)
+  const spaceInfo = useMemo(() => {
+    if (initialData?.vacancy) {
+      return {
+        deposit: (initialData.vacancy.deposit || 0) * 10000,
+        rent: (initialData.vacancy.monthlyRent || 0) * 10000,
+        maintenance: (initialData.vacancy.managementFee || 0) * 10000,
+        size: 15 // 면적 정보가 없는 경우 기본 15평 적용
+      };
+    }
+    return getSpaceConditions(initialData?.location || '');
+  }, [initialData?.location, initialData?.vacancy]);
 
   // Inputs State
 

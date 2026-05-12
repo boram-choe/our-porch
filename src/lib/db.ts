@@ -14,6 +14,14 @@ export interface DbVacancy {
   registered_by: string | null;
   neighborhood: string;
   description: string | null;
+  // 툇마루단 조사 데이터 추가
+  image_url: string | null;
+  deposit: number | null;
+  monthly_rent: number | null;
+  management_fee: number | null;
+  survey_remarks: string | null;
+  realtor_name: string | null;
+  realtor_phone: string | null;
   created_at: string;
 }
 
@@ -101,6 +109,14 @@ export async function saveVacancy(v: {
   lng: number;
   neighborhood: string;
   userId?: string;
+  // 툇마루단 데이터
+  imageUrl?: string;
+  deposit?: number;
+  monthlyRent?: number;
+  managementFee?: number;
+  surveyRemarks?: string;
+  realtorName?: string;
+  realtorPhone?: string;
 }): Promise<string | null> {
   const { data, error } = await supabase
     .from("vacancies")
@@ -112,6 +128,14 @@ export async function saveVacancy(v: {
       lng: v.lng,
       neighborhood: v.neighborhood,
       registered_by: v.userId || null,
+      // 툇마루단 매핑
+      image_url: v.imageUrl || null,
+      deposit: v.deposit || null,
+      monthly_rent: v.monthlyRent || null,
+      management_fee: v.management_fee || null,
+      survey_remarks: v.survey_remarks || null,
+      realtor_name: v.realtor_name || null,
+      realtor_phone: v.realtor_phone || null,
     })
     .select("id")
     .single();

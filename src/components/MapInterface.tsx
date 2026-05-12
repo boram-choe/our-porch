@@ -14,6 +14,7 @@ import Building3D from "./Building3D";
 import MyPage from "./MyPage";
 import AdminDashboard from "./AdminDashboard";
 import SpaceCurator from "./SpaceCurator";
+import SurveyInput from "./SurveyInput";
 import { UserProfile, loadSavedProfile } from "./AuthOnboarding";
 import { fetchVacancies, saveVacancy } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
@@ -205,10 +206,17 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                 floor: v.floor || "1층",
                 lat: v.lat,
                 lng: v.lng,
-                price: "정보 대기 중",
-                size: `${v.floor || "1층"}`,
+                price: v.monthly_rent ? `월 ${v.monthly_rent}만원` : "정보 대기 중",
+                size: v.area || "정보 대기 중",
                 status: "available" as const,
                 tags: ["이웃발견"],
+                imageUrl: v.image_url,
+                deposit: v.deposit,
+                monthlyRent: v.monthly_rent,
+                managementFee: v.management_fee,
+                surveyRemarks: v.survey_remarks,
+                realtorName: v.realtor_name,
+                realtorPhone: v.realtor_phone,
                 currentVotes: Object.values(voteCounts),
               };
             }));
@@ -330,14 +338,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         
         let buildingName = addrData.road_address?.building_name || "";
         
-        // Priority 1: Famous Landmarks (Including Apartments)
         ps.keywordSearch("우체국 은행 지하철역 정류장 도서관 공원 병원 학교 마트 시청 경찰서 아파트 단지", (famousData: any, famousStatus: any) => {
           ps.keywordSearch("빌딩 빌라 오피스텔", (buildingData: any, buildingStatus: any) => {
             let bestName = "";
             let minDistance = 999;
             let isFamous = false;
 
-            // 1. Famous Landmarks (Highest Priority) - Up to 150m
             if (famousStatus === kakao.maps.services.Status.OK && famousData.length > 0) {
               const closest = famousData[0];
               const dist = parseInt(closest.distance);
@@ -348,7 +354,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               }
             }
 
-            // 2. Fallback to Building Name from Search (Priority 2)
             if (!bestName && buildingStatus === kakao.maps.services.Status.OK && buildingData.length > 0) {
               const closestBuilding = buildingData[0];
               const dist = parseInt(closestBuilding.distance);
@@ -359,7 +364,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               }
             }
 
-            // 3. Building Name from Geocoder
             if (!bestName && buildingName) {
               bestName = buildingName;
               minDistance = 0;
@@ -368,8 +372,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
             if (bestName.includes("시청")) bestName = "서울시청";
 
-            // Priority 4: 상업 앵커 (편의점·카페·약국 등) 40m 이내
-            // landmark가 없을 때만 상업시설로 fallback하여 "xx동" 중복 방지
             ps.keywordSearch("편의점 카페 약국 은행 부동산", (nearbyData: any, nearbyStatus: any) => {
               if (!bestName && nearbyStatus === kakao.maps.services.Status.OK && nearbyData.length > 0) {
                 const nearest = nearbyData[0];
@@ -541,7 +543,15 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               <button onClick={() => switchLocation('work')} className={`flex-1 py-3.5 rounded-2xl text-[13px] font-black transition-all flex items-center justify-center gap-2 ${userProfile?.activeLocationType === 'work' ? "bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20" : "text-slate-400 hover:text-white"}`}><Briefcase size={16} /> 나의 일터</button>
             </div>
           </motion.div>
-          <motion.button initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} onClick={() => setShowMyPage(true)} className="w-14 h-14 bg-slate-950/80 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(0,0,0,0.4)] pointer-events-auto hover:bg-slate-800 transition-all"><User size={24} /></motion.button>
+          {/* 마이페이지 버튼 */}
+          <motion.button 
+            initial={{ x: 20, opacity: 0 }} 
+            animate={{ x: 0, opacity: 1 }} 
+            onClick={() => setShowMyPage(true)} 
+            className="w-14 h-14 bg-slate-950/80 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(0,0,0,0.4)] pointer-events-auto hover:bg-slate-800 transition-all"
+          >
+            <User size={24} />
+          </motion.button>
         </div>
 
       </div>

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
+import { vacancies } from "../data/dummyVacancies";
 
 const VOTES_KEY = "gongsil_user_votes";
 
@@ -676,7 +677,8 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                <FeasibilityReport 
                  initialData={{
                    location: selectedLocation,
-                   category: votes.find(v => v.location === selectedLocation)?.brand || ""
+                   category: votes.find(v => v.location === selectedLocation)?.brand || "",
+                   vacancy: vacancies.find(v => v.landmark === selectedLocation || v.address === selectedLocation)
                  }}
                />
             </div>
