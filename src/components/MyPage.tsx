@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
-import { vacancies } from "../data/dummyVacancies";
 
 const VOTES_KEY = "gongsil_user_votes";
 
@@ -37,11 +36,12 @@ export function recordVote(brand: string, location: string) {
   }
 }
 
-export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onClose }: { 
+export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onClose, vacancies = [] }: { 
   onLogout: () => void,
   isEntrepreneurMode: boolean,
   onModeChange: (val: boolean) => void,
-  onClose?: () => void
+  onClose?: () => void,
+  vacancies?: any[]
 }) {
   const [showFeasibility, setShowFeasibility] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");

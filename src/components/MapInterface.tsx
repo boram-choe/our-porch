@@ -807,12 +807,13 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[170] shadow-2xl">
              <div className="absolute inset-0 bg-slate-900/90" onClick={() => setShowMyPage(false)} />
              <div className="absolute top-0 right-0 bottom-0 w-full max-w-lg bg-white overflow-y-auto shadow-2xl transition-all">
-               <MyPage 
-                 isEntrepreneurMode={isEntrepreneurMode}
-                 onModeChange={setIsEntrepreneurMode}
-                 onClose={() => setShowMyPage(false)}
-                 onLogout={() => { localStorage.removeItem("gongsil_user_profile"); window.location.reload(); }} 
-               />
+                <MyPage 
+                  isEntrepreneurMode={isEntrepreneurMode}
+                  onModeChange={setIsEntrepreneurMode}
+                  onClose={() => setShowMyPage(false)}
+                  onLogout={() => { localStorage.removeItem("gongsil_user_profile"); window.location.reload(); }} 
+                  vacancies={vacancies}
+                />
              </div>
           </motion.div>
         )}
