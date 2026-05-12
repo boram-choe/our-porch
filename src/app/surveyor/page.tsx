@@ -28,8 +28,8 @@ export default function SurveyorPage() {
   const [detectedLandmark, setDetectedLandmark] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { loading, error } = useKakaoLoader({
-    appkey: process.env.NEXT_PUBLIC_KAKAO_APP_KEY || "your_kakao_app_key",
+  const [loading, error] = useKakaoLoader({
+    appkey: process.env.NEXT_PUBLIC_KAKAO_APP_KEY || "4e959900c93f0a3268a637079835bb73",
     libraries: ["services"],
   });
 
