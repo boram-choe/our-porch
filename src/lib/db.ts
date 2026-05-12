@@ -134,7 +134,7 @@ export async function saveVacancy(v: {
       image_url: v.imageUrl || null,
       deposit: v.deposit || null,
       monthly_rent: v.monthlyRent || null,
-      management_fee: v.management_fee || null,
+      management_fee: v.managementFee || null,
       survey_remarks: v.surveyRemarks || null,
       realtor_name: v.realtorName || null,
       realtor_phone: v.realtorPhone || null,
