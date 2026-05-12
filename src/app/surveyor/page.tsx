@@ -191,10 +191,28 @@ export default function SurveyorPage() {
         </button>
       </div>
 
+      {/* My Location Button */}
+      <button 
+        onClick={() => {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+              const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+              setPinLocation(newPos);
+              // 지도 중심 이동은 Map의 center 프롭을 통해 자동 처리됨 (state 연동 시)
+            }, (err) => {
+              alert("위치 정보를 가져올 수 없습니다.");
+            });
+          }
+        }}
+        className="absolute right-8 bottom-32 z-[100] w-14 h-14 bg-white rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 hover:bg-slate-50 transition-all pointer-events-auto border border-slate-100"
+      >
+        <MapPin size={24} />
+      </button>
+
       {/* Map */}
       <div className="absolute inset-0 z-0">
         <Map
-          center={{ lat: 37.5665, lng: 126.9780 }}
+          center={pinLocation}
           style={{ width: "100%", height: "100%" }}
           level={3}
           onClick={(_, mouseEvent) => {

@@ -30,23 +30,35 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
 
   const [isUploading, setIsUploading] = useState<number | null>(null);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    setIsUploading(index);
-    try {
-      const url = await uploadImage(file);
-      if (url) {
-        const newImages = [...(formData.images || [])];
-        newImages[index] = url;
-        setFormData({ ...formData, images: newImages });
+    // 현재 등록된 이미지 수 확인
+    const currentImages = formData.images || [];
+    const remainingSlots = 5 - currentImages.length;
+    
+    // 남은 슬롯만큼만 파일 선택 (최대 5장)
+    const filesToUpload = files.slice(0, remainingSlots);
+
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const file = filesToUpload[i];
+      const slotIndex = currentImages.length + i;
+      
+      setIsUploading(slotIndex);
+      try {
+        const url = await uploadImage(file);
+        if (url) {
+          setFormData(prev => ({
+            ...prev,
+            images: [...(prev.images || []), url]
+          }));
+        }
+      } catch (err) {
+        console.error("Upload failed", err);
       }
-    } catch (err) {
-      console.error("Upload failed", err);
-    } finally {
-      setIsUploading(null);
     }
+    setIsUploading(null);
   };
 
   const removeImage = (index: number) => {
@@ -133,8 +145,9 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
                       <input 
                         type="file" 
                         accept="image/*" 
+                        multiple
                         className="hidden" 
-                        onChange={(e) => handleFileChange(e, idx)}
+                        onChange={handleFileChange}
                         disabled={isUploading !== null}
                       />
                     </label>
