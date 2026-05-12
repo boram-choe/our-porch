@@ -22,6 +22,7 @@ export interface DbVacancy {
   survey_remarks: string | null;
   realtor_name: string | null;
   realtor_phone: string | null;
+  area: string | null;
   created_at: string;
 }
 
@@ -117,6 +118,7 @@ export async function saveVacancy(v: {
   surveyRemarks?: string;
   realtorName?: string;
   realtorPhone?: string;
+  area?: string;
 }): Promise<string | null> {
   const { data, error } = await supabase
     .from("vacancies")
@@ -133,9 +135,10 @@ export async function saveVacancy(v: {
       deposit: v.deposit || null,
       monthly_rent: v.monthlyRent || null,
       management_fee: v.management_fee || null,
-      survey_remarks: v.survey_remarks || null,
-      realtor_name: v.realtor_name || null,
-      realtor_phone: v.realtor_phone || null,
+      survey_remarks: v.surveyRemarks || null,
+      realtor_name: v.realtorName || null,
+      realtor_phone: v.realtorPhone || null,
+      area: v.area || null,
     })
     .select("id")
     .single();

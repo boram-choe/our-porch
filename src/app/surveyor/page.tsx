@@ -105,6 +105,7 @@ export default function SurveyorPage() {
         surveyRemarks: data.surveyRemarks,
         realtorName: data.realtorName,
         realtorPhone: data.realtorPhone,
+        area: data.area || "정보 대기 중",
       });
 
       if (result) {
