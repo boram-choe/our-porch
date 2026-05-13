@@ -136,7 +136,7 @@ export default function SurveyorPage() {
       const result = await saveVacancy({
         id: editingVacancyId,
         landmark: data.landmark || detectedLandmark || "신규 공실",
-        address: detectedAddress,
+        address: addressToUse,
         floor: data.floor || "1층",
         lat: pinLocation.lat,
         lng: pinLocation.lng,
@@ -152,16 +152,16 @@ export default function SurveyorPage() {
         area: data.area || "정보 대기 중",
       });
 
-      if (result) {
+      if (result.id) {
         alert(`${currentUser?.name}님, 성공적으로 저장되었습니다! 🚀`);
         setIsPinpointing(false);
-        loadData(); // 리스트 갱신
+        loadData();
       } else {
-        alert("저장에 실패했습니다. 다시 시도해주세요.");
+        alert(`저장에 실패했습니다.\n오류: ${result.error || "알 수 없는 오류"}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("오류가 발생했습니다.");
+      alert(`오류가 발생했습니다: ${err?.message || String(err)}`);
     } finally {
       setIsLoading(false);
       setShowSurveyInput(false);

@@ -122,8 +122,8 @@ export async function saveVacancy(v: {
   area?: string | null;
   images?: string[]; // 다중 이미지 배열
   id?: string | null; // 기존 공실 수정용 ID
-}): Promise<string | null> {
-  const payload: any = {
+}): Promise<{ id: string | null; error: string | null }> {
+  const commonPayload = {
     landmark: v.landmark,
     address: v.address,
     floor: v.floor,
@@ -131,11 +131,10 @@ export async function saveVacancy(v: {
     lng: v.lng,
     neighborhood: v.neighborhood,
     registered_by: v.userId || null,
-    // 툇마루단 매핑
     image_url: v.imageUrl || null,
-    deposit: v.deposit || null,
-    monthly_rent: v.monthlyRent || null,
-    management_fee: v.managementFee || null,
+    deposit: v.deposit ?? null,
+    monthly_rent: v.monthlyRent ?? null,
+    management_fee: v.managementFee ?? null,
     survey_remarks: v.surveyRemarks || null,
     realtor_name: v.realtorName || null,
     realtor_phone: v.realtorPhone || null,
@@ -144,20 +143,31 @@ export async function saveVacancy(v: {
   };
 
   if (v.id) {
-    payload.id = v.id;
+    // 기존 공실 업데이트
+    const { data, error } = await supabase
+      .from("vacancies")
+      .update(commonPayload)
+      .eq("id", v.id)
+      .select("id")
+      .single();
+    if (error) {
+      console.error("공실 업데이트 오류:", error);
+      return { id: null, error: error.message };
+    }
+    return { id: data?.id ?? null, error: null };
+  } else {
+    // 신규 공실 등록
+    const { data, error } = await supabase
+      .from("vacancies")
+      .insert(commonPayload)
+      .select("id")
+      .single();
+    if (error) {
+      console.error("공실 등록 오류:", error);
+      return { id: null, error: error.message };
+    }
+    return { id: data?.id ?? null, error: null };
   }
-
-  const { data, error } = await supabase
-    .from("vacancies")
-    .upsert(payload, { onConflict: 'id' })
-    .select("id")
-    .single();
-
-  if (error) {
-    console.error("공실 저장 오류:", error.message);
-    return null;
-  }
-  return data?.id ?? null;
 }
 
 // ─── 투표(Votes) ──────────────────────────────────────────────────────────
