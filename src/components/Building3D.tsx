@@ -406,38 +406,58 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                  )}
               </div>
 
-              {/* 툇마루단 소견 - 투표 첫 화면에 노출 */}
-              {votingStep === "category" && (vacancy.surveyRemarks || vacancy.deposit || vacancy.monthlyRent) && (
+              {/* 툇마루단 확인 정보 (상시 노출) */}
+              {(vacancy.surveyRemarks || vacancy.deposit || vacancy.monthlyRent || vacancy.area) && (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mb-8 p-6 bg-white/5 rounded-3xl border border-white/10 relative overflow-hidden"
                 >
                   <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500" />
+                  
                   {vacancy.surveyRemarks && (
                     <div className="mb-4">
-                      <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-2">툇마루단 한줄평</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">툇마루단 조사 소견</p>
+                      </div>
                       <p className="text-base font-bold text-white leading-relaxed italic">"{vacancy.surveyRemarks}"</p>
                     </div>
                   )}
-                  {(vacancy.deposit !== undefined || vacancy.monthlyRent !== undefined) && (
-                    <div className="flex items-center gap-6 pt-4 border-t border-white/10">
+
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-6 pt-4 border-t border-white/10">
+                    {vacancy.area && (
+                      <div className="flex flex-col col-span-2 mb-2">
+                        <span className="text-[9px] font-black text-slate-500 uppercase mb-1">전용 면적</span>
+                        <span className="text-sm font-black text-white">{vacancy.area}</span>
+                      </div>
+                    )}
+                    {vacancy.deposit !== undefined && (
                       <div className="flex flex-col">
                         <span className="text-[9px] font-black text-slate-500 uppercase mb-1">보증금</span>
                         <span className="text-sm font-black text-white">{vacancy.deposit?.toLocaleString()}만원</span>
                       </div>
+                    )}
+                    {vacancy.monthlyRent !== undefined && (
                       <div className="flex flex-col">
                         <span className="text-[9px] font-black text-slate-500 uppercase mb-1">월세</span>
                         <span className="text-sm font-black text-white">{vacancy.monthlyRent?.toLocaleString()}만원</span>
                       </div>
-                      {vacancy.managementFee !== undefined && (
-                        <div className="flex flex-col">
-                          <span className="text-[9px] font-black text-slate-500 uppercase mb-1">관리비</span>
-                          <span className="text-sm font-black text-white">{vacancy.managementFee?.toLocaleString()}만원</span>
+                    )}
+                    {vacancy.realtorName && (
+                      <div className="flex flex-col col-span-2 pt-2 mt-2 border-t border-white/5">
+                        <span className="text-[9px] font-black text-slate-500 uppercase mb-1">담당 공인중개사</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-black text-white">{vacancy.realtorName}</span>
+                          {vacancy.realtorPhone && (
+                            <a href={`tel:${vacancy.realtorPhone}`} className="text-[11px] font-black text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
+                              {vacancy.realtorPhone}
+                            </a>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
               )}
 

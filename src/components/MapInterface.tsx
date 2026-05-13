@@ -218,6 +218,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                 surveyRemarks: v.survey_remarks,
                 realtorName: v.realtor_name,
                 realtorPhone: v.realtor_phone,
+                area: v.area,
                 currentVotes: Object.values(voteCounts),
               };
             }));
