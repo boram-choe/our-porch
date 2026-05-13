@@ -124,6 +124,24 @@ export default function SurveyorPage() {
   };
 
   const confirmLocation = () => {
+    // 1. 중복 체크: 이미 해당 위치 근처에 등록된 공실이 있는지 확인
+    const threshold = 0.0001; // 약 10m 반경
+    const existing = allVacancies.find(v => 
+      Math.abs(v.lat - pinLocation.lat) < threshold && 
+      Math.abs(v.lng - pinLocation.lng) < threshold
+    );
+
+    if (existing) {
+      if (confirm(`이미 이 위치에 '${existing.landmark || "이름 없는 공실"}' 정보가 등록되어 있습니다.\n이 정보를 확인하고 보완하시겠습니까?`)) {
+        setEditingVacancyId(existing.id);
+        setEditingNeighborhood(existing.neighborhood);
+        setDetectedAddress(existing.address || "");
+        setDetectedLandmark(existing.landmark || "");
+        setShowSurveyInput(true);
+        return;
+      }
+    }
+
     const geocoder = new kakao.maps.services.Geocoder();
     geocoder.coord2Address(pinLocation.lng, pinLocation.lat, (result, status) => {
       if (status === kakao.maps.services.Status.OK) {
@@ -310,7 +328,7 @@ export default function SurveyorPage() {
               <div className="space-y-6">
                 <div className="flex items-center gap-3 mb-6">
                    <div className="w-2 h-8 bg-amber-500 rounded-full" />
-                   <h3 className="text-2xl font-black text-slate-950 tracking-tight">확인 필요 공실 <span className="text-amber-500 ml-2">{allVacancies.filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음")).length}</span></h3>
+                   <h3 className="text-2xl font-black text-slate-950 tracking-tight">이웃 제보 현장 확인 <span className="text-amber-500 ml-2">{allVacancies.filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음")).length}</span></h3>
                 </div>
                 <div className="space-y-4">
                   {allVacancies
@@ -326,20 +344,31 @@ export default function SurveyorPage() {
                         setShowSurveyInput(true); // 바로 입력 폼 오픈
                       }}>
                         <div className="flex items-center gap-5">
-                          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500">
+                          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 relative">
                             <Clock size={28} />
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full animate-ping" />
                           </div>
                           <div>
-                            <h4 className="text-lg font-black text-slate-950">{v.landmark || "미지정 공실"}</h4>
-                            <p className="text-sm font-bold text-slate-400 mt-1">{v.address}</p>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="px-2 py-0.5 bg-amber-100 text-amber-600 text-[9px] font-black rounded-md">이웃 제보</span>
+                              <span className="text-[10px] font-bold text-slate-400">{v.neighborhood}</span>
+                            </div>
+                            <h4 className="text-lg font-black text-slate-950">{v.landmark || "이름 없는 공실"}</h4>
+                            <p className="text-sm font-bold text-slate-400 mt-0.5">{v.address}</p>
                           </div>
                         </div>
-                        <ArrowRight size={24} className="text-slate-300" />
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="text-[10px] font-black text-amber-500">정보 보완 필요</span>
+                          <ArrowRight size={20} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+                        </div>
                       </div>
                     ))}
                   {allVacancies.filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음")).length === 0 && (
                     <div className="py-16 text-center bg-white rounded-[2rem] border-4 border-dashed border-slate-100">
-                      <p className="text-base font-bold text-slate-300">오늘 확인해야 할 공실이 없습니다. ✨</p>
+                      <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Check size={32} className="text-slate-200" />
+                      </div>
+                      <p className="text-base font-bold text-slate-300">확인할 이웃 제보가 없습니다. ✨</p>
                     </div>
                   )}
                 </div>
