@@ -60,10 +60,18 @@ export default function SurveyorPage() {
     const account = SURVEYOR_ACCOUNTS.find(acc => acc.id === loginId && acc.password === password);
     
     if (account) {
+      const profile: SurveyorProfile = {
+        id: account.id,
+        name: account.name,
+        realName: account.realName,
+        region: account.region,
+        supervisor: account.supervisor,
+        supervisorContact: account.supervisorContact
+      };
       setIsAuthenticated(true);
-      setCurrentUser({ id: account.id, name: account.name });
+      setCurrentUser(profile);
       if (typeof window !== "undefined") {
-        localStorage.setItem("gongsil_surveyor_session", JSON.stringify({ id: account.id, name: account.name }));
+        localStorage.setItem("gongsil_surveyor_session", JSON.stringify(profile));
       }
     } else {
       alert("아이디 또는 비밀번호가 올바르지 않습니다.");
