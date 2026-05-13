@@ -75,6 +75,13 @@ export default function SurveyorPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem("gongsil_surveyor_session", JSON.stringify(profile));
       }
+      
+      // 로그인 시 내 위치로 이동
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          setPinLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        });
+      }
     } else {
       alert("아이디 또는 비밀번호가 올바르지 않습니다.");
     }
@@ -89,21 +96,25 @@ export default function SurveyorPage() {
         setCurrentUser(parsed);
       }
     }
-    // 로그인 후 현재 위치로 지도 중심 설정
+    
+    // 초기 내 위치 감지
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setPinLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        },
-        () => {} // 위치 허용 거부 시 기본값 유지
-      );
+      navigator.geolocation.getCurrentPosition((pos) => {
+        setPinLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      });
     }
+
     loadData();
   }, []);
 
   const loadData = async () => {
     const data = await fetchVacancies();
-    setAllVacancies(data);
+    // images 문자열을 배열로 변환하여 저장
+    const mappedData = data.map(v => ({
+      ...v,
+      images: v.images ? (v.images as string).split(',') : []
+    })) as any[];
+    setAllVacancies(mappedData);
   };
 
   const handleLogout = () => {
@@ -158,6 +169,7 @@ export default function SurveyorPage() {
         surveyRemarks: data.surveyRemarks,
         realtorName: data.realtorName,
         realtorPhone: data.realtorPhone,
+        area: data.area || "정보 대기 중",
       });
 
       if (result.id) {

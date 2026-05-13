@@ -96,26 +96,18 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
     const remainingSlots = 5 - currentImages.length;
     const filesToUpload = files.slice(0, remainingSlots);
 
-    // 선택 즉시 로컬 미리보기(blob URL) 먼저 표시
-    const localPreviews = filesToUpload.map(f => URL.createObjectURL(f));
-    setFormData(prev => ({
-      ...prev,
-      images: [...(prev.images || []), ...localPreviews],
-    }));
-
-    // 백그라운드에서 실제 업로드 후 URL 교체
     for (let i = 0; i < filesToUpload.length; i++) {
       const file = filesToUpload[i];
-      const insertIndex = currentImages.length + i;
-      setIsUploading(insertIndex);
+      const slotIndex = currentImages.length + i;
+      
+      setIsUploading(slotIndex);
       try {
         const url = await uploadImage(file);
         if (url) {
-          setFormData(prev => {
-            const newImages = [...(prev.images || [])];
-            newImages[insertIndex] = url; // blob → 실제 URL로 교체
-            return { ...prev, images: newImages };
-          });
+          setFormData(prev => ({
+            ...prev,
+            images: [...(prev.images || []), url]
+          }));
         }
       } catch (err) {
         console.error("Upload failed", err);
