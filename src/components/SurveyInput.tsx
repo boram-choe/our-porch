@@ -193,9 +193,10 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
             <p className="text-xs font-bold text-slate-400 text-center italic mt-3">첫 번째 사진이 투표 화면 배경으로 사용됩니다.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-3 gap-6">
             <InputField label="랜드마크 명칭" icon={Landmark} value={formData.landmark} onChange={(v: string) => setFormData({...formData, landmark: v})} placeholder="예: 무악재역 인근 건물" />
             <InputField label="해당 층수" icon={Layers} value={formData.floor} onChange={(v: string) => setFormData({...formData, floor: v})} placeholder="예: 1층" />
+            <InputField label="전용 면적" icon={Building2} value={formData.area} onChange={(v: string) => setFormData({...formData, area: v})} placeholder="예: 약 30평 / 99㎡" />
           </div>
 
           <div className="space-y-8">

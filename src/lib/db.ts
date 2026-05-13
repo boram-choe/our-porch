@@ -132,8 +132,6 @@ export async function saveVacancy(v: {
     neighborhood: v.neighborhood,
     registered_by: v.userId || null,
     image_url: (v.images && v.images.length > 0) ? v.images[0] : (v.imageUrl || null),
-    /* 
-    // DB 스키마에 해당 컬럼들이 없을 경우를 대비해 일시 주석 처리
     deposit: v.deposit ?? null,
     monthly_rent: v.monthlyRent ?? null,
     management_fee: v.managementFee ?? null,
@@ -142,7 +140,6 @@ export async function saveVacancy(v: {
     realtor_phone: v.realtorPhone || null,
     area: v.area || null,
     images: v.images && v.images.length > 0 ? v.images.join(',') : null,
-    */
   };
 
   if (v.id) {
