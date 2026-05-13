@@ -424,7 +424,14 @@ export default function SurveyorPage() {
               initial={{ scale: 0.8, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 20 }}
-              onClick={() => setIsPinpointing(true)}
+              onClick={() => {
+                // 신규 등록 시 편집 상태 초기화
+                setEditingVacancyId(null);
+                setEditingNeighborhood("");
+                setDetectedAddress("");
+                setDetectedLandmark("");
+                setIsPinpointing(true);
+              }}
               className="bg-slate-950 text-white px-10 py-6 rounded-[2.5rem] text-xl font-black shadow-2xl flex items-center gap-4 pointer-events-auto hover:bg-slate-800 transition-all active:scale-95"
             >
               <Building2 size={24} className="text-amber-500" /> 신규 공실 조사하기
