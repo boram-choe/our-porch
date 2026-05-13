@@ -138,7 +138,7 @@ export async function saveVacancy(v: {
     survey_remarks: v.surveyRemarks || null,
     realtor_name: v.realtorName || null,
     realtor_phone: v.realtorPhone || null,
-    area: v.area || null,
+    // area: v.area || null, // DB에 area 컬럼이 없어 일시 제외
     images: v.images && v.images.length > 0 ? v.images.join(',') : null,
   };
 
