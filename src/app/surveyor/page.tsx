@@ -45,6 +45,7 @@ export default function SurveyorPage() {
   
   const [pinLocation, setPinLocation] = useState({ lat: 37.5665, lng: 126.9780 });
   const [isPinpointing, setIsPinpointing] = useState(false);
+  const [editingVacancyId, setEditingVacancyId] = useState<string | null>(null);
   const [showSurveyInput, setShowSurveyInput] = useState(false);
   const [detectedAddress, setDetectedAddress] = useState("");
   const [detectedLandmark, setDetectedLandmark] = useState("");
@@ -127,6 +128,7 @@ export default function SurveyorPage() {
       const neighborhood = addrParts.find(p => p.endsWith('동') || p.endsWith('가')) || addrParts[addrParts.length - 1];
 
       const result = await saveVacancy({
+        id: editingVacancyId,
         landmark: data.landmark || detectedLandmark || "신규 공실",
         address: detectedAddress,
         floor: data.floor || "1층",
@@ -134,7 +136,7 @@ export default function SurveyorPage() {
         lng: pinLocation.lng,
         neighborhood: neighborhood,
         userId: currentUser?.id, // 현재 로그인한 조사단 ID 기록
-        imageUrl: data.imageUrl,
+        images: data.images,
         deposit: data.deposit,
         monthlyRent: data.monthlyRent,
         managementFee: data.managementFee,
@@ -157,6 +159,7 @@ export default function SurveyorPage() {
     } finally {
       setIsLoading(false);
       setShowSurveyInput(false);
+      setEditingVacancyId(null); // 초기화
     }
   };
 
@@ -286,7 +289,7 @@ export default function SurveyorPage() {
                   {allVacancies
                     .filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음"))
                     .map(v => (
-                      <div key={v.id} className="bg-white p-6 rounded-[2rem] shadow-md border-2 border-slate-100 flex items-center justify-between group active:border-amber-500 transition-all cursor-pointer" onClick={() => { setPinLocation({ lat: v.lat, lng: v.lng }); setActiveView("map"); setIsPinpointing(true); }}>
+                      <div key={v.id} className="bg-white p-6 rounded-[2rem] shadow-md border-2 border-slate-100 flex items-center justify-between group active:border-amber-500 transition-all cursor-pointer" onClick={() => { setPinLocation({ lat: v.lat, lng: v.lng }); setEditingVacancyId(v.id); setActiveView("map"); setIsPinpointing(true); }}>
                         <div className="flex items-center gap-5">
                           <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500">
                             <Clock size={28} />

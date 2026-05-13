@@ -121,28 +121,35 @@ export async function saveVacancy(v: {
   realtorPhone?: string | null;
   area?: string | null;
   images?: string[]; // 다중 이미지 배열
+  id?: string | null; // 기존 공실 수정용 ID
 }): Promise<string | null> {
+  const payload: any = {
+    landmark: v.landmark,
+    address: v.address,
+    floor: v.floor,
+    lat: v.lat,
+    lng: v.lng,
+    neighborhood: v.neighborhood,
+    registered_by: v.userId || null,
+    // 툇마루단 매핑
+    image_url: v.imageUrl || null,
+    deposit: v.deposit || null,
+    monthly_rent: v.monthlyRent || null,
+    management_fee: v.managementFee || null,
+    survey_remarks: v.surveyRemarks || null,
+    realtor_name: v.realtorName || null,
+    realtor_phone: v.realtorPhone || null,
+    area: v.area || null,
+    images: v.images && v.images.length > 0 ? v.images.join(',') : null,
+  };
+
+  if (v.id) {
+    payload.id = v.id;
+  }
+
   const { data, error } = await supabase
     .from("vacancies")
-    .insert({
-      landmark: v.landmark,
-      address: v.address,
-      floor: v.floor,
-      lat: v.lat,
-      lng: v.lng,
-      neighborhood: v.neighborhood,
-      registered_by: v.userId || null,
-      // 툇마루단 매핑
-      image_url: v.imageUrl || null,
-      deposit: v.deposit || null,
-      monthly_rent: v.monthlyRent || null,
-      management_fee: v.managementFee || null,
-      survey_remarks: v.surveyRemarks || null,
-      realtor_name: v.realtorName || null,
-      realtor_phone: v.realtorPhone || null,
-      area: v.area || null,
-      images: v.images && v.images.length > 0 ? v.images.join(',') : null,
-    })
+    .upsert(payload, { onConflict: 'id' })
     .select("id")
     .single();
 
