@@ -19,8 +19,8 @@ import { UserProfile, loadSavedProfile } from "./AuthOnboarding";
 import { fetchVacancies, saveVacancy } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 
-// ─── 위치 기반 필터링 ─────────────────────────────────────────────────────────
-const FILTER_RADIUS_KM = 2.5; // 인증 위치 기준 반경 (인접 행정동 포함)
+// ─── 위치 기반 필터링 (조사단 정보 노출을 위해 범위 확대) ──────────────────────
+const FILTER_RADIUS_KM = 100; // 반경 100km로 설정하여 사실상 전체 노출
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -151,6 +151,20 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   }, [selectedVacancy]);
 
   useEffect(() => {
+    // 1. 현재 실시간 위치 감지 시도
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setMapCenter({ lat: latitude, lng: longitude });
+        },
+        (err) => {
+          console.warn("위치 정보를 가져올 수 없습니다. 프로필 위치를 사용합니다.", err);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    }
+
     const profile = loadSavedProfile();
     if (profile) {
       const isOldVersion = !profile.home;
@@ -173,14 +187,14 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       const activeLoc = finalProfile.activeLocationType === 'home' ? finalProfile.home : (finalProfile.work || finalProfile.home);
       
       if (activeLoc) {
-        setMapCenter({ lat: activeLoc.lat, lng: activeLoc.lng });
+        // 프로필 위치가 있더라도 실시간 위치 감지에 실패한 경우에만 프로필 위치로 이동 (또는 둘 다 반영)
         const dong = activeLoc.neighborhood || "우리동네";
         const animal = finalProfile.nickname?.split(' ')[1] || "이웃";
 
         // 피드는 filteredVacancies가 업데이트될 때 연동하여 재생성함 (아래 useEffect 참가)
 
         // Supabase에서 공실 불러오기 (동네 필터링)
-        fetchVacancies(activeLoc.neighborhood).then(async (dbVacancies) => {
+        fetchVacancies().then(async (dbVacancies) => {
           if (dbVacancies.length > 0) {
             // 각 공실별로 실시간 투표 데이터를 가져와서 집계합니다.
             const vacanciesWithVotes = await Promise.all(dbVacancies.map(async (v) => {
