@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2 } from "lucide-react";
 import { Vacancy } from "../data/dummyVacancies";
-
 import { uploadImage } from "../lib/db";
 
 interface SurveyInputProps {
@@ -12,6 +11,65 @@ interface SurveyInputProps {
   onClose: () => void;
   onSave: (data: Partial<Vacancy>) => void;
 }
+
+// 금액 콤마 포맷팅
+const formatCurrency = (val: number | string) => {
+  const num = Number(val);
+  if (isNaN(num)) return "";
+  return new Intl.NumberFormat('ko-KR').format(num);
+};
+
+// 억 단위 환산 표시
+const getEokDisplay = (manWon: number | string) => {
+  const num = Number(manWon);
+  if (isNaN(num) || num < 10000) return null;
+  const eok = Math.floor(num / 10000);
+  const remainder = num % 10000;
+  return `${eok}억 ${remainder > 0 ? formatCurrency(remainder) + "만" : ""}`;
+};
+
+// 입력 필드 컴포넌트 (포커스 유지 위해 외부 분리)
+const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeholder, suffix }: any) => {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-2 text-sm font-black text-slate-400 uppercase tracking-widest">
+          <Icon size={18} /> {label}
+        </label>
+        {type === "number" && value >= 10000 && (
+          <motion.span 
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-[10px] font-black text-amber-500 bg-amber-50 px-2 py-1 rounded-md border border-amber-100"
+          >
+            약 {getEokDisplay(value)}
+          </motion.span>
+        )}
+      </div>
+      <div className="relative group">
+        <input
+          type={type === "number" ? "text" : type}
+          value={type === "number" ? (value === 0 ? "" : formatCurrency(value)) : value}
+          onChange={(e) => {
+            if (type === "number") {
+              const val = e.target.value.replace(/,/g, '');
+              if (val === "" || /^\d+$/.test(val)) {
+                onChange(val === "" ? 0 : Number(val));
+              }
+            } else {
+              onChange(e.target.value);
+            }
+          }}
+          placeholder={placeholder}
+          className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] py-5 px-8 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-lg group-hover:border-slate-200"
+        />
+        {suffix && (
+          <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest">{suffix}</span>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default function SurveyInput({ initialData, onClose, onSave }: SurveyInputProps) {
   const [formData, setFormData] = useState<Partial<Vacancy>>({
@@ -34,11 +92,8 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // 현재 등록된 이미지 수 확인
     const currentImages = formData.images || [];
     const remainingSlots = 5 - currentImages.length;
-    
-    // 남은 슬롯만큼만 파일 선택 (최대 5장)
     const filesToUpload = files.slice(0, remainingSlots);
 
     for (let i = 0; i < filesToUpload.length; i++) {
@@ -71,26 +126,6 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
     onSave(formData);
     onClose();
   };
-
-  const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeholder, suffix }: any) => (
-    <div className="space-y-4">
-      <label className="flex items-center gap-2 text-sm font-black text-slate-400 uppercase tracking-widest">
-        <Icon size={18} /> {label}
-      </label>
-      <div className="relative group">
-        <input
-          type={type}
-          value={value ?? (type === "number" ? 0 : "")}
-          onChange={(e) => onChange(type === "number" ? Number(e.target.value) : e.target.value)}
-          placeholder={placeholder}
-          className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] py-5 px-8 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-lg group-hover:border-slate-200"
-        />
-        {suffix && (
-          <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest">{suffix}</span>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 overflow-y-auto bg-slate-950/80 backdrop-blur-md">
@@ -163,9 +198,9 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
             <InputField label="해당 층수" icon={Layers} value={formData.floor} onChange={(v: string) => setFormData({...formData, floor: v})} placeholder="예: 1층" />
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2"><div className="h-6 w-1.5 bg-blue-500 rounded-full" /><h3 className="text-xl font-black text-slate-950 tracking-tight">임대 조건</h3></div>
-            <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-8">
+            <div className="flex items-center gap-4 mb-4"><div className="h-10 w-2 bg-blue-500 rounded-full" /><h3 className="text-2xl font-black text-slate-950 tracking-tight">임대 조건</h3></div>
+            <div className="grid grid-cols-3 gap-6">
               <InputField label="보증금" icon={CircleDollarSign} type="number" value={formData.deposit} onChange={(v: number) => setFormData({...formData, deposit: v})} suffix="만원" />
               <InputField label="월세" icon={CircleDollarSign} type="number" value={formData.monthlyRent} onChange={(v: number) => setFormData({...formData, monthlyRent: v})} suffix="만원" />
               <InputField label="관리비" icon={CircleDollarSign} type="number" value={formData.managementFee} onChange={(v: number) => setFormData({...formData, managementFee: v})} suffix="만원" />
@@ -187,8 +222,8 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2"><div className="h-6 w-1.5 bg-teal-500 rounded-full" /><h3 className="text-xl font-black text-slate-950 tracking-tight">부동산 정보</h3></div>
+          <div className="space-y-8">
+            <div className="flex items-center gap-4 mb-4"><div className="h-10 w-2 bg-teal-500 rounded-full" /><h3 className="text-2xl font-black text-slate-950 tracking-tight">부동산 정보</h3></div>
             <div className="grid grid-cols-2 gap-6">
               <InputField label="공인중개사 이름" icon={User} value={formData.realtorName} onChange={(v: string) => setFormData({...formData, realtorName: v})} placeholder="예: 김민수 공인중개사" />
               <InputField label="중개사 연락처" icon={Phone} value={formData.realtorPhone} onChange={(v: string) => setFormData({...formData, realtorPhone: v})} placeholder="예: 010-1234-5678" />
@@ -197,12 +232,12 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
         </div>
 
         {/* Footer */}
-        <div className="p-10 pt-6 border-t border-slate-50 flex-shrink-0">
+        <div className="p-12 pt-6 border-t border-slate-50 flex-shrink-0">
           <button 
             onClick={handleSave}
             className="w-full py-6 bg-slate-950 text-white rounded-[2.5rem] text-xl font-black shadow-2xl hover:bg-slate-800 active:scale-95 transition-all flex items-center justify-center gap-4"
           >
-            조사 데이터 저장하기 <Check size={24} />
+            조사 데이터 저장하기 <Check size={32} />
           </button>
         </div>
       </motion.div>
