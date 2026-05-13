@@ -230,8 +230,8 @@ export default function SurveyorPage() {
                   <User size={24} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-950 tracking-tight">조사단 마이페이지</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{currentUser?.name || "로그인 필요"}</p>
+                  <h2 className="text-2xl font-black text-slate-950 tracking-tight">조사단 마이페이지</h2>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{currentUser?.name || "로그인 필요"}</p>
                 </div>
               </div>
               <button onClick={() => setActiveView("map")} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
@@ -258,73 +258,64 @@ export default function SurveyorPage() {
                       <User size={28} />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black tracking-tight">{currentUser?.realName} <span className="text-sm font-bold text-slate-400 ml-1">조사원</span></h3>
-                      <p className="text-amber-500 text-xs font-bold mt-1">📍 {currentUser?.region}</p>
+                      <h3 className="text-3xl font-black tracking-tight">{currentUser?.realName} <span className="text-lg font-bold text-slate-400 ml-1">조사원</span></h3>
+                      <p className="text-amber-500 text-sm font-bold mt-2">📍 {currentUser?.region}</p>
                     </div>
                   </div>
                   
-                  <div className="pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
+                  <div className="pt-8 border-t border-white/10 grid grid-cols-2 gap-6">
                     <div>
-                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">직속 담당자</p>
-                      <p className="text-sm font-bold">{currentUser?.supervisor}</p>
+                      <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">직속 담당자</p>
+                      <p className="text-lg font-bold">{currentUser?.supervisor}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">비상 연락처</p>
-                      <p className="text-sm font-bold flex items-center gap-1"><Phone size={12} className="text-amber-500" /> {currentUser?.supervisorContact}</p>
+                      <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">비상 연락처</p>
+                      <p className="text-lg font-bold flex items-center gap-2"><Phone size={16} className="text-amber-500" /> {currentUser?.supervisorContact}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Lists */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                   <div className="w-1.5 h-6 bg-amber-500 rounded-full" />
-                   <h3 className="text-lg font-black text-slate-950 tracking-tight">확인 필요 공실 <span className="text-amber-500 ml-1">{allVacancies.filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음")).length}</span></h3>
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                   <div className="w-2 h-8 bg-amber-500 rounded-full" />
+                   <h3 className="text-2xl font-black text-slate-950 tracking-tight">확인 필요 공실 <span className="text-amber-500 ml-2">{allVacancies.filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음")).length}</span></h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {allVacancies
                     .filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음"))
                     .map(v => (
-                      <div key={v.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between group hover:border-amber-500 transition-all cursor-pointer" onClick={() => { setPinLocation({ lat: v.lat, lng: v.lng }); setActiveView("map"); setIsPinpointing(true); }}>
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500">
-                            <Clock size={20} />
+                      <div key={v.id} className="bg-white p-6 rounded-[2rem] shadow-md border-2 border-slate-100 flex items-center justify-between group active:border-amber-500 transition-all cursor-pointer" onClick={() => { setPinLocation({ lat: v.lat, lng: v.lng }); setActiveView("map"); setIsPinpointing(true); }}>
+                        <div className="flex items-center gap-5">
+                          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500">
+                            <Clock size={28} />
                           </div>
                           <div>
-                            <h4 className="text-sm font-black text-slate-950">{v.landmark || "미지정 공실"}</h4>
-                            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{v.address}</p>
+                            <h4 className="text-lg font-black text-slate-950">{v.landmark || "미지정 공실"}</h4>
+                            <p className="text-sm font-bold text-slate-400 mt-1">{v.address}</p>
                           </div>
                         </div>
-                        <ArrowRight size={16} className="text-slate-300 group-hover:text-amber-500 transition-all" />
+                        <ArrowRight size={24} className="text-slate-300" />
                       </div>
                     ))}
-                  {allVacancies.filter(v => !v.images && v.neighborhood.includes(currentUser?.region.split(' ').pop() || "")).length === 0 && (
-                    <div className="py-10 text-center bg-white rounded-3xl border-2 border-dashed border-slate-100">
-                      <p className="text-xs font-bold text-slate-300">오늘 확인해야 할 공실이 없습니다. ✨</p>
+                  {allVacancies.filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음")).length === 0 && (
+                    <div className="py-16 text-center bg-white rounded-[2rem] border-4 border-dashed border-slate-100">
+                      <p className="text-base font-bold text-slate-300">오늘 확인해야 할 공실이 없습니다. ✨</p>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-4 pb-12">
-                <div className="flex items-center gap-2 mb-4">
-                   <div className="w-1.5 h-6 bg-slate-950 rounded-full" />
-                   <h3 className="text-lg font-black text-slate-950 tracking-tight">내가 등록한 공실 <span className="text-slate-400 ml-1">{allVacancies.filter(v => v.registered_by === currentUser?.id).length}</span></h3>
+              <div className="space-y-6 pb-20">
+                <div className="flex items-center gap-3 mb-6">
+                   <div className="w-2 h-8 bg-slate-950 rounded-full" />
+                   <h3 className="text-2xl font-black text-slate-950 tracking-tight">내가 등록한 공실 <span className="text-slate-400 ml-2">{allVacancies.filter(v => v.registered_by === currentUser?.id).length}</span></h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {allVacancies
                     .filter(v => v.registered_by === currentUser?.id)
                     .map(v => (
-                      <div key={v.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between opacity-80">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
-                            <ListChecks size={20} />
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-black text-slate-950">{v.landmark}</h4>
-                            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{new Date(v.created_at).toLocaleDateString()} 등록 완료</p>
-                          </div>
                         </div>
                         <div className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">승인완료</div>
                       </div>
@@ -337,13 +328,13 @@ export default function SurveyorPage() {
       </AnimatePresence>
 
       {/* Floating View Toggle */}
-      <div className="absolute top-24 left-6 right-6 z-[100] flex justify-center pointer-events-none">
-        <motion.div initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/90 backdrop-blur-md p-1.5 rounded-2xl shadow-xl border border-white/20 flex gap-1 pointer-events-auto">
-          <button onClick={() => setActiveView("map")} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === "map" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
-            <MapIcon size={14} /> 지도
+      <div className="absolute top-28 left-6 right-6 z-[100] flex justify-center pointer-events-none">
+        <motion.div initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/95 backdrop-blur-md p-2 rounded-[2rem] shadow-2xl border border-white/20 flex gap-2 pointer-events-auto">
+          <button onClick={() => setActiveView("map")} className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeView === "map" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
+            <MapIcon size={20} /> 지도 보기
           </button>
-          <button onClick={() => setActiveView("mypage")} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === "mypage" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
-            <User size={14} /> 내 정보
+          <button onClick={() => setActiveView("mypage")} className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeView === "mypage" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
+            <User size={20} /> 내 정보
           </button>
         </motion.div>
       </div>

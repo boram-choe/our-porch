@@ -73,9 +73,9 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
   };
 
   const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeholder, suffix }: any) => (
-    <div className="space-y-3">
-      <label className="flex items-center gap-2 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
-        <Icon size={14} /> {label}
+    <div className="space-y-4">
+      <label className="flex items-center gap-2 text-sm font-black text-slate-400 uppercase tracking-widest">
+        <Icon size={18} /> {label}
       </label>
       <div className="relative group">
         <input
@@ -83,10 +83,10 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
           value={value ?? (type === "number" ? 0 : "")}
           onChange={(e) => onChange(type === "number" ? Number(e.target.value) : e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-sm group-hover:border-slate-200"
+          className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] py-5 px-8 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-lg group-hover:border-slate-200"
         />
         {suffix && (
-          <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400 uppercase tracking-widest">{suffix}</span>
+          <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest">{suffix}</span>
         )}
       </div>
     </div>
@@ -100,47 +100,47 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
         className="bg-white w-full max-w-xl rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header */}
-        <div className="p-10 pb-6 border-b border-slate-50 relative flex-shrink-0">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-500 shadow-xl border-2 border-white/10">
-              <Building2 size={24} />
+        <div className="p-12 pb-8 border-b border-slate-50 relative flex-shrink-0">
+          <div className="flex items-center gap-6 mb-3">
+            <div className="w-16 h-16 bg-slate-950 rounded-[1.5rem] flex items-center justify-center text-amber-500 shadow-xl border-2 border-white/10">
+              <Building2 size={32} />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-950 tracking-tighter">툇마루단 현장 조사 ✨</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{formData.address || "신규 공실 등록"}</p>
+              <h2 className="text-3xl font-black text-slate-950 tracking-tighter">툇마루단 현장 조사 ✨</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{formData.address || "신규 공실 등록"}</p>
             </div>
           </div>
-          <button onClick={onClose} className="absolute top-10 right-10 text-slate-300 hover:text-slate-600 transition-colors">
-            <X size={24} />
+          <button onClick={onClose} className="absolute top-12 right-12 text-slate-300 hover:text-slate-600 transition-colors">
+            <X size={32} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scroll no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-12 space-y-12 custom-scroll no-scrollbar">
           {/* 이미지 섹션 */}
-          <div className="space-y-4">
-            <label className="flex items-center gap-2 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
-              <Camera size={14} /> 현장 사진 (최대 5장)
+          <div className="space-y-6">
+            <label className="flex items-center gap-2 text-sm font-black text-slate-400 uppercase tracking-widest">
+              <Camera size={18} /> 현장 사진 (최대 5장)
             </label>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-5 gap-4">
               {[0, 1, 2, 3, 4].map((idx) => (
-                <div key={idx} className="relative aspect-square bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden group hover:border-amber-500 transition-all">
+                <div key={idx} className="relative aspect-square bg-slate-50 rounded-[1.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden group hover:border-amber-500 transition-all">
                   {formData.images?.[idx] ? (
                     <>
                       <img src={formData.images[idx]} className="w-full h-full object-cover" alt={`공실 사진 ${idx + 1}`} />
                       <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button onClick={() => removeImage(idx)} className="bg-red-500 text-white p-1.5 rounded-lg shadow-xl hover:scale-110 transition-all">
-                          <Trash2 size={14} />
+                        <button onClick={() => removeImage(idx)} className="bg-red-500 text-white p-3 rounded-xl shadow-xl hover:scale-110 transition-all">
+                          <Trash2 size={20} />
                         </button>
                       </div>
-                      {idx === 0 && <span className="absolute top-2 left-2 bg-amber-500 text-slate-950 text-[8px] font-black px-1.5 py-0.5 rounded-md">대표</span>}
+                      {idx === 0 && <span className="absolute top-3 left-3 bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-1 rounded-md">대표</span>}
                     </>
                   ) : (
                     <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
                       {isUploading === idx ? (
-                        <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <Plus size={20} className="text-slate-300 group-hover:text-amber-500 transition-colors" />
+                        <Plus size={32} className="text-slate-300 group-hover:text-amber-500 transition-colors" />
                       )}
                       <input 
                         type="file" 
@@ -155,7 +155,7 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
                 </div>
               ))}
             </div>
-            <p className="text-[10px] font-bold text-slate-400 text-center italic mt-2">첫 번째 사진이 투표 화면 배경으로 사용됩니다.</p>
+            <p className="text-xs font-bold text-slate-400 text-center italic mt-3">첫 번째 사진이 투표 화면 배경으로 사용됩니다.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
@@ -172,17 +172,17 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2"><div className="h-6 w-1.5 bg-amber-500 rounded-full" /><h3 className="text-xl font-black text-slate-950 tracking-tight">툇마루단 소견</h3></div>
-            <div className="space-y-3">
-              <label className="flex items-center gap-2 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                <MessageSquare size={14} /> 한줄평 (비고)
+          <div className="space-y-8">
+            <div className="flex items-center gap-4 mb-4"><div className="h-10 w-2 bg-amber-500 rounded-full" /><h3 className="text-2xl font-black text-slate-950 tracking-tight">툇마루단 소견</h3></div>
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 text-sm font-black text-slate-400 uppercase tracking-widest">
+                <MessageSquare size={18} /> 한줄평 (비고)
               </label>
               <textarea
                 value={formData.surveyRemarks || ""}
                 onChange={(e) => setFormData({...formData, surveyRemarks: e.target.value})}
                 placeholder="공실의 특징을 한줄로 요약해 주세요 (예: 층고가 높고 채광이 좋음)"
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] py-5 px-6 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-sm min-h-[120px]"
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] py-6 px-8 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-lg min-h-[160px]"
               />
             </div>
           </div>
