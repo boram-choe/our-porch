@@ -82,7 +82,9 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
     surveyRemarks: initialData?.surveyRemarks || "",
     realtorName: initialData?.realtorName || "",
     realtorPhone: initialData?.realtorPhone || "",
-    images: initialData?.images || [],
+    images: Array.isArray(initialData?.images) 
+      ? initialData.images 
+      : (typeof initialData?.images === 'string' ? (initialData.images as string).split(',').filter(Boolean) : []),
     area: initialData?.area || "",
   });
 
