@@ -225,8 +225,8 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
           <div className="space-y-8">
             <div className="flex items-center gap-4 mb-4"><div className="h-10 w-2 bg-teal-500 rounded-full" /><h3 className="text-2xl font-black text-slate-950 tracking-tight">부동산 정보</h3></div>
             <div className="grid grid-cols-2 gap-6">
-              <InputField label="공인중개사 이름" icon={User} value={formData.realtorName} onChange={(v: string) => setFormData({...formData, realtorName: v})} placeholder="예: 김민수 공인중개사" />
-              <InputField label="중개사 연락처" icon={Phone} value={formData.realtorPhone} onChange={(v: string) => setFormData({...formData, realtorPhone: v})} placeholder="예: 010-1234-5678" />
+              <InputField label="담당 공인중개사" icon={User} value={formData.realtorName} onChange={(v: string) => setFormData({...formData, realtorName: v})} placeholder="예: 김민수 공인중개사" />
+              <InputField label="중개사 연락처" icon={Phone} value={formData.realtorPhone} onChange={(v: string) => setFormData({...formData, realtorPhone: v})} placeholder="예: 02-123-3456" />
             </div>
           </div>
         </div>
