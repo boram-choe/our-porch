@@ -331,7 +331,8 @@ export default function SurveyorPage() {
                     ))}
                 </div>
               </div>
-            )}
+            </div>
+          )}
           </motion.div>
         )}
       </AnimatePresence>
