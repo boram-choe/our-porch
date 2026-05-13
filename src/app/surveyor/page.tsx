@@ -333,36 +333,43 @@ export default function SurveyorPage() {
                 <div className="space-y-4">
                   {allVacancies
                     .filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음"))
-                    .map(v => (
-                      <div key={v.id} className="bg-white p-6 rounded-[2rem] shadow-md border-2 border-slate-100 flex items-center justify-between group active:border-amber-500 transition-all cursor-pointer" onClick={() => {
-                        setPinLocation({ lat: v.lat, lng: v.lng });
-                        setEditingVacancyId(v.id);
-                        setEditingNeighborhood(v.neighborhood);
-                        setDetectedAddress(v.address || "");
-                        setDetectedLandmark(v.landmark || "");
-                        setActiveView("map");
-                        setShowSurveyInput(true); // 바로 입력 폼 오픈
-                      }}>
-                        <div className="flex items-center gap-5">
-                          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 relative">
-                            <Clock size={28} />
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full animate-ping" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="px-2 py-0.5 bg-amber-100 text-amber-600 text-[9px] font-black rounded-md">이웃 제보</span>
-                              <span className="text-[10px] font-bold text-slate-400">{v.neighborhood}</span>
+                    .map(v => {
+                      const isDupWarning = v.survey_remarks?.includes("중복 확인 필요");
+                      return (
+                        <div key={v.id} className={`bg-white p-6 rounded-[2rem] shadow-md border-2 flex items-center justify-between group transition-all cursor-pointer ${isDupWarning ? 'border-red-200 bg-red-50/30' : 'border-slate-100 active:border-amber-500'}`} onClick={() => {
+                          setPinLocation({ lat: v.lat, lng: v.lng });
+                          setEditingVacancyId(v.id);
+                          setEditingNeighborhood(v.neighborhood);
+                          setDetectedAddress(v.address || "");
+                          setDetectedLandmark(v.landmark || "");
+                          setActiveView("map");
+                          setShowSurveyInput(true);
+                        }}>
+                          <div className="flex items-center gap-5">
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center relative ${isDupWarning ? 'bg-red-100 text-red-500' : 'bg-amber-50 text-amber-500'}`}>
+                              {isDupWarning ? <AlertTriangle size={28} /> : <Clock size={28} />}
+                              <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full animate-ping" />
                             </div>
-                            <h4 className="text-lg font-black text-slate-950">{v.landmark || "이름 없는 공실"}</h4>
-                            <p className="text-sm font-bold text-slate-400 mt-0.5">{v.address}</p>
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`px-2 py-0.5 text-[9px] font-black rounded-md ${isDupWarning ? 'bg-red-500 text-white' : 'bg-amber-100 text-amber-600'}`}>
+                                  {isDupWarning ? '⚠️ 병합 검토 대상' : '이웃 제보'}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400">{v.neighborhood}</span>
+                              </div>
+                              <h4 className="text-lg font-black text-slate-950">{v.landmark || "이름 없는 공실"}</h4>
+                              <p className="text-sm font-bold text-slate-400 mt-0.5">{v.address}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className={`text-[10px] font-black ${isDupWarning ? 'text-red-500' : 'text-amber-500'}`}>
+                              {isDupWarning ? '동일 층 중복 확인' : '정보 보완 필요'}
+                            </span>
+                            <ArrowRight size={20} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <span className="text-[10px] font-black text-amber-500">정보 보완 필요</span>
-                          <ArrowRight size={20} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   {allVacancies.filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음")).length === 0 && (
                     <div className="py-16 text-center bg-white rounded-[2rem] border-4 border-dashed border-slate-100">
                       <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">

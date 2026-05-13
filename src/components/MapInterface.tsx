@@ -413,13 +413,31 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   };
 
   const addNewSpace = async () => {
-    // 중복 방어 (안전장치 — UI에서이미 차단)
-    const dup = vacancies.find(v => {
-      const isClose = haversineKm(pinLocation.lat, pinLocation.lng, v.lat, v.lng) <= 0.03;
-      const sameAddr = (detectedAddress && v.address) ? v.address === detectedAddress : true;
-      return sameAddr && isClose && v.floor === newSpaceFloor;
-    });
-    if (dup) return;
+    if (!userProfile) return;
+
+    // 1. 중복 체크: 같은 위치(근접), 같은 층 확인
+    const threshold = 0.0001; 
+    const duplicate = vacancies.find(v => 
+      Math.abs(v.lat - pinLocation.lat) < threshold && 
+      Math.abs(v.lng - pinLocation.lng) < threshold &&
+      v.floor === newSpaceFloor
+    );
+
+    let isPotentialDuplicate = false;
+
+    if (duplicate) {
+      const msg = `해당 건물 ${newSpaceFloor}에는 이미 공실 정보가 등록되어 투표가 진행 중입니다.\n지금 추가하시려는 공실이 여기와 다른 곳인가요?\n\n[확인]을 누르면 계속해서 추가하며, [취소]를 누르면 기존 투표 페이지로 이동합니다.`;
+      if (confirm(msg)) {
+        // Yes 선택 시 진행하되 플래그 설정
+        isPotentialDuplicate = true;
+      } else {
+        // No 선택 시 기존 공실 상세 페이지로 이동하고 종료
+        setSelectedVacancy(duplicate);
+        setIsPinpointing(false);
+        setShowAddModal(false);
+        return;
+      }
+    }
 
     const featureTags = selectedFeatures.map(f => SPACE_FEATURES.find(sf => sf.id === f)?.label || "");
     const addrParts = detectedAddress.split(' ');
@@ -428,6 +446,23 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     let prefix = detectedLandmark || neighborhood;
     
     if (detectedLandmark) {
+      if (landmarkDistance > 30) prefix = `${detectedLandmark} 근처`;
+    }
+
+    const finalLandmark = `${prefix} ${newSpaceFloor} 공간`;
+
+    try {
+      const result = await saveVacancy({
+        landmark: finalLandmark,
+        address: detectedAddress || "주소 정보 없음",
+        floor: newSpaceFloor,
+        lat: pinLocation.lat,
+        lng: pinLocation.lng,
+        neighborhood: neighborhood,
+        userId: userProfile.nickname,
+        area: newSpaceSize,
+        surveyRemarks: isPotentialDuplicate ? "[⚠️ 중복 확인 필요: 툇마루단 병합 검토 대상]" : undefined
+      });
       if (isFamousLandmark) {
         if (detectedLandmark.includes("아파트") || detectedLandmark.includes("단지")) {
           if (landmarkDistance < 40) {
