@@ -316,8 +316,17 @@ export default function SurveyorPage() {
                   {allVacancies
                     .filter(v => v.registered_by === currentUser?.id)
                     .map(v => (
+                      <div key={v.id} className="bg-white p-6 rounded-[2rem] shadow-sm border-2 border-slate-50 flex items-center justify-between opacity-90">
+                        <div className="flex items-center gap-5">
+                          <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400">
+                            <ListChecks size={28} />
+                          </div>
+                          <div>
+                            <h4 className="text-lg font-black text-slate-950">{v.landmark}</h4>
+                            <p className="text-sm font-bold text-slate-400 mt-1">{new Date(v.created_at).toLocaleDateString()} 등록 완료</p>
+                          </div>
                         </div>
-                        <div className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">승인완료</div>
+                        <div className="text-xs font-black text-emerald-500 bg-emerald-50 px-4 py-2 rounded-full">승인완료</div>
                       </div>
                     ))}
                 </div>
