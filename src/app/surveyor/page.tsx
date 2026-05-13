@@ -231,7 +231,7 @@ export default function SurveyorPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-black text-slate-950 tracking-tight">조사단 마이페이지</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{currentUser?.name}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{currentUser?.name || "로그인 필요"}</p>
                 </div>
               </div>
               <button onClick={() => setActiveView("map")} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
@@ -239,7 +239,14 @@ export default function SurveyorPage() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {!currentUser ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                <Lock size={48} className="text-slate-200 mb-4" />
+                <p className="text-slate-400 font-bold">사용자 정보를 불러올 수 없습니다.<br/>다시 로그인해주세요.</p>
+                <button onClick={handleLogout} className="mt-6 px-8 py-3 bg-slate-950 text-white rounded-2xl font-black">로그인 화면으로</button>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Profile Card */}
               <div className="bg-slate-950 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -273,11 +280,11 @@ export default function SurveyorPage() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                    <div className="w-1.5 h-6 bg-amber-500 rounded-full" />
-                   <h3 className="text-lg font-black text-slate-950 tracking-tight">확인 필요 공실 <span className="text-amber-500 ml-1">{allVacancies.filter(v => !v.images && v.neighborhood.includes(currentUser?.region.split(' ').pop() || "")).length}</span></h3>
+                   <h3 className="text-lg font-black text-slate-950 tracking-tight">확인 필요 공실 <span className="text-amber-500 ml-1">{allVacancies.filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음")).length}</span></h3>
                 </div>
                 <div className="space-y-3">
                   {allVacancies
-                    .filter(v => !v.images && v.neighborhood.includes(currentUser?.region.split(' ').pop() || ""))
+                    .filter(v => !v.images && v.neighborhood.includes((currentUser?.region || "").split(' ').pop() || "알수없음"))
                     .map(v => (
                       <div key={v.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between group hover:border-amber-500 transition-all cursor-pointer" onClick={() => { setPinLocation({ lat: v.lat, lng: v.lng }); setActiveView("map"); setIsPinpointing(true); }}>
                         <div className="flex items-center gap-4">
@@ -324,7 +331,7 @@ export default function SurveyorPage() {
                     ))}
                 </div>
               </div>
-            </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
