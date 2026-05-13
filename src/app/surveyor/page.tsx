@@ -2,24 +2,46 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, MapPin, Search, Check, Building2, LogOut, Lock, ArrowRight, Zap } from "lucide-react";
+import { ShieldCheck, MapPin, Search, Check, Building2, LogOut, Lock, ArrowRight, Zap, User, Phone, LocateFixed, ListChecks, Clock, Map as MapIcon } from "lucide-react";
 import { Map, MapMarker } from "react-kakao-maps-sdk";
 import { useKakaoLoader } from "react-kakao-maps-sdk";
 import SurveyInput from "../../components/SurveyInput";
-import { saveVacancy } from "../../lib/db";
+import { saveVacancy, fetchVacancies, DbVacancy } from "../../lib/db";
 import { Vacancy } from "../../data/dummyVacancies";
 
-const SURVEYOR_ACCOUNTS = Array.from({ length: 10 }, (_, i) => ({
-  id: `surveyor${String(i + 1).padStart(2, '0')}`,
-  password: `gongsil${String(i + 1).padStart(2, '0')}!`,
-  name: `툇마루단 ${i + 1}호`
-}));
+const SURVEYOR_ACCOUNTS = [
+  { id: "surveyor01", password: "gongsil01!", name: "툇마루단 1호", realName: "홍길동", region: "서대문구 남가좌동", supervisor: "박관리 팀장", supervisorContact: "010-1111-2222" },
+  { id: "surveyor02", password: "gongsil02!", name: "툇마루단 2호", realName: "김철수", region: "서대문구 북가좌동", supervisor: "박관리 팀장", supervisorContact: "010-1111-2222" },
+  { id: "surveyor03", password: "gongsil03!", name: "툇마루단 3호", realName: "이영희", region: "서대문구 연희동", supervisor: "최운영 과장", supervisorContact: "010-3333-4444" },
+  { id: "surveyor04", password: "gongsil04!", name: "툇마루단 4호", realName: "박지성", region: "마포구 성산동", supervisor: "최운영 과장", supervisorContact: "010-3333-4444" },
+  { id: "surveyor05", password: "gongsil05!", name: "툇마루단 5호", realName: "손흥민", region: "마포구 망원동", supervisor: "이지원 대리", supervisorContact: "010-5555-6666" },
+  // ... 나머지도 유사하게 확장 가능
+].concat(Array.from({ length: 5 }, (_, i) => ({
+  id: `surveyor${String(i + 6).padStart(2, '0')}`,
+  password: `gongsil${String(i + 6).padStart(2, '0')}!`,
+  name: `툇마루단 ${i + 6}호`,
+  realName: `조사원${i + 6}`,
+  region: "담당 지역 배정 중",
+  supervisor: "본사 관리팀",
+  supervisorContact: "02-123-4567"
+})));
+
+interface SurveyorProfile {
+  id: string;
+  name: string;
+  realName: string;
+  region: string;
+  supervisor: string;
+  supervisorContact: string;
+}
 
 export default function SurveyorPage() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{id: string, name: string} | null>(null);
+  const [currentUser, setCurrentUser] = useState<SurveyorProfile | null>(null);
+  const [activeView, setActiveView] = useState<"map" | "mypage">("map");
+  const [allVacancies, setAllVacancies] = useState<DbVacancy[]>([]);
   
   const [pinLocation, setPinLocation] = useState({ lat: 37.5665, lng: 126.9780 });
   const [isPinpointing, setIsPinpointing] = useState(false);
@@ -57,7 +79,13 @@ export default function SurveyorPage() {
         setCurrentUser(parsed);
       }
     }
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    const data = await fetchVacancies();
+    setAllVacancies(data);
+  };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -111,6 +139,7 @@ export default function SurveyorPage() {
       if (result) {
         alert(`${currentUser?.name}님, 성공적으로 저장되었습니다! 🚀`);
         setIsPinpointing(false);
+        loadData(); // 리스트 갱신
       } else {
         alert("저장에 실패했습니다. 다시 시도해주세요.");
       }
@@ -176,19 +205,132 @@ export default function SurveyorPage() {
 
   return (
     <div className="relative w-full h-screen bg-slate-950 font-sans overflow-hidden">
-      {/* Header */}
-      <div className="absolute top-8 left-6 right-6 z-[100] flex items-center justify-between pointer-events-none">
-        <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-4 bg-white px-6 py-4 rounded-3xl shadow-2xl border border-slate-100 pointer-events-auto">
-          <div className="w-10 h-10 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-lg"><Zap size={20} fill="currentColor" /></div>
-          <div>
-            <h2 className="text-sm font-black text-slate-950 leading-none">{currentUser?.name || "툇마루단"}</h2>
-            <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Live Survey Mode</p>
-          </div>
+      {/* Surveyor MyPage View */}
+      <AnimatePresence>
+        {activeView === "mypage" && (
+          <motion.div 
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[200] bg-slate-50 flex flex-col"
+          >
+            {/* Header */}
+            <div className="bg-white p-8 pb-6 shadow-sm flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-500 shadow-xl">
+                  <User size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-950 tracking-tight">조사단 마이페이지</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{currentUser?.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setActiveView("map")} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                <ArrowRight size={20} className="rotate-180" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Profile Card */}
+              <div className="bg-slate-950 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                  <ShieldCheck size={120} />
+                </div>
+                <div className="relative z-10 space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-amber-500">
+                      <User size={28} />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black tracking-tight">{currentUser?.realName} <span className="text-sm font-bold text-slate-400 ml-1">조사원</span></h3>
+                      <p className="text-amber-500 text-xs font-bold mt-1">📍 {currentUser?.region}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">직속 담당자</p>
+                      <p className="text-sm font-bold">{currentUser?.supervisor}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">비상 연락처</p>
+                      <p className="text-sm font-bold flex items-center gap-1"><Phone size={12} className="text-amber-500" /> {currentUser?.supervisorContact}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lists */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                   <div className="w-1.5 h-6 bg-amber-500 rounded-full" />
+                   <h3 className="text-lg font-black text-slate-950 tracking-tight">확인 필요 공실 <span className="text-amber-500 ml-1">{allVacancies.filter(v => !v.images && v.neighborhood.includes(currentUser?.region.split(' ').pop() || "")).length}</span></h3>
+                </div>
+                <div className="space-y-3">
+                  {allVacancies
+                    .filter(v => !v.images && v.neighborhood.includes(currentUser?.region.split(' ').pop() || ""))
+                    .map(v => (
+                      <div key={v.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between group hover:border-amber-500 transition-all cursor-pointer" onClick={() => { setPinLocation({ lat: v.lat, lng: v.lng }); setActiveView("map"); setIsPinpointing(true); }}>
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500">
+                            <Clock size={20} />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-black text-slate-950">{v.landmark || "미지정 공실"}</h4>
+                            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{v.address}</p>
+                          </div>
+                        </div>
+                        <ArrowRight size={16} className="text-slate-300 group-hover:text-amber-500 transition-all" />
+                      </div>
+                    ))}
+                  {allVacancies.filter(v => !v.images && v.neighborhood.includes(currentUser?.region.split(' ').pop() || "")).length === 0 && (
+                    <div className="py-10 text-center bg-white rounded-3xl border-2 border-dashed border-slate-100">
+                      <p className="text-xs font-bold text-slate-300">오늘 확인해야 할 공실이 없습니다. ✨</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4 pb-12">
+                <div className="flex items-center gap-2 mb-4">
+                   <div className="w-1.5 h-6 bg-slate-950 rounded-full" />
+                   <h3 className="text-lg font-black text-slate-950 tracking-tight">내가 등록한 공실 <span className="text-slate-400 ml-1">{allVacancies.filter(v => v.registered_by === currentUser?.id).length}</span></h3>
+                </div>
+                <div className="space-y-3">
+                  {allVacancies
+                    .filter(v => v.registered_by === currentUser?.id)
+                    .map(v => (
+                      <div key={v.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between opacity-80">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                            <ListChecks size={20} />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-black text-slate-950">{v.landmark}</h4>
+                            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{new Date(v.created_at).toLocaleDateString()} 등록 완료</p>
+                          </div>
+                        </div>
+                        <div className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">승인완료</div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating View Toggle */}
+      <div className="absolute top-24 left-6 right-6 z-[100] flex justify-center pointer-events-none">
+        <motion.div initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/90 backdrop-blur-md p-1.5 rounded-2xl shadow-xl border border-white/20 flex gap-1 pointer-events-auto">
+          <button onClick={() => setActiveView("map")} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === "map" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
+            <MapIcon size={14} /> 지도
+          </button>
+          <button onClick={() => setActiveView("mypage")} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === "mypage" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
+            <User size={14} /> 내 정보
+          </button>
         </motion.div>
-        
-        <button onClick={handleLogout} className="w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center text-slate-400 hover:text-red-500 transition-all pointer-events-auto border border-slate-100">
-          <LogOut size={24} />
-        </button>
       </div>
 
       {/* My Location Button */}
@@ -206,7 +348,7 @@ export default function SurveyorPage() {
         }}
         className="absolute right-8 bottom-32 z-[100] w-14 h-14 bg-white rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 hover:bg-slate-50 transition-all pointer-events-auto border border-slate-100"
       >
-        <MapPin size={24} />
+        <LocateFixed size={24} />
       </button>
 
       {/* Map */}
