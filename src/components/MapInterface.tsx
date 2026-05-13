@@ -463,61 +463,33 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         area: newSpaceSize,
         surveyRemarks: isPotentialDuplicate ? "[⚠️ 중복 확인 필요: 툇마루단 병합 검토 대상]" : undefined
       });
-      if (isFamousLandmark) {
-        if (detectedLandmark.includes("아파트") || detectedLandmark.includes("단지")) {
-          if (landmarkDistance < 40) {
-            prefix = `${detectedLandmark} 상가`;
-          } else {
-            prefix = `${detectedLandmark} 인근`;
-          }
-        } else {
-          if (detectedLandmark.includes("출구") || detectedLandmark.includes("정류장") || landmarkDistance < 50) {
-            prefix = `${detectedLandmark} 앞`;
-          } else {
-            prefix = `${detectedLandmark} 인근`;
-          }
-        }
-      } else {
-        prefix = detectedLandmark;
+
+      if (result.id) {
+        // 로컬 상태 즉시 업데이트 (UX 빠름)
+        const newV: Vacancy = {
+          id: result.id,
+          address: detectedAddress,
+          landmark: finalLandmark,
+          floor: newSpaceFloor,
+          lat: pinLocation.lat,
+          lng: pinLocation.lng,
+          price: "정보 대기 중",
+          size: `${newSpaceSize} (${newSpaceFloor})`,
+          status: "available",
+          tags: [...featureTags, "이웃발견"],
+          currentVotes: []
+        };
+        setVacancies([newV, ...vacancies]);
+        setShowAddModal(false);
+        setSelectedFeatures([]);
+        setShowSuccessToast(`'${finalLandmark}' 공간이 성공적으로 등록되었습니다!`);
+        setTimeout(() => setShowSuccessToast(null), 4000);
       }
-    }
-    
-    const finalName = `${prefix} ${newSpaceFloor} 공간`;
-    const userId = localStorage.getItem("gongsil_user_id") || undefined;
-
-    // 로컬 상태 즉시 업데이트 (UX 빠름)
-    const newV: Vacancy = {
-      id: `v-${Date.now()}`,
-      address: detectedAddress,
-      landmark: finalName,
-      floor: newSpaceFloor,
-      lat: pinLocation.lat,
-      lng: pinLocation.lng,
-      price: "정보 대기 중",
-      size: `${newSpaceSize} (${newSpaceFloor})`,
-      status: "available",
-      tags: [...featureTags, "이웃발견"],
-      currentVotes: []
-    };
-    setVacancies([newV, ...vacancies]);
-    setShowAddModal(false);
-    setSelectedFeatures([]);
-    setShowSuccessToast(`'${newV.landmark}' 공간이 성공적으로 등록되었습니다!`);
-    setTimeout(() => setShowSuccessToast(null), 4000);
-
-    // Supabase에 비동기 저장
-    try {
-      await saveVacancy({
-        landmark: finalName,
-        address: detectedAddress,
-        floor: newSpaceFloor,
-        lat: pinLocation.lat,
-        lng: pinLocation.lng,
-        neighborhood,
-        userId,
-      });
     } catch (e) {
-      console.warn("공실 Supabase 저장 실패:", e);
+      console.warn("공실 저장 실패:", e);
+      alert("공실 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsPinpointing(false);
     }
   };
 
