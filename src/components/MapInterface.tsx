@@ -19,8 +19,8 @@ import { UserProfile, loadSavedProfile } from "./AuthOnboarding";
 import { fetchVacancies, saveVacancy } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 
-// ─── 위치 기반 필터링 (조사단 정보 노출을 위해 범위 확대) ──────────────────────
-const FILTER_RADIUS_KM = 100; // 반경 100km로 설정하여 사실상 전체 노출
+// ─── 위치 기반 필터링 ─────────────────────────────────────────────────────────
+const FILTER_RADIUS_KM = 2.5; // 인증 위치 기준 반경 (인접 행정동 포함)
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -194,7 +194,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         // 피드는 filteredVacancies가 업데이트될 때 연동하여 재생성함 (아래 useEffect 참가)
 
         // Supabase에서 공실 불러오기 (동네 필터링)
-        fetchVacancies().then(async (dbVacancies) => {
+        fetchVacancies(activeLoc.neighborhood).then(async (dbVacancies) => {
           if (dbVacancies.length > 0) {
             // 각 공실별로 실시간 투표 데이터를 가져와서 집계합니다.
             const vacanciesWithVotes = await Promise.all(dbVacancies.map(async (v) => {

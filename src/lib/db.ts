@@ -90,12 +90,12 @@ export async function saveUserProfile(profile: {
 
 // ─── 공실(Vacancies) ──────────────────────────────────────────────────────
 
-export async function fetchVacancies(): Promise<DbVacancy[]> {
-  const { data, error } = await supabase
-    .from("vacancies")
-    .select("*")
-    .order("created_at", { ascending: false });
-
+export async function fetchVacancies(neighborhood?: string): Promise<DbVacancy[]> {
+  let query = supabase.from("vacancies").select("*").order("created_at", { ascending: false });
+  if (neighborhood) {
+    query = query.eq("neighborhood", neighborhood);
+  }
+  const { data, error } = await query;
   if (error) {
     console.error("공실 조회 오류:", error.message);
     return [];
