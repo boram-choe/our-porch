@@ -89,6 +89,15 @@ export default function SurveyorPage() {
         setCurrentUser(parsed);
       }
     }
+    // 로그인 후 현재 위치로 지도 중심 설정
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setPinLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        },
+        () => {} // 위치 허용 거부 시 기본값 유지
+      );
+    }
     loadData();
   }, []);
 
@@ -149,7 +158,6 @@ export default function SurveyorPage() {
         surveyRemarks: data.surveyRemarks,
         realtorName: data.realtorName,
         realtorPhone: data.realtorPhone,
-        area: data.area || "정보 대기 중",
       });
 
       if (result.id) {

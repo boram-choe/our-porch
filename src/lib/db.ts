@@ -119,7 +119,6 @@ export async function saveVacancy(v: {
   surveyRemarks?: string | null;
   realtorName?: string | null;
   realtorPhone?: string | null;
-  area?: string | null;
   images?: string[]; // 다중 이미지 배열
   id?: string | null; // 기존 공실 수정용 ID
 }): Promise<{ id: string | null; error: string | null }> {
@@ -138,7 +137,6 @@ export async function saveVacancy(v: {
     survey_remarks: v.surveyRemarks || null,
     realtor_name: v.realtorName || null,
     realtor_phone: v.realtorPhone || null,
-    area: v.area || null,
     images: v.images && v.images.length > 0 ? v.images.join(',') : null,
   };
 
