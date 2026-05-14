@@ -423,12 +423,10 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                   </div>
 
                   {/* 3. 공실 기간 태그 (변환 로직) */}
-                  {vacancy.duration && vacancy.duration !== "잘 모르겠음" && (
+                  {vacancy.vacancyPeriod && vacancy.vacancyPeriod !== "잘 모르겠어요" && (
                     <div className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-xs font-bold border border-white/10 flex items-center gap-2">
                       <Clock size={12} className="text-amber-400" />
-                      {vacancy.duration === "3개월 미만" ? "방금 비었음 ✨" : 
-                       vacancy.duration === "3~6개월" ? "공실된지 좀 됐어요 ⏳" : 
-                       vacancy.duration === "6개월 이상" ? "공실된지 오래됐어요 🕯️" : vacancy.duration}
+                      {vacancy.vacancyPeriod}
                     </div>
                   )}
 
@@ -474,7 +472,26 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
               <div className="relative">
                 <AnimatePresence mode="wait">
-                  {votingStep === "category" ? (
+                  {vacancy.status === 'completed' ? (
+                    <motion.div 
+                      key="completed-msg"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="p-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2.5rem] shadow-[0_20px_50px_rgba(16,185,129,0.3)] border-4 border-white/20 text-center relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-4 opacity-20 rotate-12 scale-150"><Sparkles size={100} className="text-white" /></div>
+                      <div className="relative z-10">
+                        <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/30">
+                          <CheckCircle2 size={40} className="text-white" strokeWidth={3} />
+                        </div>
+                        <h4 className="text-2xl font-black text-white tracking-tighter leading-tight mb-2">계약이 완료되었습니다! 🎊</h4>
+                        <p className="text-base font-bold text-emerald-50 leading-relaxed">
+                          어떤 공간이 입점될 예정입니다.<br/>
+                          많이 기대해주세요! ✨
+                        </p>
+                      </div>
+                    </motion.div>
+                  ) : votingStep === "category" ? (
                     <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
                       {recommendedCategory && !hasVoted && (
                         <motion.button 

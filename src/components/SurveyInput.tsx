@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2, Clock, History } from "lucide-react";
 import { Vacancy } from "../data/dummyVacancies";
 import { uploadImage } from "../lib/db";
 
@@ -86,7 +86,12 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
       ? initialData.images 
       : (typeof initialData?.images === 'string' ? (initialData.images as string).split(',').filter(Boolean) : []),
     area: initialData?.area || "",
-    duration: initialData?.duration || "잘 모르겠음",
+    vacancyPeriod: initialData?.vacancyPeriod || "잘 모르겠어요",
+    status: initialData?.status || "available",
+    hiddenReason: initialData?.hiddenReason || "",
+    hiddenComment: initialData?.hiddenComment || "",
+    mergedIntoId: initialData?.mergedIntoId || (initialData as any)?.merged_into_id || "",
+    rejectionReason: initialData?.rejectionReason || (initialData as any)?.rejection_reason || "",
   });
 
   const [isUploading, setIsUploading] = useState<number | null>(null);
@@ -144,8 +149,15 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
               <Building2 size={32} />
             </div>
             <div>
-              <h2 className="text-3xl font-black text-slate-950 tracking-tighter">툇마루단 현장 조사 ✨</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{formData.address || "신규 공실 등록"}</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-3xl font-black text-slate-950 tracking-tighter leading-none">툇마루단 현장 조사 ✨</h2>
+                {initialData?.displayId && (
+                  <span className="px-2 py-1 bg-slate-950 text-white text-[9px] font-black rounded-lg tracking-tighter h-fit">
+                    ID: {initialData.displayId}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">{formData.address || "신규 공실 등록"}</p>
             </div>
           </div>
           <button onClick={onClose} className="absolute top-12 right-12 text-slate-300 hover:text-slate-600 transition-colors">
@@ -207,11 +219,11 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
               <Clock size={18} /> 공실 기간 (현장 확인 필요)
             </label>
             <div className="grid grid-cols-4 gap-3">
-              {["3개월 미만", "3~6개월", "6개월 이상", "잘 모르겠음"].map(d => (
+              {["방금 비었음", "공실된지 좀 됐어요", "공실된지 오래됐어요", "잘 모르겠어요"].map(d => (
                 <button 
                   key={d} 
-                  onClick={() => setFormData({...formData, duration: d})}
-                  className={`py-4 rounded-2xl text-xs font-black border-2 transition-all ${formData.duration === d ? 'bg-amber-500 border-amber-500 text-slate-950 shadow-lg' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
+                  onClick={() => setFormData({...formData, vacancyPeriod: d})}
+                  className={`py-4 rounded-2xl text-[10px] font-black border-2 transition-all ${formData.vacancyPeriod === d ? 'bg-amber-500 border-amber-500 text-slate-950 shadow-lg' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
                 >
                   {d}
                 </button>
@@ -226,6 +238,101 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
               <InputField label="월세" icon={CircleDollarSign} type="number" value={formData.monthlyRent} onChange={(v: number) => setFormData({...formData, monthlyRent: v})} suffix="만원" />
               <InputField label="관리비" icon={CircleDollarSign} type="number" value={formData.managementFee} onChange={(v: number) => setFormData({...formData, managementFee: v})} suffix="만원" />
             </div>
+          </div>
+
+          <div className="space-y-8">
+            <div className="flex items-center gap-4 mb-4"><div className="h-10 w-2 bg-rose-500 rounded-full" /><h3 className="text-2xl font-black text-slate-950 tracking-tight">공간 상태 관리</h3></div>
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { id: 'available', label: '공실 가능', icon: '✅' },
+                { id: 'completed', label: '입점 완료', icon: '✨' },
+                { id: 'merged', label: '통합 처리', icon: '🔗' },
+                { id: 'rejected', label: '비공개/반려', icon: '🔒' }
+              ].map(s => (
+                <button 
+                  key={s.id} 
+                  onClick={() => setFormData({...formData, status: s.id})}
+                  className={`py-5 rounded-2xl flex flex-col items-center gap-2 border-2 transition-all ${formData.status === s.id ? 'bg-slate-950 border-slate-950 text-white shadow-xl scale-105' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
+                >
+                  <span className="text-xl">{s.icon}</span>
+                  <span className="text-[12px] font-black">{s.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <AnimatePresence mode="wait">
+              {formData.status === 'merged' && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }} 
+                  animate={{ height: 'auto', opacity: 1 }} 
+                  exit={{ height: 0, opacity: 0 }}
+                  className="space-y-6 overflow-hidden"
+                >
+                  <div className="p-8 bg-purple-50 rounded-[2.5rem] border-2 border-purple-100 space-y-6">
+                    <div className="space-y-4">
+                      <label className="text-[11px] font-black text-purple-400 uppercase tracking-widest px-1">통합할 대상 공실 정보</label>
+                      <input
+                        type="text"
+                        value={formData.mergedIntoId || ""}
+                        onChange={(e) => setFormData({...formData, mergedIntoId: e.target.value})}
+                        placeholder="통합될 공실의 ID 또는 랜드마크명을 입력해주세요."
+                        className="w-full bg-white border-2 border-purple-100 rounded-2xl py-4 px-6 font-bold text-slate-950 focus:outline-none focus:border-purple-500 transition-all text-sm"
+                      />
+                      <p className="text-[10px] text-purple-600 font-bold ml-1">※ 동일한 공간에 대한 중복 제보인 경우 하나로 통합 관리됩니다.</p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {formData.status === 'rejected' && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }} 
+                  animate={{ height: 'auto', opacity: 1 }} 
+                  exit={{ height: 0, opacity: 0 }}
+                  className="space-y-6 overflow-hidden"
+                >
+                  <div className="p-8 bg-rose-50 rounded-[2.5rem] border-2 border-rose-100 space-y-6">
+                    <div className="space-y-4">
+                      <label className="text-[11px] font-black text-rose-400 uppercase tracking-widest px-1">비공개/반려 사유 선택</label>
+                      <div className="flex flex-wrap gap-2">
+                        {["공실아님", "임대인요청", "정보부족", "기타"].map(r => (
+                          <button 
+                            key={r} 
+                            onClick={() => setFormData({...formData, rejectionReason: r})}
+                            className={`px-6 py-3 rounded-full text-[12px] font-black border-2 transition-all ${formData.rejectionReason === r ? 'bg-rose-100 border-rose-200 text-rose-600' : 'bg-white border-white text-slate-400 hover:border-slate-200'}`}
+                          >
+                            {r}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <label className="text-[11px] font-black text-rose-400 uppercase tracking-widest px-1">상세 사유 입력 (제보자에게 안내됨)</label>
+                      <textarea
+                        value={formData.hiddenComment || ""}
+                        onChange={(e) => setFormData({...formData, hiddenComment: e.target.value})}
+                        placeholder="등록한 사람에게 전달될 상세 사유를 입력해주세요."
+                        className="w-full bg-white border-2 border-rose-100 rounded-2xl py-4 px-6 font-bold text-slate-950 focus:outline-none focus:border-rose-500 transition-all text-sm min-h-[100px]"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {formData.status === 'completed' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 bg-emerald-50 rounded-2xl border-2 border-emerald-100 flex items-center gap-4"
+              >
+                <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">✨</div>
+                <p className="text-sm font-bold text-emerald-700 leading-relaxed">
+                  임대차계약이 완료된 공간입니다. <br/>
+                  저장 시 사용자에게 <span className="font-black text-emerald-900">'어떤 공간이 입점될 예정입니다. 많이 기대해주세요'</span> 메시지가 표시됩니다.
+                </p>
+              </motion.div>
+            )}
           </div>
 
           <div className="space-y-8">
@@ -251,6 +358,26 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
             </div>
           </div>
         </div>
+
+        {/* History Log */}
+        {initialData?.updatedAt && (
+          <div className="px-12 py-6 bg-slate-50 border-y border-slate-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <History size={16} className="text-slate-400" />
+                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">수정 이력 로그</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[11px] font-black text-slate-950">
+                  {initialData.lastModifiedBy || "시스템/사용자"} 
+                  <span className="text-slate-400 ml-2 font-bold">
+                    {new Date(initialData.updatedAt).toLocaleString()}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="p-12 pt-6 border-t border-slate-50 flex-shrink-0">

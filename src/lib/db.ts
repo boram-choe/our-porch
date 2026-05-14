@@ -4,6 +4,28 @@ import { supabase } from "./supabase";
 
 // ─── 타입 ────────────────────────────────────────────────────────────────────
 
+// 사진 업로드 함수
+export async function uploadImage(file: File): Promise<string | null> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+  const filePath = `images/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('vacancies')
+    .upload(filePath, file);
+
+  if (uploadError) {
+    console.error("이미지 업로드 오류:", uploadError.message);
+    return null;
+  }
+
+  const { data } = supabase.storage
+    .from('vacancies')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
+
 export interface DbVacancy {
   id: string;
   landmark: string;
@@ -23,9 +45,17 @@ export interface DbVacancy {
   realtor_name: string | null;
   realtor_phone: string | null;
   area: string | null;
-  duration: string | null;
+  vacancy_period: string | null;
   images: string | null; // 다중 이미지 URL (쉼표로 구분된 문자열)
+  status: string | null; // available, completed, hidden, merged, rejected
+  hidden_reason: string | null; // 공실아님, 관계자요청, 기타
+  hidden_comment: string | null; // 상세 사유
+  merged_into_id: string | null; // 통합된 대상 공실 ID
+  rejection_reason: string | null; // 사용자 제보 거절/비공개 사유
   created_at: string;
+  updated_at: string;
+  last_modified_by: string | null;
+  display_id: string | null;
 }
 
 export interface DbVote {
@@ -37,6 +67,92 @@ export interface DbVote {
   comment: string | null;
   created_at: string;
 }
+
+export interface TeamMember {
+  id: string;
+  password: string;
+  real_name: string;
+  role: "CEO" | "OPS" | "SURVEYOR";
+  city: string;
+  gu: string;
+  dong: string;
+  phone: string;
+  hire_date: string;
+  base_salary: number;
+}
+
+
+// ─── 숫자 ID 체계 매핑 (2-2-2-4) ──────────────────────────────────────────────
+import regionsData from "../data/regions.json";
+
+const regions = regionsData as Record<string, { 
+  name: string, 
+  gus: Record<string, { 
+    name: string, 
+    dongs: Record<string, string> 
+  }> 
+}>;
+
+export const generateSpaceId = (city: string, gu: string, dong: string, serial: number) => {
+  // 시/도 찾기 (예: "서울" -> "서울특별시")
+  const cityEntry = Object.entries(regions).find(([_, data]) => 
+    data.name.includes(city) || city.includes(data.name)
+  );
+  const c = cityEntry ? cityEntry[0] : "99";
+
+  let g = "99";
+  let d = "99";
+
+  if (cityEntry) {
+    // 구/군 찾기
+    const guEntry = Object.entries(cityEntry[1].gus).find(([_, data]) => 
+      data.name.includes(gu) || gu.includes(data.name)
+    );
+    if (guEntry) {
+      g = guEntry[0];
+      // 행정동 찾기
+      const dongEntry = Object.entries(guEntry[1].dongs).find(([_, name]) => 
+        name.includes(dong) || dong.includes(name)
+      );
+      if (dongEntry) {
+        d = dongEntry[0];
+      }
+    }
+  }
+
+  const s = String(serial).padStart(4, '0');
+  return `${c}${g}${d}${s}`;
+};
+
+export const generateMemberId = (city: string, gu: string, dong: string, serial: number) => {
+  // 시/도 찾기
+  const cityEntry = Object.entries(regions).find(([_, data]) => 
+    data.name.includes(city) || city.includes(data.name)
+  );
+  const c = cityEntry ? cityEntry[0] : "99";
+
+  let g = "99";
+  let d = "99";
+
+  if (cityEntry) {
+    const guEntry = Object.entries(cityEntry[1].gus).find(([_, data]) => 
+      data.name.includes(gu) || gu.includes(data.name)
+    );
+    if (guEntry) {
+      g = guEntry[0];
+      const dongEntry = Object.entries(guEntry[1].dongs).find(([_, name]) => 
+        name.includes(dong) || dong.includes(name)
+      );
+      if (dongEntry) {
+        d = dongEntry[0];
+      }
+    }
+  }
+
+  const s = String(serial).padStart(2, '0');
+  return `${c}${g}${d}${s}`;
+};
+
 
 export interface DbUserProfile {
   id: string;
@@ -79,14 +195,13 @@ export async function saveUserProfile(profile: {
       persona_ids: profile.personaIds || [],
       persona_label: profile.personaLabel || null,
     })
-    .select("id")
-    .single();
+    .select("id");
 
   if (error) {
     console.error("프로필 저장 오류:", error.message);
     return null;
   }
-  return data?.id ?? null;
+  return (data && data.length > 0) ? data[0].id : null;
 }
 
 // ─── 공실(Vacancies) ──────────────────────────────────────────────────────
@@ -112,7 +227,7 @@ export async function saveVacancy(v: {
   lng: number;
   neighborhood: string;
   userId?: string;
-  duration?: string | null;
+  vacancyPeriod?: string | null;
   // 툇마루단 데이터
   imageUrl?: string | null;
   deposit?: number | null;
@@ -123,6 +238,13 @@ export async function saveVacancy(v: {
   realtorPhone?: string | null;
   area?: string | null;
   images?: string[]; // 다중 이미지 배열
+  status?: string | null;
+  hiddenReason?: string | null;
+  hiddenComment?: string | null;
+  mergedIntoId?: string | null;
+  rejectionReason?: string | null;
+  lastModifiedBy?: string | null;
+  displayId?: string | null;
   id?: string | null; // 기존 공실 수정용 ID
 }): Promise<{ id: string | null; error: string | null }> {
   const commonPayload = {
@@ -133,7 +255,7 @@ export async function saveVacancy(v: {
     lng: v.lng,
     neighborhood: v.neighborhood,
     registered_by: v.userId || null,
-    duration: v.duration || null,
+    vacancy_period: v.vacancyPeriod || null,
     image_url: (v.images && v.images.length > 0) ? v.images[0] : (v.imageUrl || null),
     deposit: v.deposit ?? null,
     monthly_rent: v.monthlyRent ?? null,
@@ -143,33 +265,70 @@ export async function saveVacancy(v: {
     realtor_phone: v.realtorPhone || null,
     area: v.area || null,
     images: v.images && v.images.length > 0 ? v.images.join(',') : null,
-  };
+    status: v.status || 'available',
+    hidden_reason: v.hiddenReason || null,
+    hidden_comment: v.hiddenComment || null,
+    merged_into_id: v.mergedIntoId || null,
+    rejection_reason: v.rejectionReason || null,
+    last_modified_by: v.lastModifiedBy || null,
+    updated_at: new Date().toISOString(),
+  } as any;
+
+  // 신규 등록 시에만 고유 ID 자동 생성
+  if (!v.id && !v.displayId) {
+    const { count } = await supabase
+      .from('vacancies')
+      .select('*', { count: 'exact', head: true })
+      .eq('neighborhood', v.neighborhood);
+    
+    // 주소에서 시/도 및 구/군 추출 (예: "서울특별시 서대문구..." -> "서울특별시", "서대문구")
+    const addrParts = (v.address || "").split(' ');
+    const city = addrParts[0] || "서울";
+    const gu = addrParts[1] || "서대문구";
+    
+    commonPayload.display_id = generateSpaceId(city, gu, v.neighborhood || "", (count || 0) + 1);
+  } else if (v.displayId) {
+    commonPayload.display_id = v.displayId;
+  }
 
   if (v.id) {
     // 기존 공실 업데이트
-    const { data, error } = await supabase
+    console.log("공실 업데이트 시도 ID:", v.id, "데이터:", commonPayload);
+    const { data, error, count } = await supabase
       .from("vacancies")
       .update(commonPayload)
       .eq("id", v.id)
-      .select("id")
-      .single();
+      .select("id");
+    
     if (error) {
       console.error("공실 업데이트 오류:", error);
       return { id: null, error: error.message };
     }
-    return { id: data?.id ?? null, error: null };
+    
+    if (!data || data.length === 0) {
+      console.warn("업데이트된 행이 없음. 권한 문제일 가능성이 큼.");
+      return { id: null, error: "데이터를 찾을 수 없거나 수정 권한이 없습니다. (DB 정책 확인 필요)" };
+    }
+    
+    return { id: data[0].id, error: null };
   } else {
     // 신규 공실 등록
+    console.log("신규 공실 등록 시도:", commonPayload);
     const { data, error } = await supabase
       .from("vacancies")
       .insert(commonPayload)
-      .select("id")
-      .single();
+      .select("id");
+    
     if (error) {
       console.error("공실 등록 오류:", error);
       return { id: null, error: error.message };
     }
-    return { id: data?.id ?? null, error: null };
+    
+    if (!data || data.length === 0) {
+      return { id: null, error: "데이터 등록에 실패했습니다." };
+    }
+    
+    return { id: data[0].id, error: null };
   }
 }
 
@@ -294,27 +453,59 @@ export async function getNeighborhoodReport(neighborhood: string): Promise<Demog
   };
 }
 
-// ─── 이미지 업로드 ──────────────────────────────────────────────────────────
+// ─── 팀원 관리 (Team Members) ──────────────────────────────────────────────
 
-export async function uploadImage(file: File): Promise<string | null> {
-  try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-    const filePath = `vacancies/${fileName}`;
+export async function fetchTeamMembers(): Promise<TeamMember[]> {
+  const { data, error } = await supabase
+    .from("team_members")
+    .select("*")
+    .order("created_at", { ascending: true });
 
-    const { error: uploadError } = await supabase.storage
-      .from('vacancy-images')
-      .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
-
-    const { data } = supabase.storage
-      .from('vacancy-images')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
-  } catch (err) {
-    console.error('Image upload error:', err);
-    return null;
+  if (error) {
+    console.error("팀원 조회 오류:", error.message);
+    return [];
   }
+  return data ?? [];
 }
+
+export async function saveTeamMember(m: Partial<TeamMember>): Promise<{ id: string | null; error: string | null }> {
+  // ID 자동 생성 로직 (해당 동네의 기존 인원수 기반)
+  let generatedId = m.id;
+  if (!generatedId) {
+    const { count } = await supabase
+      .from('team_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('city', m.city)
+      .eq('gu', m.gu)
+      .eq('dong', m.dong);
+    
+    generatedId = generateMemberId(m.city || "", m.gu || "", m.dong || "", (count || 0) + 1);
+  }
+
+  const payload = {
+    id: generatedId,
+    password: m.password || generatedId, // 비밀번호가 없으면 ID와 동일하게 부여
+    real_name: m.real_name,
+    role: m.role || 'SURVEYOR',
+    city: m.city,
+    gu: m.gu,
+    dong: m.dong,
+    phone: m.phone,
+    hire_date: m.hire_date || new Date().toISOString().split('T')[0],
+    base_salary: m.base_salary || 0,
+  };
+
+
+  const { data, error } = await supabase
+    .from("team_members")
+    .upsert(payload)
+    .select("id");
+
+  if (error) {
+    console.error("팀원 저장 오류:", error.message);
+    return { id: null, error: error.message };
+  }
+
+  return { id: (data && data.length > 0) ? data[0].id : null, error: null };
+}
+

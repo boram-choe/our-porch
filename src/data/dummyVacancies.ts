@@ -31,8 +31,15 @@ export interface Vacancy {
   realtorPhone?: string | null;  // 담당 공인중개사 연락처
   isDisputed?: boolean;
   moveInInfo?: { text: string; imageUrl?: string; reportedAt: string };
-  duration?: string | null;      // 공실 기간 (예: 3개월 미만, 3~6개월 등)
+  vacancyPeriod?: string | null;      // 공실 기간 (예: 3개월 미만, 3~6개월 등)
+  hiddenReason?: string | null;  // 비공개 사유
+  hiddenComment?: string | null; // 상세 사유
+  mergedIntoId?: string | null;  // 통합 대상 공실 ID
+  rejectionReason?: string | null; // 거절 사유
   neighborhood?: string;         // 동네 정보
+  updatedAt?: string;
+  lastModifiedBy?: string | null;
+  displayId?: string | null;
 }
 
 const getLogo = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=128&bold=true`;

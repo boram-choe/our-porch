@@ -67,7 +67,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   
   const [newSpaceFloor, setNewSpaceFloor] = useState("1층");
   const [newSpaceSize, setNewSpaceSize] = useState("약 15평");
-  const [newSpaceDuration, setNewSpaceDuration] = useState("3개월 미만");
+  const [newSpacePeriod, setNewSpacePeriod] = useState("방금 비었음");
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   
   const [pinLocation, setPinLocation] = useState({ lat: 37.5665, lng: 126.9780 });
@@ -90,6 +90,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         : userProfile.home;
     if (!activeLoc?.lat || !activeLoc?.lng) return vacancies;
     return vacancies.filter((v) =>
+      v.status !== 'hidden' && // 비공개 공실은 지도에서 제외
       haversineKm(activeLoc.lat, activeLoc.lng, v.lat, v.lng) <= FILTER_RADIUS_KM
     );
   }, [vacancies, userProfile]);
@@ -189,9 +190,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       if (activeLoc) {
         // 프로필 위치가 있더라도 실시간 위치 감지에 실패한 경우에만 프로필 위치로 이동 (또는 둘 다 반영)
         const dong = activeLoc.neighborhood || "우리동네";
-        const animal = finalProfile.nickname?.split(' ')[1] || "이웃";
-
-        // 피드는 filteredVacancies가 업데이트될 때 연동하여 재생성함 (아래 useEffect 참가)
 
         // Supabase에서 공실 불러오기 (동네 필터링)
         fetchVacancies(activeLoc.neighborhood).then(async (dbVacancies) => {
@@ -222,7 +220,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                 lng: v.lng,
                 price: v.monthly_rent ? `월 ${v.monthly_rent}만원` : "정보 대기 중",
                 size: v.area || "정보 대기 중",
-                status: "available" as const,
                 tags: ["이웃발견"],
                 images: v.images ? v.images.split(',') : [],
                 imageUrl: v.images ? v.images.split(',')[0] : v.image_url,
@@ -233,6 +230,11 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                 realtorName: v.realtor_name,
                 realtorPhone: v.realtor_phone,
                 area: v.area,
+                vacancyPeriod: v.vacancy_period,
+                status: v.status || "available",
+                hiddenReason: v.hidden_reason,
+                hiddenComment: v.hidden_comment,
+                displayId: v.display_id,
                 currentVotes: Object.values(voteCounts),
               };
             }));
@@ -320,7 +322,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   // 핀 클릭: 같은 주소(동일 건물) 여러 층이면 층 선택, 1개면 바로 진입
   const handlePinClick = (clicked: Vacancy) => {
-    // 주소 동일 여부와 30m 반경 거리 동시 판단 (대단지 아파트 내 다른 동 구분)
     const sameBuilding = filteredVacancies.filter(v => {
       const isClose = haversineKm(clicked.lat, clicked.lng, v.lat, v.lng) <= 0.03;
       const sameAddr = (clicked.address && v.address) ? v.address === clicked.address : true;
@@ -428,10 +429,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     if (duplicate) {
       const msg = `해당 건물 ${newSpaceFloor}에는 이미 공실 정보가 등록되어 투표가 진행 중입니다.\n지금 추가하시려는 공실이 여기와 다른 곳인가요?\n\n[확인]을 누르면 계속해서 추가하며, [취소]를 누르면 기존 투표 페이지로 이동합니다.`;
       if (confirm(msg)) {
-        // Yes 선택 시 진행하되 플래그 설정
         isPotentialDuplicate = true;
       } else {
-        // No 선택 시 기존 공실 상세 페이지로 이동하고 종료
         setSelectedVacancy(duplicate);
         setIsPinpointing(false);
         setShowAddModal(false);
@@ -461,12 +460,11 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         neighborhood: neighborhood,
         userId: userProfile.nickname,
         area: newSpaceSize,
-        duration: newSpaceDuration, // 기간 정보 추가
+        vacancyPeriod: newSpacePeriod === "잘 모르겠어요" ? null : newSpacePeriod,
         surveyRemarks: isPotentialDuplicate ? "[⚠️ 중복 확인 필요: 툇마루단 병합 검토 대상]" : undefined
       });
 
       if (result.id) {
-        // 로컬 상태 즉시 업데이트 (UX 빠름)
         const newV: Vacancy = {
           id: result.id,
           address: detectedAddress,
@@ -476,7 +474,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           lng: pinLocation.lng,
           price: "정보 대기 중",
           size: `${newSpaceSize} (${newSpaceFloor})`,
-          duration: newSpaceDuration, // 기간 정보 추가
+          vacancyPeriod: newSpacePeriod === "잘 모르겠어요" ? null : newSpacePeriod,
           status: "available",
           tags: [...featureTags, "이웃발견"],
           currentVotes: []
@@ -495,10 +493,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     }
   };
 
-
   const votedVacancies = filteredVacancies.filter(v => votedIds.includes(v.id));
 
-  // ─ 중복 공실 판정: 같은 주소 + 30m 반경 이내 + 같은 층 (대단지 아파트 내 동 구분) ────────────────────────────────
   const duplicateVacancy = showAddModal
     ? vacancies.find(v => {
         const isClose = haversineKm(pinLocation.lat, pinLocation.lng, v.lat, v.lng) <= 0.03;
@@ -529,8 +525,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       return (
         <CustomOverlayMap key={`${rep.id}-${hasVoted}`} position={{ lat: rep.lat, lng: rep.lng }}>
           <button onClick={() => handlePinClick(rep)} className="relative group">
-            <div className={`relative w-12 h-12 rounded-[1.5rem] flex items-center justify-center border-2 shadow-md transition-all duration-300 ${hasVoted ? "bg-amber-500 text-slate-950 border-white scale-110" : "bg-slate-950 text-white border-white/20 hover:border-white/50"}`}>
-              <Lightbulb size={24} fill="currentColor" />
+            <div className={`relative w-12 h-12 rounded-[1.5rem] flex items-center justify-center border-2 shadow-md transition-all duration-300 ${
+              rep.status === 'completed' ? "bg-emerald-500 text-white border-white scale-105" :
+              hasVoted ? "bg-amber-500 text-slate-950 border-white scale-110" : 
+              "bg-slate-950 text-white border-white/20 hover:border-white/50"
+            }`}>
+              {rep.status === 'completed' ? <Sparkles size={24} /> : <Lightbulb size={24} fill="currentColor" />}
             </div>
             {multiFloor && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-400 rounded-full border-2 border-white flex items-center justify-center shadow">
@@ -568,7 +568,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               <button onClick={() => switchLocation('work')} className={`flex-1 py-3.5 rounded-2xl text-[13px] font-black transition-all flex items-center justify-center gap-2 ${userProfile?.activeLocationType === 'work' ? "bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20" : "text-slate-400 hover:text-white"}`}><Briefcase size={16} /> 나의 일터</button>
             </div>
           </motion.div>
-          {/* 마이페이지 버튼 */}
           <motion.button 
             initial={{ x: 20, opacity: 0 }} 
             animate={{ x: 0, opacity: 1 }} 
@@ -578,12 +577,10 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             <User size={24} />
           </motion.button>
         </div>
-
       </div>
 
       <div className="absolute inset-0 z-0">
         <Map center={mapCenter} style={{ width: "100%", height: "100%" }} level={3} ref={mapRef} onDragStart={() => setShowDashboard(false)}>
-          {/* 주소 기준으로 같은 건물 공실을 하나의 핀으로 묶어 표시 */}
           {mapMarkers}
           {isPinpointing && (<MapMarker position={pinLocation} draggable={true} onDragEnd={(marker) => setPinLocation({ lat: marker.getPosition().getLat(), lng: marker.getPosition().getLng() })} image={{ src: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA2MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBkPSJNMzAgNzRMMTQgNTJDNyA0MyAzIDM1IDMgMjdDMyAxMiAxNSAwIDMwIDBDNDUgMCA1NyAxMiA1NyAyN0M1NyAzNSA1MyA0MyA0NiA1MkwzMCA3NFoiIGZpbGw9IiMwMjA2MTciIHN0cm9rZT0iI0Y1OUUwQiIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPGNpcmNsZSBjeD0iMzAiIGN5PSIyNyIgcj0iMTIiIGZpbGw9IiNGNTlFMEIiLz4KICA8cGF0aCBkPSJNMzAgMTlMMzAgMzVNMjMgMjZMMzcgMjZNMjUgMjNMMzUgMjMiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAyMDYxNyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+", size: { width: 50, height: 65 }, options: { offset: { x: 25, y: 65 } } }} />)}
         </Map>
@@ -695,7 +692,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                             })}
                           </div>
                           {isDuplicate && (
-                            <div className="flex items-start gap-3 bg-orange-50 border-2 border-orange-200 rounded-2xl p-4">
+                            <div className="flex items-start gap-3 bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 mt-4">
                               <span className="text-lg">⚠️</span>
                               <div>
                                 <p className="text-sm font-black text-orange-700">해당 위치에는 이미 투표가 진행중입니다</p>
@@ -708,7 +705,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                           )}
                         </div>
                        <div className="space-y-6"><label className="flex items-center gap-2 text-[12px] font-black text-slate-400 uppercase tracking-widest"><Maximize size={14} /> 규모</label><div className="grid grid-cols-3 gap-3">{[{ label: "아담해요", sub: "테이크아웃 추천" },{ label: "적당해요", sub: "5~6개 테이블" },{ label: "넓어요", sub: "단체 손님 가능" }].map(s => (<button key={s.label} onClick={() => setNewSpaceSize(s.label)} className={`flex flex-col items-center justify-center py-4 px-1 rounded-3xl border-2 transition-all shadow-sm ${newSpaceSize === s.label ? "bg-slate-950 text-white border-slate-950 scale-105" : "bg-white text-slate-900 border-slate-100 hover:border-slate-300"}`}><span className="text-[11px] font-black mb-1">{s.label}</span><span className={`text-[7px] font-bold ${newSpaceSize === s.label ? "text-amber-500" : "text-slate-400"}`}>{s.sub}</span></button>))}</div></div>
-                       <div className="space-y-6"><label className="flex items-center gap-2 text-[12px] font-black text-slate-400 uppercase tracking-widest"><Clock size={14} /> 공실 기간</label><div className="grid grid-cols-2 gap-4">{[{ label: "방금 비었음", sub: "최근까지 영업" },{ label: "좀 됐어요", sub: "한두 달 정도" },{ label: "오래됨", sub: "오랫동안 공실" },{ label: "잘 모르겠어요", sub: "정보 없음" }].map(d => (<button key={d.label} onClick={() => setNewSpaceDuration(d.label)} className={`flex flex-col items-center justify-center py-4 px-2 rounded-3xl border-2 transition-all shadow-sm ${newSpaceDuration === d.label ? "bg-slate-950 text-white border-slate-950 scale-105" : "bg-white text-slate-900 border-slate-100 hover:border-slate-300"}`}><span className="text-[12px] font-black mb-1">{d.label}</span><span className={`text-[8px] font-bold ${newSpaceDuration === d.label ? "text-amber-500" : "text-slate-400"}`}>{d.sub}</span></button>))}</div></div>
+                       <div className="space-y-6"><label className="flex items-center gap-2 text-[12px] font-black text-slate-400 uppercase tracking-widest"><Clock size={14} /> 공실 기간</label><div className="grid grid-cols-2 gap-4">{[{ label: "방금 비었음", sub: "최근까지 영업" },{ label: "공실된지 좀 됐어요", sub: "한두 달 정도" },{ label: "공실된지 오래됐어요", sub: "오랫동안 공실" },{ label: "잘 모르겠어요", sub: "정보 없음" }].map(d => (<button key={d.label} onClick={() => setNewSpacePeriod(d.label)} className={`flex flex-col items-center justify-center py-4 px-2 rounded-3xl border-2 transition-all shadow-sm ${newSpacePeriod === d.label ? "bg-slate-950 text-white border-slate-950 scale-105" : "bg-white text-slate-900 border-slate-100 hover:border-slate-300"}`}><span className="text-[12px] font-black mb-1">{d.label}</span><span className={`text-[8px] font-bold ${newSpacePeriod === d.label ? "text-amber-500" : "text-slate-400"}`}>{d.sub}</span></button>))}</div></div>
                        <div className="space-y-6"><label className="flex items-center gap-2 text-[12px] font-black text-slate-400 uppercase tracking-widest"><Sparkles size={14} /> 특징 <span className="text-[10px] text-amber-600 ml-1">(중복 가능)</span></label><div className="flex flex-wrap gap-3">{SPACE_FEATURES.map((feat) => (<button key={feat.id} onClick={() => setSelectedFeatures(prev => prev.includes(feat.id) ? prev.filter(f => f !== feat.id) : [...prev, feat.id])} className={`px-5 py-3 rounded-full text-[12px] font-black border-2 transition-all flex items-center gap-2 shadow-sm ${selectedFeatures.includes(feat.id) ? "bg-amber-100 text-amber-700 border-amber-300 scale-105" : "bg-slate-50 text-slate-400 border-slate-50 hover:border-slate-200"}`}><span>{feat.icon}</span>{feat.label}</button>))}</div></div>
                     </div>
                  </div>
@@ -736,7 +733,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       </AnimatePresence>
 
       <AnimatePresence>
-        {/* 층 선택 바텀시트 (같은 건물 다층) */}
         {floorPickerGroup && (
           <motion.div
             key="floor-picker"
@@ -750,7 +746,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               className="relative z-10 w-full max-w-lg mx-4 mb-8"
             >
               <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100">
-                {/* 헤더 */}
                 <div className="px-8 pt-8 pb-4">
                   <button onClick={() => setFloorPickerGroup(null)} className="absolute top-4 left-1/2 -translate-x-1/2 w-10 h-1 bg-slate-200 rounded-full" />
                   <div className="flex items-center gap-3 mt-3">
@@ -763,7 +758,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                     </div>
                   </div>
                 </div>
-                {/* 층 목로 */}
                 <div className="px-6 pb-8 space-y-3">
                   {[...(floorPickerGroup || [])]
                     .sort((a, b) => {
@@ -782,14 +776,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                             hasVoted ? "bg-amber-50 border-amber-300" : "bg-slate-50 border-slate-100 hover:border-slate-300"
                           }`}
                         >
-                          {/* 층 배지 */}
                           <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 font-black ${
                             hasVoted ? "bg-amber-500 text-slate-950" : "bg-slate-950 text-white"
                           }`}>
                             <span className="text-lg leading-none">{v.floor.replace("층", "")}</span>
                             <span className="text-[9px] font-bold opacity-60">층</span>
                           </div>
-                          {/* 정보 */}
                           <div className="flex-1 text-left">
                             <p className="text-sm font-black text-slate-950 tracking-tight">{v.landmark}</p>
                             {topVote && totalVotes > 0 ? (
@@ -798,7 +790,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                               <p className="text-[11px] font-bold text-slate-400 mt-0.5">첫 번째 투표를 남겨보세요!</p>
                             )}
                           </div>
-                          {/* 투표 현황 */}
                           <div className="flex flex-col items-end gap-1">
                             {hasVoted && <span className="text-[9px] font-black text-amber-500 bg-amber-100 px-2 py-0.5 rounded-full">투표완료</span>}
                             <ChevronRight size={16} className="text-slate-300" />
@@ -865,7 +856,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         )}
       </AnimatePresence>
 
-      {/* 첫 방문 안내 오버레이 */}
       <AnimatePresence>
         {showTutorial && (
           <motion.div
@@ -875,7 +865,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-[250] flex items-end justify-center"
           >
-            {/* 배경 어둥 (반투명) */}
             <div
               className="absolute inset-0 bg-slate-900/80"
               onClick={() => {
@@ -883,8 +872,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                 localStorage.setItem("gongsil_tutorial_done", "1");
               }}
             />
-
-            {/* 안내 카드 */}
             <motion.div
               initial={{ y: 120, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -893,7 +880,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               className="relative z-10 w-full max-w-lg mx-4 mb-8"
             >
               <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200">
-                {/* 헤더 */}
                 <div className="px-8 pt-8 pb-5">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="w-8 h-8 bg-slate-950 rounded-xl flex items-center justify-center">
@@ -903,22 +889,17 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                   </div>
                   <h2 className="text-2xl font-black text-slate-950 tracking-tighter">우리 동네, 함께 채워가요 ✨</h2>
                 </div>
-
-                {/* 팁 카드 2개 */}
                 <div className="px-6 pb-6 space-y-3">
-                  {/* 팁 1 */}
                   <div className="flex items-start gap-4 bg-amber-50 rounded-2xl p-5">
                     <div className="w-11 h-11 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30">
                       <Plus size={22} strokeWidth={3} className="text-white" />
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">TIP 1 &middot; 공간 등록</p>
-                      <p className="text-sm font-black text-slate-900 leading-snug">동네를 걸다 발견한 빈 공간,<br/>바로 지도에 꽀아보세요.</p>
+                      <p className="text-sm font-black text-slate-900 leading-snug">동네를 걸다 발견한 빈 공간,<br/>바로 지도에 꼿아보세요.</p>
                       <p className="text-[11px] text-slate-500 font-bold mt-1">화면 오른쪽 ➕ 버튼을 눌러주세요</p>
                     </div>
                   </div>
-
-                  {/* 팁 2 */}
                   <div className="flex items-start gap-4 bg-slate-50 rounded-2xl p-5">
                     <div className="w-11 h-11 bg-slate-950 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                       <Lightbulb size={20} className="text-amber-500" fill="currentColor" />
@@ -926,12 +907,10 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                     <div>
                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">TIP 2 &middot; 업종 투표</p>
                       <p className="text-sm font-black text-slate-900 leading-snug">지도의 핀을 탭하면<br/>내가 원하는 업종을 바로 투표할 수 있어요.</p>
-                      <p className="text-[11px] text-slate-500 font-bold mt-1">여러 이웃의 주표가 모여 동네가 바뀌어요</p>
+                      <p className="text-[11px] text-slate-500 font-bold mt-1">여러 이웃의 투표가 모여 동네가 바뀌어요</p>
                     </div>
                   </div>
                 </div>
-
-                {/* 시작 버튼 */}
                 <div className="px-6 pb-8">
                   <button
                     onClick={() => {
