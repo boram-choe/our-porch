@@ -406,60 +406,71 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                  )}
               </div>
 
-              {/* 툇마루단 확인 정보 (상시 노출) */}
-              {(vacancy.surveyRemarks || vacancy.deposit || vacancy.monthlyRent || vacancy.area) && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-8 p-6 bg-white/5 rounded-3xl border border-white/10 relative overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500" />
-                  
-                  {vacancy.surveyRemarks && (
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                        <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">툇마루단 조사 소견</p>
-                      </div>
-                      <p className="text-base font-bold text-white leading-relaxed italic">"{vacancy.surveyRemarks}"</p>
+              {/* 공간 상세 태그 및 정보 (상시 노출) */}
+              <div className="mb-8 space-y-6">
+                {/* 메인 정보 태그 그룹 */}
+                <div className="flex flex-wrap gap-2">
+                  {/* 1. 명칭 및 층수 태그 */}
+                  <div className="px-4 py-2 bg-amber-500 text-slate-950 rounded-full text-xs font-black shadow-lg shadow-amber-500/20 flex items-center gap-2">
+                    <MapPin size={12} strokeWidth={3} />
+                    {vacancy.landmark || vacancy.address.split(' ').pop()} {vacancy.floor?.includes('층') ? vacancy.floor : `${vacancy.floor || '1'}층`}
+                  </div>
+
+                  {/* 2. 규모 태그 (전용면적 또는 등록시 규모) */}
+                  <div className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-xs font-bold border border-white/10 flex items-center gap-2">
+                    <Maximize size={12} className="text-amber-400" />
+                    {vacancy.area ? (vacancy.area.includes('평') ? vacancy.area : `전용면적 ${vacancy.area}평`) : (vacancy.size || "규모 확인 중")}
+                  </div>
+
+                  {/* 3. 공실 기간 태그 (변환 로직) */}
+                  {vacancy.duration && vacancy.duration !== "잘 모르겠음" && (
+                    <div className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-xs font-bold border border-white/10 flex items-center gap-2">
+                      <Clock size={12} className="text-amber-400" />
+                      {vacancy.duration === "3개월 미만" ? "방금 비었음 ✨" : 
+                       vacancy.duration === "3~6개월" ? "공실된지 좀 됐어요 ⏳" : 
+                       vacancy.duration === "6개월 이상" ? "공실된지 오래됐어요 🕯️" : vacancy.duration}
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-6 pt-4 border-t border-white/10">
-                    {vacancy.area && (
-                      <div className="flex flex-col col-span-2 mb-2">
-                        <span className="text-[9px] font-black text-slate-500 uppercase mb-1">전용 면적</span>
-                        <span className="text-sm font-black text-white">{vacancy.area}</span>
-                      </div>
-                    )}
-                    {vacancy.deposit !== undefined && (
-                      <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-500 uppercase mb-1">보증금</span>
-                        <span className="text-sm font-black text-white">{vacancy.deposit?.toLocaleString()}만원</span>
-                      </div>
-                    )}
-                    {vacancy.monthlyRent !== undefined && (
-                      <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-500 uppercase mb-1">월세</span>
-                        <span className="text-sm font-black text-white">{vacancy.monthlyRent?.toLocaleString()}만원</span>
-                      </div>
-                    )}
-                    {vacancy.realtorName && (
-                      <div className="flex flex-col col-span-2 pt-2 mt-2 border-t border-white/5">
-                        <span className="text-[9px] font-black text-slate-500 uppercase mb-1">담당 공인중개사</span>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-black text-white">{vacancy.realtorName}</span>
-                          {vacancy.realtorPhone && (
-                            <a href={`tel:${vacancy.realtorPhone}`} className="text-[11px] font-black text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
-                              {vacancy.realtorPhone}
-                            </a>
-                          )}
-                        </div>
-                      </div>
+                  {/* 4. 특징 태그들 */}
+                  {vacancy.tags?.filter(t => t !== "이웃발견").map(tag => (
+                    <div key={tag} className="px-4 py-2 bg-white/5 text-white/70 rounded-full text-xs font-bold border border-white/5">
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+
+                {/* 툇마루단 한줄평 섹션 */}
+                {vacancy.surveyRemarks && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-6 bg-gradient-to-br from-white/10 to-transparent rounded-[2rem] border border-white/10 relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500" />
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">툇마루단 조사 소견</p>
+                    </div>
+                    <p className="text-base font-bold text-white leading-relaxed italic">"{vacancy.surveyRemarks}"</p>
+                  </motion.div>
+                )}
+
+                {/* 중개사 정보 (있는 경우만 하단에 작게) */}
+                {vacancy.realtorName && (
+                  <div className="px-6 py-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group">
+                    <div className="flex items-center gap-3">
+                      <Briefcase size={14} className="text-slate-500" />
+                      <span className="text-[11px] font-bold text-slate-400">담당 중개사: <span className="text-white ml-1">{vacancy.realtorName}</span></span>
+                    </div>
+                    {vacancy.realtorPhone && (
+                      <a href={`tel:${vacancy.realtorPhone}`} className="text-[10px] font-black text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/10 hover:bg-amber-500/20 transition-all">
+                        문의하기
+                      </a>
                     )}
                   </div>
-                </motion.div>
-              )}
+                )}
+              </div>
 
               <div className="relative">
                 <AnimatePresence mode="wait">
