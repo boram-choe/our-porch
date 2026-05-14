@@ -829,12 +829,19 @@ export default function SurveyorPage() {
         {showSurveyInput && (
           <SurveyInput 
             allVacancies={allVacancies}
-            initialData={editingVacancyId ? (allVacancies.find(v => v.id === editingVacancyId) as any) : { address: detectedAddress, landmark: detectedLandmark }}
+            initialData={editingVacancyId 
+              ? { ...(allVacancies.find(v => v.id === editingVacancyId) as any), lat: pinLocation.lat, lng: pinLocation.lng }
+              : { address: detectedAddress, landmark: detectedLandmark, lat: pinLocation.lat, lng: pinLocation.lng }
+            }
             onClose={() => {
               setShowSurveyInput(false);
               setEditingVacancyId(null);
             }}
             onSave={handleSave}
+            onEditLocation={() => {
+              setShowSurveyInput(false);
+              setIsPinpointing(true);
+            }}
           />
         )}
       </AnimatePresence>

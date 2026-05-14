@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2, Clock, History } from "lucide-react";
+import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2, Clock, History, MapPin } from "lucide-react";
 import { Vacancy } from "../data/dummyVacancies";
 import { uploadImage } from "../lib/db";
 
@@ -11,6 +11,7 @@ interface SurveyInputProps {
   initialData?: any;
   onClose: () => void;
   onSave: (data: Partial<Vacancy>) => void;
+  onEditLocation?: () => void;
 }
 
 // 거리 계산 (Haversine formula)
@@ -83,7 +84,7 @@ const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeho
   );
 };
 
-export default function SurveyInput({ allVacancies, initialData, onClose, onSave }: SurveyInputProps) {
+export default function SurveyInput({ allVacancies, initialData, onClose, onSave, onEditLocation }: SurveyInputProps) {
   const [formData, setFormData] = useState<Partial<Vacancy>>({
     id: initialData?.id,
     lat: initialData?.lat,
@@ -241,6 +242,26 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
               ))}
             </div>
             <p className="text-xs font-bold text-slate-400 text-center italic mt-3">첫 번째 사진이 투표 화면 배경으로 사용됩니다.</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 mb-4">
+            <div className="p-8 bg-amber-50 rounded-[2.5rem] border-2 border-amber-100 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-500 shadow-sm border border-amber-200">
+                  <MapPin size={24} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">핀 위치 수정</p>
+                  <p className="text-sm font-black text-slate-900 mt-0.5">{formData.lat?.toFixed(6)}, {formData.lng?.toFixed(6)}</p>
+                </div>
+              </div>
+              <button 
+                onClick={onEditLocation}
+                className="px-6 py-3 bg-slate-950 text-white text-[11px] font-black rounded-xl hover:bg-slate-800 active:scale-95 transition-all shadow-lg"
+              >
+                지도에서 위치 수정하기 →
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-6">
