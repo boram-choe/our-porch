@@ -343,8 +343,15 @@ export default function SurveyorPage() {
                       {icon}
                     </div>
                     <div>
-                      <h4 className="text-base font-black text-slate-950 leading-tight">{v.landmark || "신규 제보"}</h4>
-                      <p className="text-[10px] font-bold text-slate-400 mt-1">{v.address}</p>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h4 className="text-base font-black text-slate-950 leading-tight">{v.landmark || "신규 제보"}</h4>
+                        {v.display_id && (
+                          <span className="px-2 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded-md tracking-tighter">
+                            {v.display_id}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-400">{v.address}</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -819,6 +826,7 @@ export default function SurveyorPage() {
       <AnimatePresence>
         {showSurveyInput && (
           <SurveyInput 
+            allVacancies={allVacancies}
             initialData={editingVacancyId ? (allVacancies.find(v => v.id === editingVacancyId) as any) : { address: detectedAddress, landmark: detectedLandmark }}
             onClose={() => {
               setShowSurveyInput(false);

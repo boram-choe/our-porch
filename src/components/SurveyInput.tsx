@@ -7,10 +7,22 @@ import { Vacancy } from "../data/dummyVacancies";
 import { uploadImage } from "../lib/db";
 
 interface SurveyInputProps {
-  initialData?: Partial<Vacancy>;
+  allVacancies: any[];
+  initialData?: any;
   onClose: () => void;
   onSave: (data: Partial<Vacancy>) => void;
 }
+
+// 거리 계산 (Haversine formula)
+const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+  const R = 6371e3;
+  const φ1 = lat1 * Math.PI/180;
+  const φ2 = lat2 * Math.PI/180;
+  const Δφ = (lat2-lat1) * Math.PI/180;
+  const Δλ = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+};
 
 // 금액 콤마 포맷팅
 const formatCurrency = (val: number | string) => {
@@ -71,8 +83,11 @@ const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeho
   );
 };
 
-export default function SurveyInput({ initialData, onClose, onSave }: SurveyInputProps) {
+export default function SurveyInput({ allVacancies, initialData, onClose, onSave }: SurveyInputProps) {
   const [formData, setFormData] = useState<Partial<Vacancy>>({
+    id: initialData?.id,
+    lat: initialData?.lat,
+    lng: initialData?.lng,
     address: initialData?.address || "",
     landmark: initialData?.landmark || "",
     floor: initialData?.floor || "1층",
@@ -90,8 +105,8 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
     status: initialData?.status || "available",
     hiddenReason: initialData?.hiddenReason || "",
     hiddenComment: initialData?.hiddenComment || "",
-    mergedIntoId: initialData?.mergedIntoId || (initialData as any)?.merged_into_id || "",
-    rejectionReason: initialData?.rejectionReason || (initialData as any)?.rejection_reason || "",
+    mergedIntoId: initialData?.merged_into_id || initialData?.mergedIntoId || "",
+    rejectionReason: initialData?.rejectionReason || initialData?.rejection_reason || "",
   });
 
   const [isUploading, setIsUploading] = useState<number | null>(null);
@@ -130,7 +145,27 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
     setFormData({ ...formData, images: newImages });
   };
 
+  // 가장 인접한 공실 찾기
+  const nearestVacancy = allVacancies
+    .filter(v => v.id !== formData.id && v.status !== 'merged')
+    .map(v => ({ ...v, distance: getDistance(formData.lat || 0, formData.lng || 0, v.lat, v.lng) }))
+    .sort((a, b) => a.distance - b.distance)[0];
+
   const handleSave = () => {
+    // 통합 처리 시 유효성 검사
+    if (formData.status === 'merged') {
+      const targetId = formData.mergedIntoId?.trim();
+      if (!targetId || targetId.length !== 10 || isNaN(Number(targetId))) {
+        alert("올바른 10자리 공실 ID를 입력해주세요.");
+        return;
+      }
+      const targetExists = allVacancies.find(v => v.display_id === targetId);
+      if (!targetExists) {
+        alert("존재하지 않는 공실 ID입니다. 다시 확인해주세요.");
+        return;
+      }
+    }
+
     onSave(formData);
     onClose();
   };
@@ -151,9 +186,9 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-3xl font-black text-slate-950 tracking-tighter leading-none">툇마루단 현장 조사 ✨</h2>
-                {initialData?.displayId && (
+                {initialData?.display_id && (
                   <span className="px-2 py-1 bg-slate-950 text-white text-[9px] font-black rounded-lg tracking-tighter h-fit">
-                    ID: {initialData.displayId}
+                    ID: {initialData.display_id}
                   </span>
                 )}
               </div>
@@ -269,13 +304,32 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
                   className="space-y-6 overflow-hidden"
                 >
                   <div className="p-8 bg-purple-50 rounded-[2.5rem] border-2 border-purple-100 space-y-6">
+                    {nearestVacancy && (
+                      <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black text-purple-500 uppercase tracking-widest">가장 인접한 공실 추천</span>
+                          <span className="text-[9px] font-bold text-slate-400 italic">약 {Math.round(nearestVacancy.distance)}m 거리</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="px-2 py-1 bg-purple-600 text-white text-[10px] font-black rounded-lg">{nearestVacancy.display_id}</span>
+                          <span className="font-black text-slate-950 text-sm">{nearestVacancy.landmark}</span>
+                        </div>
+                        <button 
+                          onClick={() => setFormData({...formData, mergedIntoId: nearestVacancy.display_id})}
+                          className="w-full mt-2 py-2 bg-purple-50 text-purple-600 text-[10px] font-black rounded-xl hover:bg-purple-600 hover:text-white transition-all"
+                        >
+                          이 공실 ID로 자동 입력하기
+                        </button>
+                      </div>
+                    )}
+
                     <div className="space-y-4">
-                      <label className="text-[11px] font-black text-purple-400 uppercase tracking-widest px-1">통합할 대상 공실 정보</label>
+                      <label className="text-[11px] font-black text-purple-400 uppercase tracking-widest px-1">통합할 대상 공실 ID (10자리)</label>
                       <input
                         type="text"
                         value={formData.mergedIntoId || ""}
-                        onChange={(e) => setFormData({...formData, mergedIntoId: e.target.value})}
-                        placeholder="통합될 공실의 ID 또는 랜드마크명을 입력해주세요."
+                        onChange={(e) => setFormData({...formData, mergedIntoId: e.target.value.replace(/[^0-9]/g, '').slice(0, 10)})}
+                        placeholder="통합될 공실의 10자리 ID를 입력해주세요."
                         className="w-full bg-white border-2 border-purple-100 rounded-2xl py-4 px-6 font-bold text-slate-950 focus:outline-none focus:border-purple-500 transition-all text-sm"
                       />
                       <p className="text-[10px] text-purple-600 font-bold ml-1">※ 동일한 공간에 대한 중복 제보인 경우 하나로 통합 관리됩니다.</p>
