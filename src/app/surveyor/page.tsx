@@ -228,6 +228,8 @@ export default function SurveyorPage() {
       setEditingVacancyId(null);
       setEditingNeighborhood("");
     }
+  };
+
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMemberDong) return;
