@@ -382,9 +382,10 @@ export default function SurveyorPage() {
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">아이디</label>
                   <input 
                     type="text" 
+                    autoComplete="off"
                     value={loginId}
                     onChange={(e) => setLoginId(e.target.value)}
-                    placeholder="아이디를 입력하세요"
+                    placeholder="아이디(11010101)를 입력하세요"
                     className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-black text-slate-950 focus:border-amber-500 outline-none transition-all"
                   />
                 </div>
@@ -413,7 +414,7 @@ export default function SurveyorPage() {
                 disabled={isLoading}
                 className={`w-full py-6 rounded-2xl text-lg font-black shadow-xl flex items-center justify-center gap-3 transition-all ${isLoading ? 'bg-slate-800 text-slate-400 cursor-not-allowed' : 'bg-slate-950 text-white hover:bg-slate-900 active:scale-95'}`}
               >
-                {isLoading ? "인증 중..." : <>채널 접속하기 <ArrowRight size={20} /></>}
+                {isLoading ? "인증 중..." : <>🚀 채널 접속 시작 🚀 <ArrowRight size={20} /></>}
               </button>
             </form>
           </div>
