@@ -208,12 +208,12 @@ export default function SurveyorPage() {
         status: data.status,
         hiddenReason: data.hiddenReason,
         hiddenComment: data.hiddenComment,
-        lastModifiedBy: currentUser?.realName,
+        lastModifiedBy: currentUser?.real_name,
         displayId: editingVacancyId ? allVacancies.find(v => v.id === editingVacancyId)?.displayId : null,
       });
 
       if (result.id) {
-        alert(`${currentUser?.realName}님, 성공적으로 저장되었습니다! 🚀`);
+        alert(`${currentUser?.real_name}님, 성공적으로 저장되었습니다! 🚀`);
         setIsPinpointing(false);
         loadData();
       } else {
