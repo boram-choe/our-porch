@@ -448,7 +448,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                     <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500" />
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                      <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">툇마루단 조사 소견</p>
+                      <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">툇마루단의 한마디</p>
                     </div>
                     <p className="text-base font-bold text-white leading-relaxed italic">"{vacancy.surveyRemarks}"</p>
                   </motion.div>
