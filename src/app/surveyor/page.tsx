@@ -6,7 +6,7 @@ import { ShieldCheck, MapPin, Search, Check, Building2, LogOut, Lock, ArrowRight
 import { Map, MapMarker } from "react-kakao-maps-sdk";
 import { useKakaoLoader } from "react-kakao-maps-sdk";
 import SurveyInput from "../../components/SurveyInput";
-import { saveVacancy, fetchVacancies, DbVacancy, generateSpaceId, fetchTeamMembers, saveTeamMember, TeamMember, generateMemberId } from "../../lib/db";
+import { saveVacancy, fetchVacancies, DbVacancy, generateSpaceId, fetchTeamMembers, saveTeamMember, TeamMember, generateMemberId, updateTeamMemberPassword } from "../../lib/db";
 import { Vacancy } from "../../data/dummyVacancies";
 import regionsData from "../../data/regions.json";
 
@@ -266,12 +266,9 @@ export default function SurveyorPage() {
     if (!currentUser || !newPw) return;
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('team_members')
-        .update({ password: newPw })
-        .eq('id', currentUser.id);
+      const { error } = await updateTeamMemberPassword(currentUser.id, newPw);
       
-      if (error) throw error;
+      if (error) throw new Error(error);
       alert("비밀번호가 변경되었습니다. 다시 로그인해주세요.");
       handleLogout();
     } catch (err: any) {

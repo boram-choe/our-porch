@@ -509,3 +509,11 @@ export async function saveTeamMember(m: Partial<TeamMember>): Promise<{ id: stri
   return { id: (data && data.length > 0) ? data[0].id : null, error: null };
 }
 
+export async function updateTeamMemberPassword(id: string, newPassword: string): Promise<{ error: string | null }> {
+  const { error } = await supabase
+    .from('team_members')
+    .update({ password: newPassword })
+    .eq('id', id);
+  return { error: error ? error.message : null };
+}
+
