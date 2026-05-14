@@ -517,3 +517,15 @@ export async function updateTeamMemberPassword(id: string, newPassword: string):
   return { error: error ? error.message : null };
 }
 
+export async function loginTeamMember(id: string, password: string): Promise<TeamMember | null> {
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('id', id.trim())
+    .eq('password', password.trim())
+    .single();
+  
+  if (error || !data) return null;
+  return data;
+}
+

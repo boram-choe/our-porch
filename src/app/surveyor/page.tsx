@@ -6,7 +6,7 @@ import { ShieldCheck, MapPin, Search, Check, Building2, LogOut, Lock, ArrowRight
 import { Map, MapMarker } from "react-kakao-maps-sdk";
 import { useKakaoLoader } from "react-kakao-maps-sdk";
 import SurveyInput from "../../components/SurveyInput";
-import { saveVacancy, fetchVacancies, DbVacancy, generateSpaceId, fetchTeamMembers, saveTeamMember, TeamMember, generateMemberId, updateTeamMemberPassword } from "../../lib/db";
+import { saveVacancy, fetchVacancies, DbVacancy, generateSpaceId, fetchTeamMembers, saveTeamMember, TeamMember, generateMemberId, updateTeamMemberPassword, loginTeamMember } from "../../lib/db";
 import { Vacancy } from "../../data/dummyVacancies";
 import regionsData from "../../data/regions.json";
 
@@ -59,32 +59,40 @@ export default function SurveyorPage() {
     libraries: ["services"],
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const account = teamMembers.find(acc => acc.id === loginId && acc.password === password);
+    setIsLoading(true);
     
-    if (account) {
-      const rank = calculateRank(account.hire_date);
-      const profile: SurveyorProfile = {
-        ...account,
-        calculatedRank: rank,
-        formattedName: account.role === "CEO" ? `대표이사 ${account.real_name}` : 
-                       account.role === "OPS" ? `운영팀장 ${account.real_name}` :
-                       `툇마루단-${account.gu}-${account.real_name} ${rank}`
-      };
-      setIsAuthenticated(true);
-      setCurrentUser(profile);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("gongsil_surveyor_session", JSON.stringify(profile));
-      }
+    try {
+      const account = await loginTeamMember(loginId, password);
       
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-          setPinLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        });
+      if (account) {
+        const rank = calculateRank(account.hire_date);
+        const profile: SurveyorProfile = {
+          ...account,
+          calculatedRank: rank,
+          formattedName: account.role === "CEO" ? `대표이사 ${account.real_name}` : 
+                         account.role === "OPS" ? `운영팀장 ${account.real_name}` :
+                         `툇마루단-${account.gu}-${account.real_name} ${rank}`
+        };
+        setIsAuthenticated(true);
+        setCurrentUser(profile);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("gongsil_surveyor_session", JSON.stringify(profile));
+        }
+        
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((pos) => {
+            setPinLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          });
+        }
+      } else {
+        alert("아이디 또는 비밀번호가 올바르지 않습니다.");
       }
-    } else {
-      alert("아이디 또는 비밀번호가 올바르지 않습니다.");
+    } catch (err) {
+      alert("로그인 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
