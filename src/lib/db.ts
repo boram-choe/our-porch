@@ -305,6 +305,40 @@ export async function saveVacancy(v: {
       return { id: null, error: error.message };
     }
     
+    // [추가] 통합(merged) 처리 시 투표 및 댓글 이관 로직
+    if (v.status === 'merged' && v.mergedIntoId) {
+      try {
+        // 1. 통합 대상 공실의 UUID(id) 찾기
+        const { data: targetVacancy } = await supabase
+          .from('vacancies')
+          .select('id')
+          .eq('display_id', v.mergedIntoId.trim())
+          .single();
+
+        if (targetVacancy) {
+          // 2. 투표(votes) 이관
+          const { error: voteError } = await supabase
+            .from('votes')
+            .update({ vacancy_id: targetVacancy.id })
+            .eq('vacancy_id', v.id);
+          
+          if (voteError) console.error("투표 이관 오류:", voteError.message);
+
+          // 3. 댓글(comments) 이관
+          const { error: commentError } = await supabase
+            .from('comments')
+            .update({ vacancy_id: targetVacancy.id })
+            .eq('vacancy_id', v.id);
+
+          if (commentError) console.error("댓글 이관 오류:", commentError.message);
+          
+          console.log(`공실 ${v.id}의 데이터가 ${targetVacancy.id}로 이관되었습니다.`);
+        }
+      } catch (mergeErr) {
+        console.error("통합 이관 처리 중 예외 발생:", mergeErr);
+      }
+    }
+    
     if (!data || data.length === 0) {
       console.warn("업데이트된 행이 없음. 권한 문제일 가능성이 큼.");
       return { id: null, error: "데이터를 찾을 수 없거나 수정 권한이 없습니다. (DB 정책 확인 필요)" };
