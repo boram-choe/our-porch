@@ -188,6 +188,7 @@ export default function SurveyorPage() {
         realtorName: data.realtorName,
         realtorPhone: data.realtorPhone,
         area: data.area || "정보 대기 중",
+        duration: data.duration, // 공실 기간 추가
       });
 
       if (result.id) {

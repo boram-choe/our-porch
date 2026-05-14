@@ -23,6 +23,7 @@ export interface DbVacancy {
   realtor_name: string | null;
   realtor_phone: string | null;
   area: string | null;
+  duration: string | null;
   images: string | null; // 다중 이미지 URL (쉼표로 구분된 문자열)
   created_at: string;
 }
@@ -111,6 +112,7 @@ export async function saveVacancy(v: {
   lng: number;
   neighborhood: string;
   userId?: string;
+  duration?: string | null;
   // 툇마루단 데이터
   imageUrl?: string | null;
   deposit?: number | null;
@@ -131,6 +133,7 @@ export async function saveVacancy(v: {
     lng: v.lng,
     neighborhood: v.neighborhood,
     registered_by: v.userId || null,
+    duration: v.duration || null,
     image_url: (v.images && v.images.length > 0) ? v.images[0] : (v.imageUrl || null),
     deposit: v.deposit ?? null,
     monthly_rent: v.monthlyRent ?? null,

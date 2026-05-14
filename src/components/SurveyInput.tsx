@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2 } from "lucide-react";
+import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2, Clock } from "lucide-react";
 import { Vacancy } from "../data/dummyVacancies";
 import { uploadImage } from "../lib/db";
 
@@ -86,6 +86,7 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
       ? initialData.images 
       : (typeof initialData?.images === 'string' ? (initialData.images as string).split(',').filter(Boolean) : []),
     area: initialData?.area || "",
+    duration: initialData?.duration || "잘 모르겠음",
   });
 
   const [isUploading, setIsUploading] = useState<number | null>(null);
@@ -199,6 +200,23 @@ export default function SurveyInput({ initialData, onClose, onSave }: SurveyInpu
             <InputField label="랜드마크 명칭" icon={Landmark} value={formData.landmark} onChange={(v: string) => setFormData({...formData, landmark: v})} placeholder="예: 무악재역 인근 건물" />
             <InputField label="해당 층수" icon={Layers} value={formData.floor} onChange={(v: string) => setFormData({...formData, floor: v})} placeholder="예: 1층" />
             <InputField label="전용 면적" icon={Building2} value={formData.area} onChange={(v: string) => setFormData({...formData, area: v})} placeholder="예: 약 30평 / 99㎡" />
+          </div>
+
+          <div className="space-y-6">
+            <label className="flex items-center gap-2 text-sm font-black text-slate-400 uppercase tracking-widest">
+              <Clock size={18} /> 공실 기간 (현장 확인 필요)
+            </label>
+            <div className="grid grid-cols-4 gap-3">
+              {["3개월 미만", "3~6개월", "6개월 이상", "잘 모르겠음"].map(d => (
+                <button 
+                  key={d} 
+                  onClick={() => setFormData({...formData, duration: d})}
+                  className={`py-4 rounded-2xl text-xs font-black border-2 transition-all ${formData.duration === d ? 'bg-amber-500 border-amber-500 text-slate-950 shadow-lg' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-8">

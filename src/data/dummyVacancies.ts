@@ -31,6 +31,8 @@ export interface Vacancy {
   realtorPhone?: string | null;  // 담당 공인중개사 연락처
   isDisputed?: boolean;
   moveInInfo?: { text: string; imageUrl?: string; reportedAt: string };
+  duration?: string | null;      // 공실 기간 (예: 3개월 미만, 3~6개월 등)
+  neighborhood?: string;         // 동네 정보
 }
 
 const getLogo = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=128&bold=true`;

@@ -461,6 +461,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         neighborhood: neighborhood,
         userId: userProfile.nickname,
         area: newSpaceSize,
+        duration: newSpaceDuration, // 기간 정보 추가
         surveyRemarks: isPotentialDuplicate ? "[⚠️ 중복 확인 필요: 툇마루단 병합 검토 대상]" : undefined
       });
 
@@ -475,6 +476,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           lng: pinLocation.lng,
           price: "정보 대기 중",
           size: `${newSpaceSize} (${newSpaceFloor})`,
+          duration: newSpaceDuration, // 기간 정보 추가
           status: "available",
           tags: [...featureTags, "이웃발견"],
           currentVotes: []
