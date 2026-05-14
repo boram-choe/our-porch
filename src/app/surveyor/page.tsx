@@ -398,8 +398,12 @@ export default function SurveyorPage() {
                   />
                 </div>
               </div>
-              <button className="w-full py-6 bg-slate-950 text-white rounded-2xl text-lg font-black shadow-xl flex items-center justify-center gap-3">
-                채널 접속하기 <ArrowRight size={20} />
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className={`w-full py-6 rounded-2xl text-lg font-black shadow-xl flex items-center justify-center gap-3 transition-all ${isLoading ? 'bg-slate-800 text-slate-400 cursor-not-allowed' : 'bg-slate-950 text-white hover:bg-slate-900 active:scale-95'}`}
+              >
+                {isLoading ? "인증 중..." : <>채널 접속하기 <ArrowRight size={20} /></>}
               </button>
             </form>
           </div>
