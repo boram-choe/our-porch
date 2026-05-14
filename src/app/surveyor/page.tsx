@@ -752,7 +752,9 @@ export default function SurveyorPage() {
             }
           }}
         >
-          {allVacancies.map((v) => (
+          {allVacancies
+            .filter(v => v.status !== 'merged' && v.status !== 'rejected')
+            .map((v) => (
             <MapMarker
               key={v.id}
               position={{ lat: v.lat, lng: v.lng }}
