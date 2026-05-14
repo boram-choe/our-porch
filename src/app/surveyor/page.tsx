@@ -217,8 +217,10 @@ export default function SurveyorPage() {
         status: data.status,
         hiddenReason: data.hiddenReason,
         hiddenComment: data.hiddenComment,
+        mergedIntoId: data.mergedIntoId,
+        rejectionReason: data.rejectionReason,
         lastModifiedBy: currentUser?.real_name,
-        displayId: editingVacancyId ? allVacancies.find(v => v.id === editingVacancyId)?.displayId : null,
+        displayId: editingVacancyId ? allVacancies.find(v => v.id === editingVacancyId)?.display_id : null,
       });
 
       if (result.id) {

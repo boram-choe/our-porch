@@ -90,7 +90,9 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         : userProfile.home;
     if (!activeLoc?.lat || !activeLoc?.lng) return vacancies;
     return vacancies.filter((v) =>
-      v.status !== 'hidden' && // 비공개 공실은 지도에서 제외
+      v.status !== 'hidden' && 
+      v.status !== 'merged' && 
+      v.status !== 'rejected' &&
       haversineKm(activeLoc.lat, activeLoc.lng, v.lat, v.lng) <= FILTER_RADIUS_KM
     );
   }, [vacancies, userProfile]);
