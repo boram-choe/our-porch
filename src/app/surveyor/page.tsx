@@ -457,6 +457,29 @@ export default function SurveyorPage() {
             }
           }}
         >
+          {/* 기존 등록된 모든 공실 마커 표시 */}
+          {allVacancies.map((v) => (
+            <MapMarker
+              key={v.id}
+              position={{ lat: v.lat, lng: v.lng }}
+              image={{
+                src: v.images && v.images.length > 0 
+                  ? "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOCIgZmlsbD0iIzEwYjk4MSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPHBhdGggZD0iTTEyIDIwTDE4IDI2TDI4IDE0IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4=" // 녹색 (검증됨)
+                  : "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOCIgZmlsbD0iI0Y1OUUwQiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iOCIgZmlsbD0id2hpdGUiLz4KPC9zdmc+", // 주황색 (미검증)
+                size: { width: 30, height: 30 },
+                options: { offset: { x: 15, y: 15 } }
+              }}
+              onClick={() => {
+                setPinLocation({ lat: v.lat, lng: v.lng });
+                setEditingVacancyId(v.id);
+                setEditingNeighborhood(v.neighborhood);
+                setDetectedAddress(v.address || "");
+                setDetectedLandmark(v.landmark || "");
+                setShowSurveyInput(true);
+              }}
+            />
+          ))}
+
           {isPinpointing && (
             <MapMarker 
               position={pinLocation} 
