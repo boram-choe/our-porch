@@ -132,12 +132,12 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
               <h2 className="text-2xl md:text-4xl font-black tracking-tight mt-2">우리 집 바로 앞에 생긴다면? 🏠</h2>
             </div>
 
-            <div className="flex-1 flex flex-col md:flex-row gap-8 items-center justify-center p-4 max-w-6xl w-full mx-auto">
+            <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-8 items-center justify-center p-2 md:p-4 max-w-6xl w-full mx-auto">
               {currentMatch[0] && currentMatch[1] && (
                 <>
                   <MatchCard candidate={currentMatch[0]} onSelect={() => handleMatchWinner(currentMatch[0])} side="left" />
-                  <div className="flex-shrink-0 w-20 h-20 bg-slate-900/50 backdrop-blur-xl border-4 border-white/5 rounded-full flex items-center justify-center z-10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-                    <span className="italic font-black text-amber-500 text-3xl tracking-tighter">VS</span>
+                  <div className="flex-shrink-0 w-12 h-12 md:w-20 md:h-20 bg-slate-900/50 backdrop-blur-xl border-4 border-white/5 rounded-full flex items-center justify-center z-10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+                    <span className="italic font-black text-amber-500 text-xl md:text-3xl tracking-tighter">VS</span>
                   </div>
                   <MatchCard candidate={currentMatch[1]} onSelect={() => handleMatchWinner(currentMatch[1])} side="right" />
                 </>
@@ -193,24 +193,24 @@ function MatchCard({ candidate, onSelect, side }: { candidate: Candidate, onSele
       initial={{ x: side === "left" ? -100 : 100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       onClick={onSelect}
-      className={`group relative w-full max-w-[360px] aspect-[4/5.5] ${candidate.color} rounded-[4rem] p-10 flex flex-col items-center justify-center shadow-[0_40px_80px_rgba(0,0,0,0.4)] border-[6px] border-white/10 hover:border-white transition-all duration-500 overflow-hidden`}
+      className={`group relative w-full max-w-[360px] h-[28vh] min-h-[160px] md:h-auto md:aspect-[4/5.5] ${candidate.color} rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-10 flex flex-col items-center justify-center shadow-[0_40px_80px_rgba(0,0,0,0.4)] border-4 md:border-[6px] border-white/10 hover:border-white transition-all duration-500 overflow-hidden`}
     >
       {/* 프리미엄 빛 반사 효과 */}
       <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-br from-white/20 to-transparent rotate-45 pointer-events-none group-hover:translate-x-10 transition-transform duration-1000" />
       
-      <div className="relative z-10 w-28 h-28 bg-white/20 backdrop-blur-md rounded-[2.5rem] flex items-center justify-center mb-10 shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-        <div className="text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]">
+      <div className="relative z-10 w-16 h-16 md:w-28 md:h-28 bg-white/20 backdrop-blur-md rounded-2xl md:rounded-[2.5rem] flex items-center justify-center mb-4 md:mb-10 shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+        <div className="text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] scale-[0.6] md:scale-100">
           {candidate.icon}
         </div>
       </div>
       
-      <h3 className="relative z-10 text-4xl font-black tracking-tighter text-center break-keep leading-[1.1] text-white drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]">
+      <h3 className="relative z-10 text-2xl md:text-4xl font-black tracking-tighter text-center break-keep leading-[1.1] text-white drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]">
         {candidate.name}
       </h3>
       
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 flex items-center gap-2 bg-white text-slate-950 px-8 py-3 rounded-full font-black text-sm uppercase tracking-widest shadow-2xl">
+      <div className="absolute bottom-4 md:bottom-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 flex items-center gap-2 bg-white text-slate-950 px-5 py-2 md:px-8 md:py-3 rounded-full font-black text-[10px] md:text-sm uppercase tracking-widest shadow-2xl">
          <span>이 공간 선택</span>
-         <Heart size={16} fill="currentColor" className="text-rose-500" />
+         <Heart size={16} fill="currentColor" className="text-rose-500 w-3 h-3 md:w-4 md:h-4" />
       </div>
     </motion.button>
   );
