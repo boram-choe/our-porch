@@ -451,14 +451,15 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-6 bg-gradient-to-br from-white/10 to-transparent rounded-[2rem] border border-white/10 relative overflow-hidden"
+                    className="w-full mt-2"
                   >
-                    <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500" />
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-1.5 mb-1.5 ml-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                      <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">툇마루단의 한마디</p>
+                      <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">툇마루단의 한마디</p>
                     </div>
-                    <p className="text-base font-bold text-white leading-relaxed italic">"{vacancy.surveyRemarks}"</p>
+                    <div className="inline-flex px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-xs font-bold border border-white/10 shadow-sm">
+                      "{vacancy.surveyRemarks}"
+                    </div>
                   </motion.div>
                 )}
 
@@ -589,7 +590,11 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                              </div>
                              <div className="flex-1">
                                 <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">최다 상상 키워드</p>
-                                <h4 className="text-sm font-black text-white truncate max-w-[120px]">{groupedVotes[0]?.label || "상상을 더해주세요!"}</h4>
+                                <h4 className="text-sm font-black text-white truncate max-w-[150px]">
+                                  {groupedVotes.length > 0 
+                                    ? groupedVotes.filter(g => g.total === groupedVotes[0].total).map(g => g.label).join(' · ') 
+                                    : "상상을 더해주세요!"}
+                                </h4>
                              </div>
                           </div>
                           <div className="flex items-center gap-3">
@@ -642,6 +647,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                           <MessageSquare size={18} className="text-amber-500" /> 이웃들의 의견 보기
                         </button>
 
+                        {/* 베타 버전에서는 예비사장님 모드 진입 버튼 숨김
                         {!isEntrepreneurMode && onModeSwitch && (
                           <motion.div 
                             initial={{ y: 20, opacity: 0 }}
@@ -666,6 +672,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                             </div>
                           </motion.div>
                         )}
+                        */}
                     </motion.div>
                   )}
                 </AnimatePresence>
