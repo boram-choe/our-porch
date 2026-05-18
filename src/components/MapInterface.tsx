@@ -616,19 +616,19 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         <div className="absolute bottom-20 md:bottom-10 left-0 right-0 px-6 z-10 pointer-events-none">
           <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white p-5 md:p-6 rounded-[2.5rem] md:rounded-[3rem] shadow-xl border border-slate-100 pointer-events-auto overflow-hidden relative">
              <button onClick={() => setShowDashboard(false)} className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
-             <div className="flex items-center justify-between mb-4 mt-2 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-lg"><History size={18} /></div>
-                  <h2 className="text-base font-black text-slate-950 tracking-tight">나의 상상 조각들 <span className="text-amber-600 ml-1">{votedIds.length}</span></h2>
+             <div className="flex items-center justify-between mb-4 mt-2 relative z-10 flex-wrap gap-y-3">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-lg"><History className="w-4 h-4 md:w-5 md:h-5" /></div>
+                  <h2 className="text-sm md:text-base font-black text-slate-950 tracking-tight whitespace-nowrap">나의 상상 조각들 <span className="text-amber-600 ml-1">{votedIds.length}</span></h2>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3">
                   <button 
                     onClick={() => setShowCurator(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black hover:bg-indigo-100 transition-all border border-indigo-100"
+                    className="flex items-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:px-3 md:py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[9px] md:text-[10px] font-black hover:bg-indigo-100 transition-all border border-indigo-100 whitespace-nowrap"
                   >
-                    <Sparkles size={12} fill="currentColor" /> 상상 연습해보기
+                    <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3" fill="currentColor" /> 상상 연습해보기
                   </button>
-                  <button className="text-[9px] font-black text-slate-400 flex items-center gap-1 uppercase tracking-[0.2em] hover:text-amber-600 transition-all">전체 보기 <ChevronRight size={10} /></button>
+                  <button className="text-[9px] font-black text-slate-400 flex items-center gap-1 uppercase tracking-[0.2em] hover:text-amber-600 transition-all whitespace-nowrap">전체 보기 <ChevronRight className="w-2.5 h-2.5" /></button>
                 </div>
              </div>
              {votedVacancies.length > 0 ? (

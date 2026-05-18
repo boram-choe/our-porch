@@ -167,31 +167,36 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     return "etc";
   };
 
-  const getCleanName = (name: string) => {
-    return name
-      .replace("24시 ", "")
-      .replace("조용한 ", "")
-      .replace("느낌 ", "")
-      .replace("감성 ", "")
-      .replace("친절한 ", "")
-      .replace("프리미엄 ", "")
-      .replace("유기농 ", "")
-      .replace("프라이빗 ", "")
-      .replace("동네 큰 ", "")
-      .replace("로컬 ", "")
-      .trim();
-  };
+  // 삭제됨: getCleanName (사용자가 입력한 원본 텍스트 유지를 위해)
 
   const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
     if (e) e.preventDefault();
     let brand = (customBrand || inputValue).trim();
     if (!brand) return;
 
-    // 데이터 세척: 수식어 제거
-    brand = getCleanName(brand);
-
     const catId = customCat || selectedCategory || 'etc';
-    const currentVotes = vacancy.currentVotes || [];
+    let currentVotes = [...(vacancy.currentVotes || [])];
+    
+    // 1인 1투표 로직: 로컬 스토리지 확인
+    const prevVoteKey = `gongsil_voted_vacancy_${vacancy.id}`;
+    const prevVotedBrand = localStorage.getItem(prevVoteKey);
+    
+    if (prevVotedBrand && prevVotedBrand !== brand) {
+      // 이전 투표 항목 취소 (count 감소)
+      currentVotes = currentVotes.map(v => {
+        if (v.brand === prevVotedBrand) {
+          return { ...v, count: Math.max(0, v.count - 1) };
+        }
+        return v;
+      }).filter(v => v.count > 0);
+    } else if (prevVotedBrand === brand) {
+      // 동일 항목에 다시 투표한 경우 무시
+      setVotingStep("results");
+      setInputValue("");
+      setSelectedCategory(null);
+      return;
+    }
+
     const existing = currentVotes.find(v => v.brand === brand);
     
     let nextVotes: VoteItem[] = [];
@@ -206,6 +211,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
         count: 1
       }];
     }
+
+    // 새로운 투표 기록 저장
+    localStorage.setItem(prevVoteKey, brand);
 
     const updated = { ...vacancy, currentVotes: nextVotes };
     setVotingStep("results");
