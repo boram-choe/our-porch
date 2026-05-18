@@ -28,6 +28,7 @@ export interface UserProfile {
 export const PERSONAS = [
   { id: "worker", name: "직장인", icon: <Briefcase size={20} />, description: "매일 같은 거리에서 새로운 영감을 찾는 직장인" },
   { id: "parenting", name: "육아맘/대디", icon: <Baby size={20} />, description: "아이와 함께 걷기 좋은 따뜻한 동네를 꿈꾸는 부모님" },
+  { id: "homemaker", name: "따뜻한 살림꾼", icon: <Heart size={20} />, description: "사랑하는 가족과 함께 동네의 온기를 채우는 이웃" },
   { id: "student", name: "취준생/학생", icon: <GraduationCap size={20} />, description: "나만의 아지트 같은 조용한 공간이 필요한 공부러" },
   { id: "solo", name: "1인 가구", icon: <Home size={20} />, description: "혼자서도 풍성하게 즐기는 미니멀 라이프 이웃" },
   { id: "pet", name: "반려인", icon: <Dog size={20} />, description: "댕냥이와 함께 행복한 산책길을 만드는 집사님" },
@@ -105,6 +106,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
        const labels: { [key: string]: string } = {
          worker: "영감을 찾는 직장인",
          parenting: userGender === "female" ? "다정한 동네 육아맘" : "다정한 동네 육아대디",
+         homemaker: "가족을 위하는 따뜻한 살림꾼",
          student: "아지트를 찾는 공부러",
          solo: "즐거운 미니멀 라이퍼",
          pet: "행복한 멍냥이 집사",
@@ -441,7 +443,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                <MapPin size={36} className="text-amber-400" />
             </div>
             <h1 className="text-3xl font-black text-white mb-6 tracking-tighter leading-tight">탐험을 시작하기 위해 <br/> <span className="text-amber-400">현재 동네</span>를 인증해 주세요</h1>
-            <p className="text-slate-400 mb-10 font-bold leading-relaxed">내가 사랑하는 동네의 숨은 매력을 발견하고 <br/> 비어있는 상상 공간을 함께 채우기 위해 위치 인증이 필요합니다.</p>
+            <p className="text-slate-400 mb-10 font-bold leading-relaxed">내가 사랑하는 동네의 숨은 매력을 발견하고 <br/> 비어있는 상상 공간을 함께 채우기 위해 <br/>위치 인증이 필요합니다.</p>
             
             <button 
               onClick={handleLocationAuth} disabled={isLocating}

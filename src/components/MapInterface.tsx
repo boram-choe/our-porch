@@ -600,7 +600,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         })()}
       </div>
 
-      <div className="absolute right-4 md:right-6 bottom-[22rem] md:bottom-64 flex flex-col gap-3 md:gap-4 z-[100]">
+      <div className="absolute right-4 md:right-6 bottom-[24rem] md:bottom-64 flex flex-col gap-3 md:gap-4 z-[100]">
         {!isPinpointing && (
           <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} onClick={startDiscovery} className="w-16 h-16 bg-slate-950 text-amber-500 rounded-3xl shadow-2xl flex items-center justify-center border-[5px] border-amber-500 relative group overflow-hidden">
             <div className="absolute inset-0 bg-amber-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
@@ -613,7 +613,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       </div>
 
       {!isPinpointing && !selectedVacancy && (
-        <div className="absolute bottom-10 left-0 right-0 px-6 z-10 pointer-events-none">
+        <div className="absolute bottom-20 md:bottom-10 left-0 right-0 px-6 z-10 pointer-events-none">
           <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white p-5 md:p-6 rounded-[2.5rem] md:rounded-[3rem] shadow-xl border border-slate-100 pointer-events-auto overflow-hidden relative">
              <button onClick={() => setShowDashboard(false)} className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
              <div className="flex items-center justify-between mb-4 mt-2 relative z-10">
@@ -626,7 +626,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                     onClick={() => setShowCurator(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black hover:bg-indigo-100 transition-all border border-indigo-100"
                   >
-                    <Sparkles size={12} fill="currentColor" /> 취향찾기
+                    <Sparkles size={12} fill="currentColor" /> 상상 연습해보기
                   </button>
                   <button className="text-[9px] font-black text-slate-400 flex items-center gap-1 uppercase tracking-[0.2em] hover:text-amber-600 transition-all">전체 보기 <ChevronRight size={10} /></button>
                 </div>
@@ -644,16 +644,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
              ) : (
                 <div className="py-6 px-4 md:py-8 md:px-6 text-center bg-slate-50 rounded-[2rem] md:rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center gap-3 md:gap-4">
                   <p className="text-xs font-black text-slate-400 leading-relaxed italic">지도의 핀을 눌러 첫 번째 상상을 시작하세요.</p>
-                  <div className="w-full h-px bg-slate-200/50" />
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-[10px] font-bold text-slate-400">무엇이 어울릴지 잘 모르겠다면?</p>
-                    <button 
-                      onClick={() => setShowCurator(true)}
-                      className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl text-[11px] font-black shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
-                    >
-                      <Sparkles size={14} fill="currentColor" /> 나만의 취향 공간 찾기 →
-                    </button>
-                  </div>
                 </div>
              )}
           </motion.div>
