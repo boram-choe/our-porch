@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, User, ArrowRight, Sparkles, Navigation as NavigationIcon, CheckCircle2, Globe, Heart, MessageSquare, Briefcase, Baby, GraduationCap, Home, Dog, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
 import { saveUserProfile } from "@/lib/db";
-
+import { supabase } from "@/lib/supabase";
 export interface UserLocation {
   neighborhood: string;
   lat: number;
@@ -293,7 +293,20 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             <p className="text-slate-400 mb-12 font-bold leading-relaxed">우리 동네의 비어있는 공간을 찾고<br/>새로운 꿈을 채워넣어 볼까요?</p>
             
             <button 
-              onClick={() => setStep(1)}
+              onClick={async () => {
+                const { error } = await supabase.auth.signInWithOAuth({
+                  provider: 'kakao',
+                  options: {
+                    redirectTo: `${window.location.origin}/?login=success`
+                  }
+                });
+                if (error) {
+                  console.error("Kakao Login Error:", error);
+                  alert("카카오 로그인 연동 중 문제가 발생했습니다.");
+                  // 에러 시 기존 UI 플로우(테스트용)로 진행하려면 아래 주석 해제
+                  // setStep(1);
+                }
+              }}
               className="w-full bg-[#FEE500] text-slate-950 py-5 rounded-2xl text-lg font-black shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
             >
               <div className="w-6 h-6 bg-slate-950 rounded-full flex items-center justify-center"><MessageSquare size={14} className="text-[#FEE500]" fill="currentColor" /></div>
