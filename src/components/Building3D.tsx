@@ -501,6 +501,26 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                     </motion.div>
                   ) : votingStep === "category" ? (
                     <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
+                      {sortedVotes.length > 0 && (
+                        <div className="mb-2 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Star size={14} className="text-amber-500" />
+                            <p className="text-[11px] font-black text-white uppercase tracking-widest">현재 이웃들의 상상 TOP 3</p>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {sortedVotes.slice(0, 3).map((v, i) => (
+                              <div key={v.id} className="flex items-center justify-between bg-white/5 px-4 py-3 rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-[11px] font-black text-slate-950 shadow-lg shadow-amber-500/20">{i + 1}</div>
+                                  <span className="text-sm font-bold text-white">{v.brand}</span>
+                                </div>
+                                <span className="text-[11px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg">{v.count}표</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {recommendedCategory && !hasVoted && (
                         <motion.button 
                           whileHover={{ scale: 1.02 }}
