@@ -28,7 +28,7 @@ export interface UserProfile {
 export const PERSONAS = [
   { id: "worker", name: "직장인", icon: <Briefcase size={20} />, description: "매일 같은 거리에서 새로운 영감을 찾는 직장인" },
   { id: "parenting", name: "육아맘/대디", icon: <Baby size={20} />, description: "아이와 함께 걷기 좋은 따뜻한 동네를 꿈꾸는 부모님" },
-  { id: "homemaker", name: "따뜻한 살림꾼", icon: <Heart size={20} />, description: "사랑하는 가족과 함께 동네의 온기를 채우는 이웃" },
+  { id: "homemaker", name: "전업주부", icon: <Heart size={20} />, description: "사랑하는 가족과 함께 동네의 온기를 채우는 이웃" },
   { id: "student", name: "취준생/학생", icon: <GraduationCap size={20} />, description: "나만의 아지트 같은 조용한 공간이 필요한 공부러" },
   { id: "solo", name: "1인 가구", icon: <Home size={20} />, description: "혼자서도 풍성하게 즐기는 미니멀 라이프 이웃" },
   { id: "pet", name: "반려인", icon: <Dog size={20} />, description: "댕냥이와 함께 행복한 산책길을 만드는 집사님" },
