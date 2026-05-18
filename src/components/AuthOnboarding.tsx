@@ -82,6 +82,25 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
     setConsentAll(consentTerms && consentPrivacy && consentLocation && consentMarketing);
   }, [consentTerms, consentPrivacy, consentLocation, consentMarketing]);
 
+  // 카카오 로그인 후 돌아왔을 때 세션이 있으면 다음 단계(약관 동의)로 자동 이동
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && step === 0) {
+        setStep(1);
+      }
+    };
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session && step === 0) {
+        setStep(1);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [step]);
+
   const canProceedConsent = consentTerms && consentPrivacy && consentLocation;
 
   const creatures = [
