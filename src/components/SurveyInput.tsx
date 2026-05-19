@@ -117,7 +117,7 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
 
   // surveyRemarks의 인라인 신고 줄 답변 상태
   const [inlineReportReplies, setInlineReportReplies] = useState<{[idx: number]: string}>({});
-  const [resolvedInlines, setResolvedInlines] = useState<number[]>([]);
+  const [repliedInlines, setRepliedInlines] = useState<{[idx: number]: string}>({}); // 처리 완료: idx -> 회신 텍스트
 
   const [pendingReports, setPendingReports] = useState<DbReport[]>([]);
   const [replyTexts, setReplyTexts] = useState<{[key: string]: string}>({});
@@ -521,51 +521,85 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
             <div className="space-y-4">
 
               {/* ── 접수된 주민 제보 목록 (surveyRemarks 내 [신고접수:] 줄 파싱) ── */}
-              {reportLines.filter((_: string, i: number) => !resolvedInlines.includes(i)).length > 0 && (
+              {reportLines.length > 0 && (
                 <div className="p-6 bg-orange-50 rounded-2xl border-2 border-orange-200 space-y-4">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xl">📋</span>
                     <div>
-                      <h4 className="text-sm font-black text-orange-800 tracking-tight">접수된 주민 제보</h4>
+                      <h4 className="text-sm font-black text-orange-800 tracking-tight">접수된 주민 제보 ({reportLines.length}건)</h4>
                       <p className="text-[10px] font-bold text-orange-600 mt-0.5">주민이 제보한 내용을 확인하고 답변을 작성해 주세요.</p>
                     </div>
                   </div>
                   {reportLines.map((line: string, i: number) => {
-                    if (resolvedInlines.includes(i)) return null;
                     const isMovein = line.includes('입점소식');
                     const content = line.replace(/^\[신고접수:[^\]]*\]\s*/, '').trim();
+                    const isReplied = !!repliedInlines[i];
                     return (
-                      <div key={i} className="bg-white p-5 rounded-xl border border-orange-100 shadow-sm space-y-3">
-                        <span className={`inline-block text-[9px] font-black px-2 py-0.5 rounded-md border ${
-                          isMovein ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-orange-100 text-orange-700 border-orange-200'
-                        }`}>
-                          {isMovein ? '📢 입점소식 제보' : '⚠️ 정보정정 요청'}
-                        </span>
+                      <div key={i} className={`bg-white p-5 rounded-xl border shadow-sm space-y-3 ${
+                        isReplied ? 'border-emerald-200 bg-emerald-50/30' : 'border-orange-100'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-block text-[9px] font-black px-2 py-0.5 rounded-md border ${
+                            isMovein ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-orange-100 text-orange-700 border-orange-200'
+                          }`}>
+                            {isMovein ? '📢 입점소식 제보' : '⚠️ 정보정정 요청'}
+                          </span>
+                          {isReplied && (
+                            <span className="inline-block text-[9px] font-black px-2 py-0.5 rounded-md border bg-emerald-50 text-emerald-700 border-emerald-200">
+                              ✅ 답변 완료
+                            </span>
+                          )}
+                        </div>
+                        {/* 주민 제보 내용 */}
                         <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                           <p className="text-[9px] font-black text-slate-400 mb-1 uppercase tracking-widest">주민 제보 내용</p>
                           <p className="text-sm font-bold text-slate-800 leading-relaxed">"{content}"</p>
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">주민에게 보낼 답변 메시지</label>
-                          <textarea
-                            value={inlineReportReplies[i] || ""}
-                            onChange={(e) => setInlineReportReplies(prev => ({ ...prev, [i]: e.target.value }))}
-                            placeholder="예: 툇마루단 박주민 이사가 현장 확인 완료했습니다. 소중한 제보 감사드립니다!"
-                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-3 px-4 font-bold text-slate-950 focus:outline-none focus:border-orange-400 transition-all text-xs min-h-[70px]"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const reply = inlineReportReplies[i]?.trim();
-                              if (!reply) { alert("답변 메시지를 입력해주세요."); return; }
-                              setResolvedInlines(prev => [...prev, i]);
-                              alert("제보 확인 완료! 저장하시면 해당 신고 내용이 소견란에서 제거됩니다.");
-                            }}
-                            className="w-full py-2.5 bg-orange-500 text-white rounded-xl text-xs font-black hover:bg-orange-400 active:scale-95 transition-all flex items-center justify-center gap-1.5"
-                          >
-                            ✓ 확인 완료 — 처리하기
-                          </button>
-                        </div>
+                        {/* 답변 완료된 경우: 회신 내용 표시 */}
+                        {isReplied ? (
+                          <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                            <p className="text-[9px] font-black text-emerald-600 mb-1 uppercase tracking-widest">툇마루단 회신 내용</p>
+                            <p className="text-sm font-bold text-emerald-800 leading-relaxed">"{repliedInlines[i]}"</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">주민에게 보낼 답변 메시지</label>
+                            <textarea
+                              value={inlineReportReplies[i] || ""}
+                              onChange={(e) => setInlineReportReplies(prev => ({ ...prev, [i]: e.target.value }))}
+                              placeholder="예: 툇마루단 박주민 이사가 현장 확인 완료했습니다. 소중한 제보 감사드립니다!"
+                              className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-3 px-4 font-bold text-slate-950 focus:outline-none focus:border-orange-400 transition-all text-xs min-h-[70px]"
+                            />
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const reply = inlineReportReplies[i]?.trim();
+                                if (!reply) { alert("답변 메시지를 입력해주세요."); return; }
+                                // pendingReports에서 내용 일치하는 항목 찾아 DB에 즉시 저장
+                                const matchingReport = pendingReports.find(r =>
+                                  r.content && content && (
+                                    r.content.trim() === content ||
+                                    r.content.includes(content) ||
+                                    content.includes(r.content)
+                                  )
+                                );
+                                if (matchingReport) {
+                                  try {
+                                    await updateReportReply(matchingReport.id, reply);
+                                    setPendingReports(prev => prev.filter(r => r.id !== matchingReport.id));
+                                  } catch (e) {
+                                    console.error("DB 회신 저장 실패:", e);
+                                  }
+                                }
+                                // 답변 완료 상태로 전환 (카드 유지, 회신 내용 표시)
+                                setRepliedInlines(prev => ({ ...prev, [i]: reply }));
+                              }}
+                              className="w-full py-2.5 bg-orange-500 text-white rounded-xl text-xs font-black hover:bg-orange-400 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                            >
+                              ✓ 확인 완료 — 처리하기
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
