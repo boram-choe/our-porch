@@ -453,21 +453,24 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                     </div>
                   )}
 
-                  {/* 이웃들의 상상 TOP 3 */}
-                  {sortedVotes.length > 0 && (
+                  {/* 이웃들의 상상 TOP 3 (대분류 기준 집계) */}
+                  {groupedVotes.length > 0 && (
                     <div className="w-full space-y-2">
                       <div className="flex items-center gap-2 ml-1">
                         <Star size={14} className="text-amber-500" />
                         <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">현재 이웃들의 상상 TOP 3</p>
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        {sortedVotes.slice(0, 3).map((v, i) => (
-                          <div key={v.id} className="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
+                        {groupedVotes.slice(0, 3).map((group, i) => (
+                          <div key={group.id} className="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all">
                             <div className="flex items-center gap-3">
                               <div className="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-[11px] font-black text-slate-950 shadow-lg shadow-amber-500/20">{i + 1}</div>
-                              <span className="text-sm font-bold text-white">{v.brand}</span>
+                              <div className="flex items-center gap-2 text-sm font-bold text-white">
+                                <span className="scale-75 opacity-70 flex items-center justify-center">{group.icon}</span>
+                                <span>{group.label}</span>
+                              </div>
                             </div>
-                            <span className="text-[11px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg">{v.count}표</span>
+                            <span className="text-[11px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg">{group.total}표</span>
                           </div>
                         ))}
                       </div>
@@ -538,12 +541,12 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                     ) : votingStep === "category" ? (
                       <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
                         
-                        {/* 질문 헤더 추가 */}
+                        {/* 질문 헤더 수정 */}
                         <div className="text-center my-2">
                           <h4 className="text-base font-black text-amber-400 tracking-tight leading-none mb-1">
-                            어떤 "큰 카테고리"가 생기면 좋을까요?
+                            어떤 공간이 생기면 좋을까요?
                           </h4>
-                          <p className="text-[10px] font-bold text-slate-400">동네에 필요한 상상의 종류를 하나 꾹 눌러주세요</p>
+                          <p className="text-[10px] font-bold text-slate-400">동네에 필요한 공간을 하나 꾹 눌러주세요</p>
                         </div>
 
                         {recommendedCategory && !hasVoted && (
@@ -589,6 +592,15 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                       </motion.div>
                   ) : votingStep === "detail" ? (
                     <motion.div key="details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
+                       
+                       {/* 대분류 이름 주입 질문 헤더 추가 */}
+                       <div className="text-center my-2">
+                         <h4 className="text-base font-black text-amber-400 tracking-tight leading-none mb-1">
+                           어떤 "{CATEGORIES.find(c => c.id === selectedCategory)?.label || "공간"}"이 생기면 좋을까요?
+                         </h4>
+                         <p className="text-[10px] font-bold text-slate-400">원하시는 세부 공간 종류나 브랜드를 선택 또는 입력해 주세요</p>
+                       </div>
+
                        <div className="flex flex-wrap gap-2">
                          {CATEGORIES.find(c => c.id === selectedCategory)?.subs.map(sub => (
                            <button key={sub} onClick={() => handleSubSelect(sub)} className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2 ${inputValue === sub ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-lg' : 'bg-white/5 text-white/50 border-white/5 hover:border-white/20'}`}>{sub}</button>
