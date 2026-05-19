@@ -261,15 +261,16 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             const vacanciesWithVotes = await Promise.all(dbVacancies.map(async (v) => {
               const { data: votes } = await supabase
                 .from("votes")
-                .select("category, category_icon")
+                .select("category, category_icon, comment")
                 .eq("vacancy_id", v.id);
 
               // 업종별로 투표 수 집계
               const voteCounts: Record<string, { brand: string, count: number, categoryId: string }> = {};
               (votes || []).forEach(vote => {
-                const brand = vote.category;
+                const brand = vote.comment || vote.category; // 사용자가 선택한 세부 카테고리/브랜드명 우선 채택
+                const bigCategoryName = vote.category; // 대분류 카테고리명 ("상점/생활", "음식점" 등)
                 if (!voteCounts[brand]) {
-                  voteCounts[brand] = { brand, count: 0, categoryId: getCategoryIdFromVote(brand) };
+                  voteCounts[brand] = { brand, count: 0, categoryId: getCategoryIdFromVote(bigCategoryName) };
                 }
                 voteCounts[brand].count += 1;
               });
