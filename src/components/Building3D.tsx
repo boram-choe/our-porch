@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Vacancy, VoteItem } from "@/data/dummyVacancies";
-import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star } from "lucide-react";
+import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "@/components/MyPage";
 import { saveVote } from "@/lib/db";
@@ -400,171 +400,193 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
               exit={{ y: 100, opacity: 0 }}
               className="w-full max-w-2xl mx-auto"
             >
-              <div className="bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-6 w-full shadow-[0_30px_70px_rgba(0,0,0,0.6)] overflow-hidden transition-all duration-500">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                  <Gift size={20} className="text-white" />
-                </div>
-                <div>
-                   <h3 className="text-lg font-black text-white tracking-tight leading-none mb-1">상상 더하기</h3>
-                   <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                     {votingStep === 'results' ? '이웃들의 상상 결합 중' : '동네의 미래를 그려보세요'}
-                   </p>
-                </div>
-                {votingStep !== "category" && (
-                   <button 
-                    onClick={() => { setVotingStep("category"); setSelectedCategory(null); }}
-                    className="ml-auto bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded-lg text-[9px] font-black tracking-widest uppercase transition-all"
-                   >
-                     수정하기
-                   </button>
-                 )}
-              </div>
-
-              {/* 공간 상세 태그 및 정보 (상시 노출) */}
-              <div className="mb-8 space-y-6">
-                {/* 메인 정보 태그 그룹 */}
-                <div className="flex flex-wrap gap-2">
-                  {/* 1. 명칭 및 층수 태그 */}
-                  <div className="px-4 py-2 bg-amber-500 text-slate-950 rounded-full text-xs font-black shadow-lg shadow-amber-500/20 flex items-center gap-2">
-                    <MapPin size={12} strokeWidth={3} />
-                    {vacancy.landmark || vacancy.address.split(' ').pop()} {vacancy.floor?.includes('층') ? vacancy.floor : `${vacancy.floor || '1'}층`}
+              {/* [💡 이웃 상상 리포트 참고 자료 카드]
+                  사용자가 상상 카테고리를 고르기 전(votingStep === 'category')에만 참고 정보를 묶어서 노출하고, 
+                  본격적인 세부 투표에 진입하면 깨끗하게 숨겨 불필요한 시선 흐려짐을 원천 차단합니다! */}
+              {votingStep === 'category' && (
+                <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-6 mb-5 w-full shadow-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Info size={16} className="text-amber-500" />
+                    <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest leading-none">💡 공간 분석 & 이웃 상상 리포트</h4>
                   </div>
+                  
+                  {/* 메인 정보 태그 그룹 */}
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {/* 1. 명칭 및 층수 태그 */}
+                    <div className="px-4 py-2 bg-amber-500 text-slate-950 rounded-full text-xs font-black shadow-lg shadow-amber-500/20 flex items-center gap-2">
+                      <MapPin size={12} strokeWidth={3} />
+                      {vacancy.landmark || vacancy.address.split(' ').pop()} {vacancy.floor?.includes('층') ? vacancy.floor : `${vacancy.floor || '1'}층`}
+                    </div>
 
-                  {/* 2. 규모 태그 (전용면적 또는 등록시 규모) */}
-                  <div className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-xs font-bold border border-white/10 flex items-center gap-2">
-                    <Maximize size={12} className="text-amber-400" />
-                    {vacancy.area ? (vacancy.area.includes('평') ? vacancy.area : `전용면적 ${vacancy.area}평`) : (vacancy.size || "규모 확인 중")}
-                  </div>
-
-                  {/* 3. 공실 기간 태그 (변환 로직) */}
-                  {vacancy.vacancyPeriod && vacancy.vacancyPeriod !== "잘 모르겠어요" && (
+                    {/* 2. 규모 태그 */}
                     <div className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-xs font-bold border border-white/10 flex items-center gap-2">
-                      <Clock size={12} className="text-amber-400" />
-                      {vacancy.vacancyPeriod}
+                      <Maximize size={12} className="text-amber-400" />
+                      {vacancy.area ? (vacancy.area.includes('평') ? vacancy.area : `전용면적 ${vacancy.area}평`) : (vacancy.size || "규모 확인 중")}
+                    </div>
+
+                    {/* 3. 공실 기간 태그 */}
+                    {vacancy.vacancyPeriod && vacancy.vacancyPeriod !== "잘 모르겠어요" && (
+                      <div className="px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-xs font-bold border border-white/10 flex items-center gap-2">
+                        <Clock size={12} className="text-amber-400" />
+                        {vacancy.vacancyPeriod}
+                      </div>
+                    )}
+
+                    {/* 4. 특징 태그들 */}
+                    {vacancy.tags?.filter(t => t !== "이웃발견").map(tag => (
+                      <div key={tag} className="px-4 py-2 bg-white/5 text-white/70 rounded-full text-xs font-bold border border-white/5">
+                        {tag}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 툇마루단 한마디 */}
+                  {vacancy.surveyRemarks && (
+                    <div className="w-full mb-5">
+                      <div className="flex items-center gap-1.5 mb-1.5 ml-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-none">툇마루단의 한마디</p>
+                      </div>
+                      <div className="inline-flex px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-2xl text-xs font-bold border border-white/10 shadow-sm">
+                        "{vacancy.surveyRemarks}"
+                      </div>
                     </div>
                   )}
 
-                  {/* 4. 특징 태그들 */}
-                  {vacancy.tags?.filter(t => t !== "이웃발견").map(tag => (
-                    <div key={tag} className="px-4 py-2 bg-white/5 text-white/70 rounded-full text-xs font-bold border border-white/5">
-                      {tag}
-                    </div>
-                  ))}
-                </div>
-
-                {/* 툇마루단 한줄평 섹션 */}
-                {vacancy.surveyRemarks && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full mt-2"
-                  >
-                    <div className="flex items-center gap-1.5 mb-1.5 ml-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                      <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">툇마루단의 한마디</p>
-                    </div>
-                    <div className="inline-flex px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-full text-xs font-bold border border-white/10 shadow-sm">
-                      "{vacancy.surveyRemarks}"
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* 중개사 정보 (있는 경우만 하단에 작게) */}
-                {vacancy.realtorName && (
-                  <div className="px-6 py-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group">
-                    <div className="flex items-center gap-3">
-                      <Briefcase size={14} className="text-slate-500" />
-                      <span className="text-[11px] font-bold text-slate-400">담당 중개사: <span className="text-white ml-1">{vacancy.realtorName}</span></span>
-                    </div>
-                    {vacancy.realtorPhone && (
-                      <a href={`tel:${vacancy.realtorPhone}`} className="text-[10px] font-black text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/10 hover:bg-amber-500/20 transition-all">
-                        문의하기
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="relative">
-                <AnimatePresence mode="wait">
-                  {vacancy.status === 'completed' ? (
-                    <motion.div 
-                      key="completed-msg"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="p-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2.5rem] shadow-[0_20px_50px_rgba(16,185,129,0.3)] border-4 border-white/20 text-center relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 right-0 p-4 opacity-20 rotate-12 scale-150"><Sparkles size={100} className="text-white" /></div>
-                      <div className="relative z-10">
-                        <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/30">
-                          <CheckCircle2 size={40} className="text-white" strokeWidth={3} />
-                        </div>
-                        <h4 className="text-2xl font-black text-white tracking-tighter leading-tight mb-2">계약이 완료되었습니다! 🎊</h4>
-                        <p className="text-base font-bold text-emerald-50 leading-relaxed">
-                          어떤 공간이 입점될 예정입니다.<br/>
-                          많이 기대해주세요! ✨
-                        </p>
+                  {/* 이웃들의 상상 TOP 3 */}
+                  {sortedVotes.length > 0 && (
+                    <div className="w-full space-y-2">
+                      <div className="flex items-center gap-2 ml-1">
+                        <Star size={14} className="text-amber-500" />
+                        <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">현재 이웃들의 상상 TOP 3</p>
                       </div>
-                    </motion.div>
-                  ) : votingStep === "category" ? (
-                    <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-2.5">
-                      {sortedVotes.length > 0 && (
-                        <div className="mb-1 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Star size={14} className="text-amber-500" />
-                            <p className="text-[11px] font-black text-white uppercase tracking-widest">현재 이웃들의 상상 TOP 3</p>
-                          </div>
-                          <div className="flex flex-col gap-1.5">
-                            {sortedVotes.slice(0, 3).map((v, i) => (
-                              <div key={v.id} className="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-[11px] font-black text-slate-950 shadow-lg shadow-amber-500/20">{i + 1}</div>
-                                  <span className="text-sm font-bold text-white">{v.brand}</span>
-                                </div>
-                                <span className="text-[11px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg">{v.count}표</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {recommendedCategory && !hasVoted && (
-                        <motion.button 
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            setSelectedCategory(recommendedCategory ? getCategoryIdFromRecommendation(recommendedCategory) : null);
-                            handleVoteSubmit(undefined, recommendedCategory || undefined, recommendedCategory ? getCategoryIdFromRecommendation(recommendedCategory) : undefined);
-                          }}
-                          className="w-full p-4 md:p-6 bg-gradient-to-br from-amber-400 via-amber-300 to-amber-500 rounded-[2.5rem] border-[3px] border-white shadow-[0_25px_50px_rgba(245,158,11,0.3)] flex items-center justify-between group"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-11 h-11 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-2xl group-hover:rotate-12 group-hover:scale-110 transition-all duration-500">
-                              <Sparkles size={20} fill="currentColor" />
+                      <div className="flex flex-col gap-1.5">
+                        {sortedVotes.slice(0, 3).map((v, i) => (
+                          <div key={v.id} className="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-[11px] font-black text-slate-950 shadow-lg shadow-amber-500/20">{i + 1}</div>
+                              <span className="text-sm font-bold text-white">{v.brand}</span>
                             </div>
-                            <div className="text-left">
-                              <div className="flex items-center gap-3 mb-1">
-                                <p className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] leading-none opacity-80">{userProfile?.nickname || "대표님"}님을 위한 추천</p>
-                                <span className="px-2.5 py-0.5 bg-slate-950 text-amber-500 text-[9px] font-black rounded-full uppercase tracking-tighter shadow-lg">
-                                  {CATEGORIES.find(c => c.id === getCategoryIdFromRecommendation(recommendedCategory || ""))?.label || "기타"}
-                                </span>
-                              </div>
-                              <h4 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tighter leading-tight italic">"{recommendedCategory}"</h4>
-                            </div>
+                            <span className="text-[11px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg">{v.count}표</span>
                           </div>
-                        </motion.button>
-                      )}
-                      
-                      <div className="grid grid-cols-4 gap-2">
-                        {CATEGORIES.map((cat) => (
-                           <button key={cat.id} onClick={() => handleCategorySelect(cat.id)} className="flex flex-col items-center justify-center h-14 md:h-16 w-full bg-white/5 border border-white/10 rounded-2xl hover:bg-amber-500 active:scale-95 transition-all group">
-                             <div className="text-white group-hover:scale-110 transition-transform mb-1 scale-75">{cat.icon}</div>
-                             <span className="text-[10px] font-black text-white/70 group-hover:text-white uppercase">{cat.label}</span>
-                           </button>
                         ))}
                       </div>
-                    </motion.div>
+                    </div>
+                  )}
+
+                  {/* 중개사 정보 */}
+                  {vacancy.realtorName && (
+                    <div className="mt-4 px-4 py-3 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group">
+                      <div className="flex items-center gap-2">
+                        <Briefcase size={12} className="text-slate-500" />
+                        <span className="text-[10px] font-bold text-slate-400">담당 중개사: <span className="text-white ml-1">{vacancy.realtorName}</span></span>
+                      </div>
+                      {vacancy.realtorPhone && (
+                        <a href={`tel:${vacancy.realtorPhone}`} className="text-[9px] font-black text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/10 hover:bg-amber-500/20 transition-all">
+                          문의하기
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* [🗳️ 상상의 실 투표함 구역]
+                  참고자료 리포트 카드와 확실한 경계를 띄우고, 2px 골드빛 보더를 둘러 인터랙티브 포인트를 즉시 인지하도록 유도합니다! */}
+              <div className="bg-slate-900/95 backdrop-blur-3xl border-2 border-amber-500/20 rounded-[3rem] p-6 w-full shadow-[0_30px_70px_rgba(0,0,0,0.6)] overflow-hidden transition-all duration-500">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                    <Gift size={20} className="text-white" />
+                  </div>
+                  <div>
+                     <h3 className="text-lg font-black text-white tracking-tight leading-none mb-1">상상 투표소</h3>
+                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest leading-none">
+                       {votingStep === 'results' ? '이웃들의 상상 결합 중' : '동네의 미래를 그려보세요'}
+                     </p>
+                  </div>
+                  {votingStep !== "category" && (
+                     <button 
+                      onClick={() => { setVotingStep("category"); setSelectedCategory(null); }}
+                      className="ml-auto bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded-lg text-[9px] font-black tracking-widest uppercase transition-all"
+                     >
+                       수정하기
+                     </button>
+                   )}
+                </div>
+
+                <div className="relative">
+                  <AnimatePresence mode="wait">
+                    {vacancy.status === 'completed' ? (
+                      <motion.div 
+                        key="completed-msg"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2.5rem] shadow-[0_20px_50px_rgba(16,185,129,0.3)] border-4 border-white/20 text-center relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 right-0 p-4 opacity-20 rotate-12 scale-150"><Sparkles size={100} className="text-white" /></div>
+                        <div className="relative z-10">
+                          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/30">
+                            <CheckCircle2 size={40} className="text-white" strokeWidth={3} />
+                          </div>
+                          <h4 className="text-2xl font-black text-white tracking-tighter leading-tight mb-2">계약이 완료되었습니다! 🎊</h4>
+                          <p className="text-base font-bold text-emerald-50 leading-relaxed">
+                            어떤 공간이 입점될 예정입니다.<br/>
+                            많이 기대해주세요! ✨
+                          </p>
+                        </div>
+                      </motion.div>
+                    ) : votingStep === "category" ? (
+                      <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
+                        
+                        {/* 질문 헤더 추가 */}
+                        <div className="text-center my-2">
+                          <h4 className="text-base font-black text-amber-400 tracking-tight leading-none mb-1">
+                            어떤 "큰 카테고리"가 생기면 좋을까요?
+                          </h4>
+                          <p className="text-[10px] font-bold text-slate-400">동네에 필요한 상상의 종류를 하나 꾹 눌러주세요</p>
+                        </div>
+
+                        {recommendedCategory && !hasVoted && (
+                          <motion.button 
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              setSelectedCategory(recommendedCategory ? getCategoryIdFromRecommendation(recommendedCategory) : null);
+                              handleVoteSubmit(undefined, recommendedCategory || undefined, recommendedCategory ? getCategoryIdFromRecommendation(recommendedCategory) : undefined);
+                            }}
+                            className="w-full p-4 md:p-6 bg-gradient-to-br from-amber-400 via-amber-300 to-amber-500 rounded-[2.5rem] border-[3px] border-white shadow-[0_25px_50px_rgba(245,158,11,0.3)] flex items-center justify-between group"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-2xl group-hover:rotate-12 group-hover:scale-110 transition-all duration-500">
+                                <Sparkles size={20} fill="currentColor" />
+                              </div>
+                              <div className="text-left">
+                                <div className="flex items-center gap-3 mb-1">
+                                  <p className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] leading-none opacity-80">{userProfile?.nickname || "대표님"}님을 위한 추천</p>
+                                  <span className="px-2.5 py-0.5 bg-slate-950 text-amber-500 text-[9px] font-black rounded-full uppercase tracking-tighter shadow-lg">
+                                    {CATEGORIES.find(c => c.id === getCategoryIdFromRecommendation(recommendedCategory || ""))?.label || "기타"}
+                                  </span>
+                                </div>
+                                <h4 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tighter leading-tight italic">"{recommendedCategory}"</h4>
+                              </div>
+                            </div>
+                          </motion.button>
+                        )}
+                        
+                        {/* 3x3 Grid 개편 */}
+                        <div className="grid grid-cols-3 gap-3">
+                          {CATEGORIES.map((cat) => (
+                             <button 
+                               key={cat.id} 
+                               onClick={() => handleCategorySelect(cat.id)} 
+                               className="flex flex-col items-center justify-center h-20 w-full bg-white/5 border border-white/10 rounded-2xl hover:bg-amber-500 hover:border-amber-400 active:scale-95 transition-all group"
+                             >
+                               <div className="text-white group-hover:scale-110 transition-transform mb-1.5 scale-90">{cat.icon}</div>
+                               <span className="text-[10px] font-black text-white/70 group-hover:text-white uppercase leading-none">{cat.label}</span>
+                             </button>
+                          ))}
+                        </div>
+                      </motion.div>
                   ) : votingStep === "detail" ? (
                     <motion.div key="details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
                        <div className="flex flex-wrap gap-2">
