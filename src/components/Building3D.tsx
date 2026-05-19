@@ -70,9 +70,10 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   userProfile: UserProfile | null,
   recommendedCategory: string | null
 }) {
-  const [reportMode, setReportMode] = useState<"dispute" | "movein" | null>(null);
+  const [reportMode, setReportMode] = useState<"choice" | "input" | null>(null);
+  const [reportType, setReportType] = useState<"movein" | "dispute" | null>(null);
+  const [reportText, setReportText] = useState("");
   const [reportSubmitted, setReportSubmitted] = useState(false);
-  const [moveInText, setMoveInText] = useState("");
   const [inputValue, setInputValue] = useState("");
   
   const [votingStep, setVotingStep] = useState<"category" | "detail" | "results">(hasVoted ? "results" : "category");
@@ -747,7 +748,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
               </div>
 
               <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                <button onClick={() => setReportMode("dispute")} className="flex items-center gap-2 text-slate-500 hover:text-amber-400 transition-colors text-[10px] font-black uppercase tracking-widest"><AlertTriangle size={12} /> 정보 정정하기</button>
+                <button onClick={() => setReportMode("choice")} className="flex items-center gap-2 text-slate-500 hover:text-amber-400 transition-colors text-[10px] font-black uppercase tracking-widest"><AlertTriangle size={12} /> 정보 정정하기</button>
                 <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
                    <div className="flex -space-x-2">
                      {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[8px] text-white font-black">{i}</div>)}
@@ -766,35 +767,147 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
             transition={{ type: "spring", damping: 25 }} 
             className="w-full max-w-2xl mx-auto"
           >
-            <div className="bg-white rounded-[3rem] p-10 w-full shadow-2xl relative overflow-hidden">
+            {/* 이전 투표창과 완벽히 통일된 딥 실버/슬레이트 카드 스타일 */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-8 w-full shadow-2xl relative overflow-hidden text-white">
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 to-orange-500" />
-              <button onClick={() => setReportMode(null)} className="text-slate-400 text-xs font-black flex items-center gap-1 mb-8 hover:text-slate-600 transition uppercase tracking-widest"><ChevronDown size={14} className="rotate-90" /> 돌아가기</button>
+              <button 
+                onClick={() => {
+                  if (reportMode === "input") {
+                    setReportMode("choice");
+                  } else {
+                    setReportMode(null);
+                    setReportType(null);
+                    setReportText("");
+                  }
+                }} 
+                className="text-slate-400 hover:text-white text-xs font-black flex items-center gap-1 mb-8 transition uppercase tracking-widest"
+              >
+                <ChevronDown size={14} className="rotate-90" /> 돌아가기
+              </button>
+
               <AnimatePresence mode="wait">
                 {reportSubmitted ? (
-                  <motion.div key="done" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
-                    <div className="w-24 h-24 bg-emerald-100 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner"><CheckCircle2 size={48} className="text-emerald-500" /></div>
-                    <p className="font-black text-slate-900 text-3xl tracking-tight mb-2">상상 조각을 받았습니다!</p>
-                    <p className="text-slate-400 font-bold">동네를 아끼는 마음, 감사합니다.</p>
+                  /* 정정 리포트 제출 성공 서브 스크린 - 툇마루단/CEO 에스컬레이션 알림 포함 */
+                  <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-4 text-center">
+                    <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-inner text-amber-500">
+                      <AlertTriangle size={32} />
+                    </div>
+                    <span className="inline-block px-3 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-black rounded-full mb-3 uppercase tracking-widest">
+                      ⚠️ 현장 확인 대기 중
+                    </span>
+                    <h3 className="font-black text-white text-xl tracking-tight mb-2">검토 리스트에 즉시 접수되었습니다</h3>
+                    <p className="text-[11px] font-bold text-slate-400 mb-6 leading-relaxed max-w-sm mx-auto">
+                      담당 지역 <span className="text-amber-400 font-black">툇마루단, 운영팀장, CEO</span>가 직접 확인해야 할 공실 정정 리스트에 즉시 반영되었습니다.
+                    </p>
+                    
+                    {/* 사용자 제보 내용 표시 */}
+                    <div className="bg-slate-950/60 border border-white/5 rounded-2xl p-5 mb-8 text-left max-w-md mx-auto">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        <span className="text-[9px] font-black text-amber-500 tracking-wider uppercase">제보된 공간 정정 의견</span>
+                      </div>
+                      <p className="text-xs font-bold text-slate-300 leading-relaxed whitespace-pre-wrap">
+                        "{reportText}"
+                      </p>
+                    </div>
+
+                    <button 
+                      onClick={() => {
+                        setReportSubmitted(false);
+                        setReportMode(null);
+                        setReportText("");
+                        setReportType(null);
+                      }} 
+                      className="w-full max-w-md bg-amber-500 text-slate-950 font-black py-4.5 rounded-2xl text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
+                    >
+                      확인
+                    </button>
                   </motion.div>
-                ) : reportMode === "dispute" ? (
-                  <motion.div key="dispute" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">공간 정보 정정 🕯️</h3>
-                    <p className="text-slate-500 font-bold mb-10 leading-relaxed text-sm">실제 현장 소식과 다른 내용이 있나요? 알려주세요.</p>
-                    <div className="flex gap-4">
-                      <button onClick={() => submitReport('dispute')} className="flex-1 bg-slate-50 text-slate-400 font-black py-8 rounded-[2rem] hover:bg-slate-100 transition-all flex flex-col items-center gap-4 border-2 border-slate-50">
-                        <X size={32} className="text-slate-300" /><span className="text-sm">다른 가게가 생겼어요</span>
+                ) : reportMode === "choice" ? (
+                  /* 정정 리포트 유형 선택 서브 스크린 (입점소식 알아요 vs 달라요) */
+                  <motion.div key="choice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <div className="flex items-center gap-2 mb-2 ml-1">
+                      <AlertTriangle size={18} className="text-amber-500" />
+                      <h3 className="text-lg font-black text-amber-500 uppercase tracking-widest leading-none">공간 정보 정정</h3>
+                    </div>
+                    <p className="text-[11px] font-bold text-slate-400 mb-6">실제 현장 소식과 다른 내용이 있나요? 올바른 정보를 제보해주세요.</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      {/* 1. 입점소식을 알아요 */}
+                      <button
+                        onClick={() => { setReportType("movein"); setReportMode("input"); }}
+                        className="flex flex-col items-center justify-center p-6 rounded-3xl border border-white/5 bg-slate-950/40 hover:bg-slate-950/80 hover:border-amber-500/50 transition-all shadow-md group text-center"
+                      >
+                        <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mb-4 group-hover:scale-110 transition-transform">
+                          <Sparkles size={24} />
+                        </div>
+                        <span className="text-sm font-black text-white mb-1">입점소식을 알아요</span>
+                        <span className="text-[9px] font-bold text-slate-500 leading-tight">공사 소식이나 현수막 제보</span>
                       </button>
-                      <button onClick={() => setReportMode("movein")} className="flex-1 bg-amber-50 text-amber-600 font-black py-8 rounded-[2rem] hover:bg-amber-100 transition-all flex flex-col items-center gap-4 border-2 border-amber-100 shadow-sm shadow-amber-500/10">
-                        <Sparkles size={32} className="text-amber-500" /><span className="text-sm">입점 소식을 알아요</span>
+
+                      {/* 2. 제가 아는 정보와 달라요 */}
+                      <button
+                        onClick={() => { setReportType("dispute"); setReportMode("input"); }}
+                        className="flex flex-col items-center justify-center p-6 rounded-3xl border border-white/5 bg-slate-950/40 hover:bg-slate-950/80 hover:border-amber-500/50 transition-all shadow-md group text-center"
+                      >
+                        <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 mb-4 group-hover:scale-110 transition-transform">
+                          <AlertTriangle size={24} />
+                        </div>
+                        <span className="text-sm font-black text-white mb-1">제가 아는 정보와 달라요</span>
+                        <span className="text-[9px] font-bold text-slate-500 leading-tight">공실 여부 또는 정보 정정</span>
                       </button>
                     </div>
                   </motion.div>
                 ) : (
-                  <motion.div key="movein" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">🎊 입점 정보 공유</h3>
-                    <p className="text-slate-500 font-bold mb-8 text-sm">현수막이나 공사 차량을 보셨나요? 정보를 나눠주세요.</p>
-                    <textarea value={moveInText} onChange={(e) => setMoveInText(e.target.value)} placeholder="어떤 브랜드나 가게가 들어오나요?" rows={3} className="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-3xl focus:outline-none focus:ring-4 focus:ring-amber-500/20 font-bold resize-none mb-6 text-slate-700" />
-                    <button onClick={() => submitReport('movein', moveInText)} className="w-full bg-slate-950 text-white font-black py-6 rounded-3xl flex items-center justify-center gap-3 shadow-2xl shadow-slate-900/30">제보 완료하기</button>
+                  /* 정정 리포트 텍스트 입력 서브 스크린 */
+                  <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <div className="flex items-center gap-2 mb-2 ml-1">
+                      {reportType === "movein" ? (
+                        <Sparkles size={18} className="text-amber-500" />
+                      ) : (
+                        <AlertTriangle size={18} className="text-orange-500" />
+                      )}
+                      <h3 className="text-lg font-black text-white uppercase tracking-widest leading-none">
+                        {reportType === "movein" ? "🎊 입점 정보 공유" : "🕯️ 정보 상이 제보"}
+                      </h3>
+                    </div>
+                    <p className="text-[11px] font-bold text-slate-400 mb-6">
+                      {reportType === "movein" 
+                        ? "현수막이나 공사 현황을 보셨나요? 정보를 나눠주세요." 
+                        : "실제 현장 정보와 어떤 점이 다른가요? 상세하게 적어주세요."}
+                    </p>
+                    
+                    <textarea 
+                      value={reportText} 
+                      onChange={(e) => setReportText(e.target.value)} 
+                      placeholder={
+                        reportType === "movein" 
+                          ? "예: 1층에 투썸플레이스가 다음 주부터 공사를 시작한다고 현수막이 붙어 있어요!" 
+                          : "예: 이 공간은 이미 공실이 아니라 옷가게가 영업을 시작했어요 / 1층이 아니라 2층 공실이에요."
+                      } 
+                      rows={4} 
+                      className="w-full px-6 py-5 bg-slate-950/80 border border-white/10 rounded-3xl focus:outline-none focus:ring-4 focus:ring-amber-500/20 font-bold resize-none mb-6 text-white placeholder-slate-600 text-sm" 
+                    />
+                    
+                    <div className="flex gap-4">
+                      <button 
+                        onClick={() => setReportMode("choice")} 
+                        className="flex-1 py-4.5 bg-white/5 border border-white/10 text-slate-300 font-black rounded-2xl text-sm hover:bg-white/10 transition-all"
+                      >
+                        돌아가기
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (reportText.trim()) {
+                            submitReport(reportType!, reportText);
+                          }
+                        }}
+                        disabled={!reportText.trim()}
+                        className="flex-1 py-4.5 bg-amber-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 font-black rounded-2xl text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-amber-500/10"
+                      >
+                        제보 완료하기
+                      </button>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
