@@ -13,6 +13,15 @@ export default function Home() {
     const saved = loadSavedProfile();
     if (saved) setUserProfile(saved);
     setChecked(true);
+
+    // URL clean up for ?login=success
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("login")) {
+        url.searchParams.delete("login");
+        window.history.replaceState({}, "", url.pathname + url.search);
+      }
+    }
   }, []);
 
   if (!checked) return null; // prevents hydration mismatch

@@ -4,8 +4,8 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { Vacancy, VoteItem } from "@/data/dummyVacancies";
 import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { recordVote } from "@/components/MyPage";
-import { saveVote } from "@/lib/db";
+import { recordVote } from "./MyPage";
+import { saveVote, saveVacancy, submitDisputeReport } from "@/lib/db";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "../lib/comments";
 
 // ─── Constants ────────────────────────────────────────────────────────────
@@ -263,19 +263,59 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     setInputValue(sub);
   };
 
-  const submitReport = (type: string, content?: string) => {
+  const submitReport = async (type: string, content?: string) => {
+    const reportTextRaw = content || (type === 'dispute' ? '다른 가게가 생겼어요' : '');
+    const prefix = type === 'movein' ? '[신고접수: 입점소식]' : '[신고접수: 정보상이]';
+    const cleanContent = `${prefix} ${reportTextRaw}`;
+
+    let newRemarks = cleanContent;
+    if (vacancy.surveyRemarks) {
+      newRemarks = `${vacancy.surveyRemarks}\n\n${cleanContent}`;
+    }
+
     const newReport = {
       id: Date.now().toString(),
       type: type as 'dispute' | 'movein',
-      content: content || (type === 'dispute' ? '다른 가게가 생겼어요' : ''),
+      content: reportTextRaw,
       timestamp: Date.now()
     };
+
     const updated = {
       ...vacancy,
+      surveyRemarks: newRemarks,
       reports: [...(vacancy.reports || []), newReport]
     };
+
     onVacancyUpdate(updated);
     setReportSubmitted(true);
+
+    try {
+      // 1. 공실의 surveyRemarks 업데이트
+      await saveVacancy({
+        id: vacancy.id,
+        landmark: vacancy.landmark || "",
+        address: vacancy.address || "",
+        floor: vacancy.floor || "",
+        lat: vacancy.lat,
+        lng: vacancy.lng,
+        neighborhood: vacancy.neighborhood || "",
+        surveyRemarks: newRemarks,
+        displayId: vacancy.displayId
+      });
+      
+      // 2. 구조화된 제보 테이블(reports)에 신규 데이터 삽입
+      const userId = (typeof window !== "undefined" ? localStorage.getItem("gongsil_user_id") : null) || "anonymous_user";
+      await submitDisputeReport({
+        vacancyId: vacancy.id,
+        userId: userId,
+        reportType: type as 'dispute' | 'movein',
+        content: reportTextRaw
+      });
+
+      console.log("Supabase에 제보 정보 및 구조화 데이터가 성공적으로 반영되었습니다.");
+    } catch (e) {
+      console.warn("제보 Supabase 반영 실패:", e);
+    }
   };
 
   const handleShare = async () => {

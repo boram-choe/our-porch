@@ -133,6 +133,8 @@ export default function SurveyorPage() {
       surveyRemarks: v.survey_remarks,
       realtorName: v.realtor_name,
       realtorPhone: v.realtor_phone,
+      monthlyRent: v.monthly_rent,
+      managementFee: v.management_fee,
       hiddenReason: v.hidden_reason,
       hiddenComment: v.hidden_comment,
       mergedIntoId: v.merged_into_id,
@@ -508,14 +510,14 @@ export default function SurveyorPage() {
                 {renderVacancyList(
                   "확인 완료 공실", 
                   <Check size={24} />, 
-                  v => !!(v.images && (v.images as any).length > 0 && (v.status === 'available' || !v.status)), 
+                  v => !!(v.images && (v.images as any).length > 0 && (v.status === 'available' || !v.status)) && !v.survey_remarks?.includes("[신고접수"), 
                   "bg-emerald-500"
                 )}
 
                 {renderVacancyList(
                   "확인 필요 공실", 
                   <AlertTriangle size={24} />, 
-                  v => (!v.images || (v.images as any).length === 0) && (v.status === 'available' || !v.status), 
+                  v => ((!v.images || (v.images as any).length === 0) || !!v.survey_remarks?.includes("[신고접수")) && (v.status === 'available' || !v.status), 
                   "bg-amber-500"
                 )}
 
@@ -843,6 +845,7 @@ export default function SurveyorPage() {
             onEditLocation={() => {
               setShowSurveyInput(false);
               setIsPinpointing(true);
+              setActiveView("map");
             }}
           />
         )}

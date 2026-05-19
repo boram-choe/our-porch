@@ -563,3 +563,96 @@ export async function loginTeamMember(id: string, password: string): Promise<Tea
   return data;
 }
 
+// ─── 공실 정보 정정 제보 및 회신(메시지함) ─────────────────────────────────────────
+
+export interface DbReport {
+  id: string;
+  vacancy_id: string;
+  user_id: string;
+  report_type: 'dispute' | 'movein';
+  content: string;
+  status: 'pending' | 'resolved';
+  reply_content: string | null;
+  created_at: string;
+  updated_at: string;
+  // UI 결합 필드
+  landmark?: string;
+  address?: string;
+}
+
+export async function submitDisputeReport(report: {
+  vacancyId: string;
+  userId: string;
+  reportType: 'dispute' | 'movein';
+  content: string;
+}): Promise<{ id: string | null; error: string | null }> {
+  const payload = {
+    vacancy_id: report.vacancyId,
+    user_id: report.userId,
+    report_type: report.reportType,
+    content: report.content,
+    status: 'pending',
+    reply_content: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from('reports')
+    .insert(payload)
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error("제보 저장 오류:", error.message);
+    return { id: null, error: error.message };
+  }
+  return { id: data ? data.id : null, error: null };
+}
+
+export async function fetchUserReports(userId: string): Promise<DbReport[]> {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error || !data) {
+    console.error("제보 조회 오류:", error?.message);
+    return [];
+  }
+  return data as DbReport[];
+}
+
+export async function fetchVacancyReports(vacancyId: string): Promise<DbReport[]> {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .eq('vacancy_id', vacancyId)
+    .order('created_at', { ascending: false });
+
+  if (error || !data) {
+    console.error("공실 제보 조회 오류:", error?.message);
+    return [];
+  }
+  return data as DbReport[];
+}
+
+export async function updateReportReply(reportId: string, replyContent: string): Promise<{ error: string | null }> {
+  const { error } = await supabase
+    .from('reports')
+    .update({
+      reply_content: replyContent,
+      status: 'resolved',
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', reportId);
+
+  if (error) {
+    console.error("제보 회신 저장 오류:", error.message);
+    return { error: error.message };
+  }
+  return { error: null };
+}
+
+

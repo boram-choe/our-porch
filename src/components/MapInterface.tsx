@@ -656,9 +656,18 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     <div className="relative w-full h-screen bg-slate-950 font-sans overflow-hidden subpixel-antialiased text-slate-900">
       <div className="absolute top-4 md:top-8 left-0 right-0 px-4 md:px-6 z-[100] pointer-events-none">
         <div className="flex items-center gap-2 md:gap-4 w-full max-w-2xl mx-auto">
-          <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-2 md:gap-3 bg-slate-950/80 backdrop-blur-xl px-3 md:px-5 py-2.5 md:py-3 rounded-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-            <img src="/images/logo.png" alt="여긴뭐가 로고" className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl object-cover shadow-lg shadow-amber-500/10 flex-shrink-0" />
-            <h1 className="text-sm md:text-base font-black text-white tracking-tighter hidden sm:block">여긴뭐가</h1>
+          <motion.div 
+            initial={{ x: -20, opacity: 0 }} 
+            animate={{ x: 0, opacity: 1 }} 
+            className="w-11 h-11 md:w-14 md:h-14 bg-slate-950/80 backdrop-blur-xl rounded-xl md:rounded-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4)] overflow-hidden flex items-center justify-center pointer-events-auto flex-shrink-0"
+          >
+            <div className="w-full h-full overflow-hidden flex items-center justify-center relative bg-slate-950">
+              <img 
+                src="/images/logo.png" 
+                alt="여긴뭐가 로고" 
+                className="w-full h-full object-cover scale-[1.3] -translate-y-[12%]" 
+              />
+            </div>
           </motion.div>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 pointer-events-auto">
             <div className="bg-slate-950/80 backdrop-blur-xl p-1 md:p-1.5 rounded-[1.4rem] md:rounded-[1.8rem] border border-white/10 flex gap-0.5 md:gap-1 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
@@ -1047,6 +1056,14 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           </motion.div>
         )}
       </AnimatePresence>
+      {/* 사업자 정보 푸터 (카카오 비즈니스 채널 심사용) */}
+      <div className="hidden md:flex absolute bottom-2 left-4 z-[300] bg-slate-950/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 text-[9px] md:text-[10px] text-slate-400 font-bold flex items-center gap-3 shadow-lg pointer-events-auto">
+        <span className="text-white font-black">사업자 정보</span>
+        <span className="text-white/20">|</span>
+        <span>상호명: 채담</span>
+        <span className="text-white/20">|</span>
+        <span>사업자등록번호: <span className="text-amber-500 font-black">621-50-01252</span></span>
+      </div>
     </div>
   );
 }

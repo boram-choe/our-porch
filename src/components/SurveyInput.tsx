@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Building2, Landmark, Layers, CircleDollarSign, MessageSquare, User, Phone, Check, Camera, Plus, Trash2, Clock, History, MapPin } from "lucide-react";
 import { Vacancy } from "../data/dummyVacancies";
-import { uploadImage } from "../lib/db";
+import { uploadImage, fetchVacancyReports, updateReportReply, DbReport } from "../lib/db";
 
 interface SurveyInputProps {
   allVacancies: any[];
@@ -109,6 +109,50 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
     mergedIntoId: initialData?.merged_into_id || initialData?.mergedIntoId || "",
     rejectionReason: initialData?.rejectionReason || initialData?.rejection_reason || "",
   });
+
+  const [pendingReports, setPendingReports] = useState<DbReport[]>([]);
+  const [replyTexts, setReplyTexts] = useState<{[key: string]: string}>({});
+
+  useEffect(() => {
+    async function loadReports() {
+      if (initialData?.id) {
+        try {
+          const reports = await fetchVacancyReports(initialData.id);
+          setPendingReports(reports.filter(r => r.status === 'pending'));
+        } catch (e) {
+          console.error("Failed to load vacancy reports", e);
+        }
+      }
+    }
+    loadReports();
+  }, [initialData?.id]);
+
+  const handleResolveReport = async (reportId: string) => {
+    const replyText = replyTexts[reportId]?.trim();
+    if (!replyText) {
+      alert("주민분께 전할 회신 메시지를 입력해주세요.");
+      return;
+    }
+
+    try {
+      await updateReportReply(reportId, replyText);
+      alert("제보하신 주민분께 감사 메시지가 성공적으로 전송되었습니다! ✨");
+
+      setPendingReports(prev => prev.filter(r => r.id !== reportId));
+
+      if (formData.surveyRemarks) {
+        const lines = formData.surveyRemarks.split('\n\n');
+        const cleanedLines = lines.filter(line => !line.includes('[신고접수]'));
+        setFormData(prev => ({
+          ...prev,
+          surveyRemarks: cleanedLines.join('\n\n')
+        }));
+      }
+    } catch (err) {
+      console.error("제보 답변 작성 실패:", err);
+      alert("제보 해결 처리 중 오류가 발생했습니다.");
+    }
+  };
 
   const [isUploading, setIsUploading] = useState<number | null>(null);
 
@@ -409,6 +453,59 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
               </motion.div>
             )}
           </div>
+
+          {pendingReports.length > 0 && (
+            <div className="p-8 bg-rose-50/50 rounded-[2.5rem] border-2 border-rose-100 space-y-6">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🚨</span>
+                <div>
+                  <h3 className="text-lg font-black text-rose-800 tracking-tight">접수된 주민 제보 및 정보 정정 요청 ({pendingReports.length})</h3>
+                  <p className="text-[11px] font-bold text-rose-600/80 leading-relaxed mt-0.5">
+                    주민분들이 지도에서 보고 수정을 제안한 실시간 제보입니다. 답변을 작성하여 제보를 해결 처리해 주세요.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {pendingReports.map((report) => (
+                  <div key={report.id} className="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md">
+                        {report.report_type === 'movein' ? '입점 소식 알림' : '정보 정정 요청'}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400">
+                        {new Date(report.created_at).toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest text-[9px]">제보 내용</p>
+                      <p className="text-xs font-bold text-slate-800 leading-relaxed italic">
+                        "{report.content}"
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">주민 감사 및 회신 피드백 메시지</label>
+                      <textarea
+                        value={replyTexts[report.id] || ""}
+                        onChange={(e) => setReplyTexts(prev => ({ ...prev, [report.id]: e.target.value }))}
+                        placeholder="이웃분께 전할 친절한 확인 메시지를 작성해 주세요. (예: 툇마루단 OOO대리가 현장 확인하여 정보를 업데이트하였습니다. 유익한 제보 대단히 감사드립니다!)"
+                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-3 px-4 font-bold text-slate-950 focus:outline-none focus:border-rose-500 transition-all text-xs min-h-[80px]"
+                      />
+                      
+                      <button
+                        onClick={() => handleResolveReport(report.id)}
+                        className="w-full py-3 bg-rose-600 text-white rounded-xl text-xs font-black hover:bg-rose-500 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        답변 작성 및 제보 해결 ✓
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-8">
             <div className="flex items-center gap-4 mb-4"><div className="h-10 w-2 bg-amber-500 rounded-full" /><h3 className="text-2xl font-black text-slate-950 tracking-tight">툇마루단 소견</h3></div>

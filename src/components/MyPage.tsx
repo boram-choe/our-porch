@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
+import { fetchUserReports, DbReport } from "@/lib/db";
 
 const VOTES_KEY = "gongsil_user_votes";
 
@@ -46,7 +47,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [showFeasibility, setShowFeasibility] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<"profile" | "activity" | "settings">(isEntrepreneurMode ? "activity" : "profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "activity" | "reports" | "settings">(isEntrepreneurMode ? "activity" : "profile");
   const [isEditing, setIsEditing] = useState(false);
   const [editNickname, setEditNickname] = useState("");
   const [votes, setVotes] = useState<VoteRecord[]>([]);
@@ -269,7 +270,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       <div className="px-6 space-y-6">
         {/* Tabs */}
         <div className="flex p-1 bg-slate-200/50 rounded-2xl">
-          {(!isEntrepreneurMode ? ["profile", "activity", "settings"] : ["activity", "settings"]).map((tab) => (
+          {(!isEntrepreneurMode ? ["profile", "activity", "reports", "settings"] : ["activity", "reports", "settings"]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
@@ -277,7 +278,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 activeTab === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
               }`}
             >
-              {tab === "profile" ? "내 정보" : tab === "activity" ? (isEntrepreneurMode ? "관심공간" : "활동 내역") : "설정"}
+              {tab === "profile" ? "내 정보" : tab === "activity" ? (isEntrepreneurMode ? "관심공간" : "활동 내역") : tab === "reports" ? "제보 & 알림함" : "설정"}
             </button>
           ))}
         </div>
@@ -592,6 +593,10 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
           </motion.div>
         )}
 
+        {activeTab === "reports" && (
+          <UserReportsSection vacancies={vacancies} />
+        )}
+
         {activeTab === "settings" && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
@@ -686,5 +691,127 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+// ─── 제보 & 알림함 컴포넌트 ──────────────────────────────────────────────────
+
+function UserReportsSection({ vacancies }: { vacancies: any[] }) {
+  const [reports, setReports] = useState<DbReport[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadReports() {
+      if (typeof window === "undefined") return;
+      const userId = localStorage.getItem("gongsil_user_id") || "anonymous_user";
+      setIsLoading(true);
+      const data = await fetchUserReports(userId);
+      setReports(data);
+      setIsLoading(false);
+    }
+    loadReports();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-xs font-bold text-slate-400">제보 내역을 불러오고 있어요...</p>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+      <div className="flex items-center justify-between px-1">
+        <h3 className="text-lg font-black text-slate-900">나의 공간 제보 내역</h3>
+        <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-widest">
+          {reports.length} 건 접수됨
+        </span>
+      </div>
+
+      {reports.length === 0 ? (
+        <div className="bg-white p-12 rounded-[2rem] text-center border-2 border-dashed border-slate-200">
+          <MessageSquare size={48} className="mx-auto text-slate-200 mb-4" />
+          <p className="text-slate-400 font-bold text-sm leading-relaxed">
+            아직 제보하신 내역이 없습니다.<br/>
+            실제와 다른 공실 정보가 있다면<br/>
+            <span className="text-amber-500 font-black">"정보 정정하기"</span>를 통해 제보해 주세요! ✍️
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {reports.map((report) => {
+            const matchedVacancy = vacancies.find(v => v.id === report.vacancy_id);
+            const spaceName = matchedVacancy?.landmark || matchedVacancy?.address || "우리동네 공실";
+            const isResolved = report.status === 'resolved';
+
+            return (
+              <div key={report.id} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4 relative overflow-hidden">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <span className={`inline-block text-[9px] font-black px-2 py-0.5 rounded-md ${
+                      report.report_type === 'movein' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-orange-50 text-orange-600 border border-orange-100'
+                    }`}>
+                      {report.report_type === 'movein' ? '🎉 입점 소식 제보' : '🚨 정보 정정 제보'}
+                    </span>
+                    <h4 className="text-sm font-black text-slate-900 tracking-tight">{spaceName}</h4>
+                  </div>
+                  
+                  <div className="text-right">
+                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 ${
+                      isResolved ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                    }`}>
+                      {isResolved ? (
+                        <>
+                          <Check size={10} strokeWidth={3} /> 답변 완료
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> 확인 중
+                        </>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                  <p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest text-[9px]">내가 접수한 내용</p>
+                  <p className="text-xs font-bold text-slate-700 leading-relaxed">
+                    "{report.content}"
+                  </p>
+                  <p className="text-[9px] font-bold text-slate-300 mt-2 flex items-center gap-1">
+                    <Clock size={8} /> {new Date(report.created_at).toLocaleString()}
+                  </p>
+                </div>
+
+                {isResolved && report.reply_content ? (
+                  <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/50 flex gap-3 items-start relative">
+                    <div className="w-7 h-7 rounded-xl bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
+                      <Sparkles size={14} fill="currentColor" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">툇마루단 & 운영팀의 감사 메시지</p>
+                      <p className="text-xs font-bold text-emerald-800 leading-relaxed">
+                        {report.reply_content}
+                      </p>
+                      <p className="text-[9px] font-bold text-emerald-600/70 mt-1">
+                        ✓ 확인 완료 • 정정 사항이 동네 지도에 반영되었습니다.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-amber-50/20 p-3.5 rounded-2xl border border-dashed border-amber-200/50 text-center">
+                    <p className="text-[10px] font-bold text-amber-600/70 leading-relaxed">
+                      🕰️ 담당 툇마루단이 현장에 출동하여 꼼꼼하게 실사 중에 있습니다. 확인이 완료되면 즉시 이곳으로 소식을 전해드릴게요!
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </motion.div>
   );
 }
