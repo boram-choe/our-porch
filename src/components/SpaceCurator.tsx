@@ -208,7 +208,7 @@ function MatchCard({ candidate, onSelect, side }: { candidate: Candidate, onSele
         {candidate.name}
       </h3>
       
-      <div className="absolute bottom-4 md:bottom-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 flex items-center gap-2 bg-white text-slate-950 px-5 py-2 md:px-8 md:py-3 rounded-full font-black text-[10px] md:text-sm uppercase tracking-widest shadow-2xl">
+      <div className="absolute bottom-4 md:bottom-12 left-1/2 -translate-x-1/2 opacity-0 md:group-hover:opacity-100 transition-all duration-300 translate-y-4 md:group-hover:translate-y-0 flex items-center gap-2 bg-white text-slate-950 px-5 py-2 md:px-8 md:py-3 rounded-full font-black text-[10px] md:text-sm uppercase tracking-widest shadow-2xl">
          <span>이 공간 선택</span>
          <Heart size={16} fill="currentColor" className="text-rose-500 w-3 h-3 md:w-4 md:h-4" />
       </div>
