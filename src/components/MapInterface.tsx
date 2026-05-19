@@ -613,7 +613,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       </div>
 
       {!isPinpointing && !selectedVacancy && (
-        <div className="absolute bottom-20 md:bottom-10 left-0 right-0 px-6 z-10 pointer-events-none">
+        <div className="absolute bottom-28 md:bottom-10 left-0 right-0 px-6 z-10 pointer-events-none">
           <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white p-5 md:p-6 rounded-[2.5rem] md:rounded-[3rem] shadow-xl border border-slate-100 pointer-events-auto overflow-hidden relative">
              <button onClick={() => setShowDashboard(false)} className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
              <div className="flex items-center justify-between mb-4 mt-2 relative z-10 flex-wrap gap-y-3">
