@@ -126,29 +126,18 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   // ─── 인증 위치 기반 공실 필터링 (반경 2.5km = 인증 동 + 인접 동) ───────────
   const filteredVacancies = useMemo(() => {
-    let urlVacancyId: string | null = null;
-    if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
-      urlVacancyId = searchParams.get("vacancyId");
-    }
-
     if (!userProfile) return vacancies;
     const activeLoc =
       userProfile.activeLocationType === "work"
         ? userProfile.work || userProfile.home
         : userProfile.home;
     if (!activeLoc?.lat || !activeLoc?.lng) return vacancies;
-    return vacancies.filter((v) => {
-      // 만약 공유받은 딥링크 공실 ID와 일치한다면 인증 거리 제한을 우회하여 무조건 표기
-      if (urlVacancyId && v.id === urlVacancyId) return true;
-
-      return (
-        v.status !== 'hidden' && 
-        v.status !== 'merged' && 
-        v.status !== 'rejected' &&
-        haversineKm(activeLoc.lat, activeLoc.lng, v.lat, v.lng) <= FILTER_RADIUS_KM
-      );
-    });
+    return vacancies.filter((v) =>
+      v.status !== 'hidden' && 
+      v.status !== 'merged' && 
+      v.status !== 'rejected' &&
+      haversineKm(activeLoc.lat, activeLoc.lng, v.lat, v.lng) <= FILTER_RADIUS_KM
+    );
   }, [vacancies, userProfile]);
 
   // ─── 반경 내 공실 기반 실시간 피드 생성 ──────────────────────────────────────
@@ -315,21 +304,36 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
             setVacancies(vacanciesWithVotes);
 
-            // ─── 공유 링크(딥링크)로 유입되었을 때 해당 공실 즉시 열기 ─────────
+            // ─── 공유 링크(딥링크)로 유입되었을 때 해당 공실 검증 및 열기 ─────────
             if (typeof window !== "undefined") {
               const searchParams = new URLSearchParams(window.location.search);
               const urlVacancyId = searchParams.get("vacancyId");
               if (urlVacancyId) {
                 const found = vacanciesWithVotes.find(v => v.id === urlVacancyId);
-                if (found) {
+                const activeLoc = finalProfile.activeLocationType === 'home' ? finalProfile.home : (finalProfile.work || finalProfile.home);
+                
+                let isWithinRange = false;
+                if (found && activeLoc?.lat && activeLoc?.lng) {
+                  const distance = haversineKm(activeLoc.lat, activeLoc.lng, found.lat, found.lng);
+                  if (distance <= FILTER_RADIUS_KM) {
+                    isWithinRange = true;
+                  }
+                }
+
+                if (isWithinRange && found) {
                   setSelectedVacancy(found);
                   setMapCenter({ lat: found.lat, lng: found.lng });
-                  // 지도 중심 이동 처리
                   setTimeout(() => {
                     if (mapRef.current) {
                       mapRef.current.setCenter(new kakao.maps.LatLng(found.lat, found.lng));
                     }
                   }, 500);
+                } else {
+                  // 2.5km 범위 밖이거나 동네를 벗어난 곳의 딥링크 공유 접근 차단 안내 및 주소 정리
+                  alert("공유받은 상상 조각이 회원님의 인증 동네(반경 2.5km)를 벗어난 곳에 위치하여 열어볼 수 없습니다. 📍");
+                  searchParams.delete("vacancyId");
+                  const query = searchParams.toString();
+                  window.history.pushState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
                 }
               }
             }
