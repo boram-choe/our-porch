@@ -265,8 +265,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
   const handleShare = async () => {
     const text = `우리 동네 '${vacancy.landmark || vacancy.address}' 공간에 이런 게 생기면 어떨까요? 함께 상상해봐요! ✨`;
-    // Vercel 기본 주소 등으로 접속했더라도 항상 공식 여긴뭐가.kr 주소로 전환하여 공유되도록 처리
-    const url = window.location.href.replace(window.location.origin, 'https://여긴뭐가.kr');
+    // 각 공실의 고유 ID를 쿼리 파라미터로 결합하여 북마크/공유 시 해당 공실이 즉시 열리도록 딥링크 구축
+    const url = `https://여긴뭐가.kr/?vacancyId=${vacancy.id}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: '여긴뭐가 | 우리 동네 상상 시뮬레이터', text, url });

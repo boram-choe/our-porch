@@ -40,6 +40,49 @@ const SPACE_FEATURES = [
   { id: "high", label: "높은층고", icon: "⬆️" }
 ];
 
+const getCategoryIdFromVote = (categoryText: string): string => {
+  const matchLabel = [
+    { id: 'cafe', label: '카페' },
+    { id: 'food', label: '음식점' },
+    { id: 'hair', label: '미용/뷰티' },
+    { id: 'doctor', label: '병원/약국' },
+    { id: 'gym', label: '운동/헬스' },
+    { id: 'store', label: '상점/생활' },
+    { id: 'edu', label: '교육/학원' },
+    { id: 'studio', label: '스튜디오' },
+  ].find(c => c.label === categoryText);
+  if (matchLabel) return matchLabel.id;
+
+  const categoriesList = [
+    { id: 'cafe', subs: ['프랜차이즈', '감성카페', '디저트/베이커리'], brands: ['스타벅스', '스벅', '투썸플레이스', '투썸', '이디야', '폴바셋', '메가커피', '빽다방'] },
+    { id: 'food', subs: ['한식', '양식', '일식/중식', '패스트푸드'], brands: ['맥도날드', '서브웨이', '본죽', '미즈컨테이너', '버거킹'] },
+    { id: 'hair', subs: ['헤어살롱', '남성전용/바버샵', '네일/에스테틱'], brands: ['준오헤어', '박승철헤어', '리안헤어', '올리브영'] },
+    { id: 'doctor', subs: ['소아과', '치과', '내과/가정의학', '약국'], brands: [] },
+    { id: 'gym', subs: ['헬스장', '필라테스/요가', '태권도/주짓수'], brands: [] },
+    { id: 'store', subs: ['편의점', '소품샵', '무인점포', '반찬가게'], brands: ['GS25', 'CU', '세븐일레븐', '다이소'] },
+    { id: 'edu', subs: ['영어/수학', '음악/미술', '스터디카페'], brands: [] },
+    { id: 'studio', subs: ['사진관', '공방/클래스', '꽃집'], brands: [] },
+  ];
+
+  const found = categoriesList.find(c => 
+    c.subs.some(sub => categoryText.includes(sub)) || 
+    c.brands.some(b => categoryText.includes(b))
+  );
+  if (found) return found.id;
+
+  const norm = categoryText.toLowerCase();
+  if (norm.includes("카페") || norm.includes("커피") || norm.includes("디저트") || norm.includes("베이커리") || norm.includes("빵")) return "cafe";
+  if (norm.includes("식당") || norm.includes("맛집") || norm.includes("음식") || norm.includes("한식") || norm.includes("양식") || norm.includes("중식") || norm.includes("일식") || norm.includes("버거") || norm.includes("피자") || norm.includes("치킨")) return "food";
+  if (norm.includes("미용") || norm.includes("뷰티") || norm.includes("헤어") || norm.includes("네일") || norm.includes("바버")) return "hair";
+  if (norm.includes("병원") || norm.includes("의원") || norm.includes("약국") || norm.includes("소아과") || norm.includes("내과") || norm.includes("치과")) return "doctor";
+  if (norm.includes("헬스") || norm.includes("필라테스") || norm.includes("요가") || norm.includes("체육관") || norm.includes("운동") || norm.includes("피트니스") || norm.includes("피티") || norm.includes("gym")) return "gym";
+  if (norm.includes("상점") || norm.includes("생활") || norm.includes("편의점") || norm.includes("마트") || norm.includes("소품") || norm.includes("무인") || norm.includes("가게") || norm.includes("슈퍼")) return "store";
+  if (norm.includes("학원") || norm.includes("교육") || norm.includes("공부") || norm.includes("과외") || norm.includes("스터디")) return "edu";
+  if (norm.includes("스튜디오") || norm.includes("공방") || norm.includes("사진관") || norm.includes("꽃집") || norm.includes("플라워") || norm.includes("사진")) return "studio";
+
+  return "etc";
+};
+
 export default function MapInterface({ userProfile, onProfileUpdate }: { userProfile: UserProfile | null, onProfileUpdate: (updated: UserProfile | null) => void }) {
   const [loading, error] = useKakaoLoader({
     appkey: "4e959900c93f0a3268a637079835bb73",
@@ -83,18 +126,29 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   // ─── 인증 위치 기반 공실 필터링 (반경 2.5km = 인증 동 + 인접 동) ───────────
   const filteredVacancies = useMemo(() => {
+    let urlVacancyId: string | null = null;
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      urlVacancyId = searchParams.get("vacancyId");
+    }
+
     if (!userProfile) return vacancies;
     const activeLoc =
       userProfile.activeLocationType === "work"
         ? userProfile.work || userProfile.home
         : userProfile.home;
     if (!activeLoc?.lat || !activeLoc?.lng) return vacancies;
-    return vacancies.filter((v) =>
-      v.status !== 'hidden' && 
-      v.status !== 'merged' && 
-      v.status !== 'rejected' &&
-      haversineKm(activeLoc.lat, activeLoc.lng, v.lat, v.lng) <= FILTER_RADIUS_KM
-    );
+    return vacancies.filter((v) => {
+      // 만약 공유받은 딥링크 공실 ID와 일치한다면 인증 거리 제한을 우회하여 무조건 표기
+      if (urlVacancyId && v.id === urlVacancyId) return true;
+
+      return (
+        v.status !== 'hidden' && 
+        v.status !== 'merged' && 
+        v.status !== 'rejected' &&
+        haversineKm(activeLoc.lat, activeLoc.lng, v.lat, v.lng) <= FILTER_RADIUS_KM
+      );
+    });
   }, [vacancies, userProfile]);
 
   // ─── 반경 내 공실 기반 실시간 피드 생성 ──────────────────────────────────────
@@ -146,10 +200,28 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     }
   }, []);
 
-  // ─── 공실 선택 시 안내 토스트 자동 제거 ──────────────────────────────────────
+  // ─── 공실 선택 상태와 브라우저 URL 딥링크 동기화 ─────────────────────────────
   useEffect(() => {
     if (selectedVacancy) {
       setShowSuccessToast(null);
+      // 모달이 열릴 때 브라우저 주소 표시줄에 vacancyId 동기화
+      if (typeof window !== "undefined") {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.get("vacancyId") !== selectedVacancy.id) {
+          searchParams.set("vacancyId", selectedVacancy.id);
+          window.history.pushState(null, "", `${window.location.pathname}?${searchParams.toString()}`);
+        }
+      }
+    } else {
+      // 모달이 닫힐 때 브라우저 주소 표시줄에서 vacancyId 깔끔하게 제거
+      if (typeof window !== "undefined") {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has("vacancyId")) {
+          searchParams.delete("vacancyId");
+          const query = searchParams.toString();
+          window.history.pushState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+        }
+      }
     }
   }, [selectedVacancy]);
 
@@ -208,7 +280,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               (votes || []).forEach(vote => {
                 const brand = vote.category;
                 if (!voteCounts[brand]) {
-                  voteCounts[brand] = { brand, count: 0, categoryId: 'etc' };
+                  voteCounts[brand] = { brand, count: 0, categoryId: getCategoryIdFromVote(brand) };
                 }
                 voteCounts[brand].count += 1;
               });
@@ -242,6 +314,25 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             }));
 
             setVacancies(vacanciesWithVotes);
+
+            // ─── 공유 링크(딥링크)로 유입되었을 때 해당 공실 즉시 열기 ─────────
+            if (typeof window !== "undefined") {
+              const searchParams = new URLSearchParams(window.location.search);
+              const urlVacancyId = searchParams.get("vacancyId");
+              if (urlVacancyId) {
+                const found = vacanciesWithVotes.find(v => v.id === urlVacancyId);
+                if (found) {
+                  setSelectedVacancy(found);
+                  setMapCenter({ lat: found.lat, lng: found.lng });
+                  // 지도 중심 이동 처리
+                  setTimeout(() => {
+                    if (mapRef.current) {
+                      mapRef.current.setCenter(new kakao.maps.LatLng(found.lat, found.lng));
+                    }
+                  }, 500);
+                }
+              }
+            }
           } else {
             setVacancies([]);
           }
