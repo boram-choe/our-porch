@@ -79,6 +79,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
+  const hasPhoto = !!(vacancy.images?.[0] || vacancy.imageUrl);
+  const showTopVisual = (votingStep === 'results') || hasPhoto;
+
   // 댓글 관련 상태
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -363,29 +366,36 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
   return (
     <div className="relative w-full h-full overflow-y-auto no-scrollbar bg-slate-950 flex flex-col">
-      <div className="relative w-full h-[50vh] flex-shrink-0 overflow-hidden flex items-center justify-center">
-        {/* 툇마루단 촬영 실사 배경 */}
-        <AnimatePresence>
-          {(vacancy.images?.[0] || vacancy.imageUrl) && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
-              className="absolute inset-0 z-0 pointer-events-none"
-            >
-              <img 
-                src={vacancy.images?.[0] || vacancy.imageUrl || ""} 
-                className="w-full h-full object-cover" 
-                alt="Field Photo Background" 
-              />
-              {/* 자연스러운 그라데이션 오버레이 */}
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
-              <div className="absolute inset-0 backdrop-blur-[1px]" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* 대표사진이 등록되었거나 혹은 마지막 투표 결과(결과창에선 건물 애니메이션을 위해 50vh 유지)일 경우에만 상단 50% 공간 노출 */}
+      {showTopVisual ? (
+        <div className="relative w-full h-[50vh] flex-shrink-0 overflow-hidden flex items-center justify-center">
+          {/* 툇마루단 촬영 실사 배경 */}
+          <AnimatePresence>
+            {hasPhoto && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: votingStep === 'results' ? 0.6 : 0.95 }}
+                className="absolute inset-0 z-0 pointer-events-none"
+              >
+                <img 
+                  src={vacancy.images?.[0] || vacancy.imageUrl || ""} 
+                  className="w-full h-full object-cover" 
+                  alt="Field Photo Background" 
+                />
+                {/* 자연스러운 그라데이션 오버레이 */}
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
+                <div className="absolute inset-0 backdrop-blur-[1px]" />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        <BuildingVisual />
-      </div>
+          {/* 건물 3D 애니메이션은 오직 마지막 투표결과창(results) 단계에만 출력 */}
+          {votingStep === 'results' && <BuildingVisual />}
+        </div>
+      ) : (
+        /* 대표사진이 등록되기 전이고 결과창이 아닐 때는 상단 50% 공간 없이 즉시 스크롤 패딩으로 대체하여 내용창 밀어올림 */
+        <div className="h-28 w-full flex-shrink-0" />
+      )}
 
       <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-start pointer-events-none z-50">
         <button onClick={onClose} className="pointer-events-auto w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition-all">
@@ -400,8 +410,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
         </div>
       </div>
 
-      {/* 하단 투표/제보 시트 영역 (자연스러운 스크롤 지원) */}
-      <div className="w-full px-4 pb-20 md:pb-10 relative z-20 flex-shrink-0 flex flex-col justify-start">
+      {/* 하단 투표/제보 시트 영역 (자연스러운 스크롤 지원 및 상태표시줄 잘림 대책용 넉넉한 바닥 패딩 pb-36) */}
+      <div className="w-full px-4 pb-36 md:pb-24 relative z-20 flex-shrink-0 flex flex-col justify-start">
         <AnimatePresence mode="wait">
           {!reportMode ? (
             <motion.div 
@@ -411,14 +421,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
               exit={{ y: 100, opacity: 0 }}
               className="w-full max-w-2xl mx-auto"
             >
-              {/* [💡 이웃 상상 리포트 참고 자료 카드]
+              {/* [💡 이 공간, 어떤 곳인가요? 참고 자료 카드]
                   사용자가 상상 카테고리를 고르기 전(votingStep === 'category')에만 참고 정보를 묶어서 노출하고, 
                   본격적인 세부 투표에 진입하면 깨끗하게 숨겨 불필요한 시선 흐려짐을 원천 차단합니다! */}
               {votingStep === 'category' && (
                 <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-6 mb-5 w-full shadow-lg">
                   <div className="flex items-center gap-2 mb-4">
                     <Info size={16} className="text-amber-500" />
-                    <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest leading-none">💡 공간 분석 & 이웃 상상 리포트</h4>
+                    <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest leading-none">💡 이 공간, 어떤 곳인가요?</h4>
                   </div>
                   
                   {/* 메인 정보 태그 그룹 */}
