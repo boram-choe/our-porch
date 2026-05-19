@@ -47,6 +47,17 @@ function getBrandLogo(brand: string) {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(brand)}&background=random&color=fff&size=128&bold=true`;
 }
 
+function getKoreanSubjectMarker(word: string): string {
+  if (!word) return "이";
+  const lastChar = word.charAt(word.length - 1);
+  const charCode = lastChar.charCodeAt(0);
+  if (charCode >= 0xAC00 && charCode <= 0xD7A3) {
+    const hasBatchim = (charCode - 0xAC00) % 28 > 0;
+    return hasBatchim ? "이" : "가";
+  }
+  return "이";
+}
+
 import { UserProfile } from "./AuthOnboarding";
 
 export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted, isEntrepreneurMode, onModeSwitch, userProfile, recommendedCategory }: { 
@@ -593,13 +604,19 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                   ) : votingStep === "detail" ? (
                     <motion.div key="details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
                        
-                       {/* 대분류 이름 주입 질문 헤더 추가 */}
-                       <div className="text-center my-2">
-                         <h4 className="text-base font-black text-amber-400 tracking-tight leading-none mb-1">
-                           어떤 "{CATEGORIES.find(c => c.id === selectedCategory)?.label || "공간"}"이 생기면 좋을까요?
-                         </h4>
-                         <p className="text-[10px] font-bold text-slate-400">원하시는 세부 공간 종류나 브랜드를 선택 또는 입력해 주세요</p>
-                       </div>
+                       {/* 대분류 이름 주입 질문 헤더 추가 (따옴표 제거 & 한국어 이/가 조사 유연 대응) */}
+                       {(() => {
+                         const catLabel = CATEGORIES.find(c => c.id === selectedCategory)?.label || "공간";
+                         const marker = getKoreanSubjectMarker(catLabel);
+                         return (
+                           <div className="text-center my-2">
+                             <h4 className="text-base font-black text-amber-400 tracking-tight leading-none mb-1">
+                               어떤 {catLabel}{marker} 생기면 좋을까요?
+                             </h4>
+                             <p className="text-[10px] font-bold text-slate-400">원하시는 세부 공간 종류나 브랜드를 선택 또는 입력해 주세요</p>
+                           </div>
+                         );
+                       })()}
 
                        <div className="flex flex-wrap gap-2">
                          {CATEGORIES.find(c => c.id === selectedCategory)?.subs.map(sub => (
