@@ -526,7 +526,11 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                <MapPin size={36} className="text-amber-400" />
             </div>
             <h1 className="text-3xl font-black text-white mb-6 tracking-tighter leading-tight">탐험을 시작하기 위해 <br/> <span className="text-amber-400">현재 동네</span>를 인증해 주세요</h1>
-            <p className="text-slate-400 mb-10 font-bold leading-relaxed">내가 사랑하는 동네의 숨은 매력을 발견하고 <br/> 비어있는 상상 공간을 함께 채우기 위해 <br/>위치 인증이 필요합니다.</p>
+            <p className="text-slate-400 mb-10 font-bold leading-relaxed break-keep">
+              내가 사랑하는 동네의 숨은 매력을 발견하고 <br/>
+              비어있는 상상 공간을 함께 채우기 위해 <br/>
+              <span className="block mt-1 text-slate-300 font-extrabold">위치 인증이 필요합니다.</span>
+            </p>
             
             <button 
               onClick={handleLocationAuth} disabled={isLocating}
