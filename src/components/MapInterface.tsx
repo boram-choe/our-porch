@@ -867,7 +867,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[250] flex items-end justify-center"
+            className="absolute inset-0 z-[250] flex items-center justify-center p-4"
           >
             <div
               className="absolute inset-0 bg-slate-900/80"
@@ -877,11 +877,11 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               }}
             />
             <motion.div
-              initial={{ y: 120, opacity: 0 }}
+              initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 120, opacity: 0 }}
+              exit={{ y: 50, opacity: 0 }}
               transition={{ type: "spring", damping: 28, stiffness: 260, delay: 0.1 }}
-              className="relative z-10 w-full max-w-lg mx-4 mb-8"
+              className="relative z-10 w-full max-w-md mx-auto"
             >
               <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200">
                 <div className="px-8 pt-8 pb-5">
