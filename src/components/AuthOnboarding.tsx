@@ -104,8 +104,17 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
   const canProceedConsent = consentTerms && consentPrivacy && consentLocation;
 
   const creatures = [
-    "호랑이", "고양이", "강아지", "여우", "토끼", "판다", "곰", "사자", "기린", "코끼리",
-    "티라노사우르스", "트리케라톱스", "스테고사우르스", "프테라노돈", "벨로키랍토르", "파키케팔로", "안킬로사우르스", "스피노사우르스", "알로사우르스"
+    // 동물 (Animals)
+    "호랑이", "고양이", "강아지", "여우", "토끼", "판다", "곰", "사자", "기린", "코끼리", 
+    "다람쥐", "사슴", "고래", "돌고래", "펭귄", "쿼카", "햄스터", "알파카", "수달", "너구리",
+    // 공룡 (Dinosaurs)
+    "티라노사우르스", "트리케라톱스", "스테고사우르스", "프테라노돈", "벨로키랍토르", "브라키오사우르스", "파키케팔로", "안킬로사우르스", "스피노사우르스",
+    // 식물/꽃 (Plants/Flowers)
+    "민들레", "장미", "튤립", "벚꽃", "해바라기", "선인장", "몬스테라", "유칼립투스", "네잎클로버", "라벤더", "로즈마리", "담쟁이", "올리브나무",
+    // 야채 (Vegetables)
+    "당근", "감자", "고구마", "브로콜리", "가지", "아보카도", "파프리카", "양파", "마늘", "호박", "옥수수",
+    // 과일 (Fruits)
+    "사과", "바나나", "딸기", "복숭아", "망고", "블루베리", "감귤", "레몬", "체리", "포도", "수박", "멜론", "파인애플"
   ];
 
   const getCombinedLabel = (ids: string[], custom: string, userGender: string | undefined) => {
@@ -165,17 +174,49 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
     return `동네의 슈퍼 히어로! ${selectedCats.join('·')}`;
   };
 
-  const generateRandomNickname = () => {
-    const name = creatures[Math.floor(Math.random() * creatures.length)];
-    setNicknameSuffix(name);
+  const generateRandomNickname = async (currentNeighborhood: string) => {
+    if (!currentNeighborhood) return;
+
+    // 단어 리스트를 무작위로 섞음
+    const shuffledSuffixes = [...creatures].sort(() => Math.random() - 0.5);
+
+    try {
+      // 해당 동(neighborhood)의 기존 유저 프로필 조회하여 닉네임 중복 체크
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .select("nickname")
+        .eq("neighborhood", currentNeighborhood);
+
+      if (error) throw error;
+
+      const takenNicknames = new Set(data?.map(row => row.nickname) || []);
+
+      // 중복되지 않는 첫 번째 단어 선택
+      const availableSuffix = shuffledSuffixes.find(suffix => {
+        const candidate = `${currentNeighborhood} ${suffix}`;
+        return !takenNicknames.has(candidate);
+      });
+
+      if (availableSuffix) {
+        setNicknameSuffix(availableSuffix);
+      } else {
+        // 모든 단어가 중복된 경우, 랜덤한 3자리 숫자를 덧붙여 고유성 확보
+        const randomNum = Math.floor(Math.random() * 900) + 100;
+        setNicknameSuffix(`${shuffledSuffixes[0]}${randomNum}`);
+      }
+    } catch (e) {
+      console.warn("닉네임 중복 체크 실패 (랜덤 기본값 사용):", e);
+      const name = creatures[Math.floor(Math.random() * creatures.length)];
+      setNicknameSuffix(name);
+    }
   };
 
   // Generate initial nickname when step becomes 3
   useEffect(() => {
     if (step === 3 && !nicknameSuffix) {
-      generateRandomNickname();
+      generateRandomNickname(neighborhood);
     }
-  }, [step]);
+  }, [step, neighborhood]);
 
   const handleLocationAuth = async () => {
     setIsLocating(true);
