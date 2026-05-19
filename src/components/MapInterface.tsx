@@ -678,7 +678,25 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       </div>
 
       <div className="absolute inset-0 z-0">
-        <Map center={mapCenter} style={{ width: "100%", height: "100%" }} level={3} ref={mapRef} onDragStart={() => setShowDashboard(false)}>
+        <Map 
+          center={mapCenter} 
+          style={{ width: "100%", height: "100%" }} 
+          level={3} 
+          ref={mapRef} 
+          onDragStart={() => setShowDashboard(false)}
+          onCenterChanged={(map) => {
+            if (isPinpointing) {
+              const center = map.getCenter();
+              setPinLocation({ lat: center.getLat(), lng: center.getLng() });
+            }
+          }}
+          onClick={(_, mouseEvent) => {
+            if (isPinpointing) {
+              const latLng = mouseEvent.latLng;
+              setPinLocation({ lat: latLng.getLat(), lng: latLng.getLng() });
+            }
+          }}
+        >
           {mapMarkers}
           {isPinpointing && (<MapMarker position={pinLocation} draggable={true} onDragEnd={(marker) => setPinLocation({ lat: marker.getPosition().getLat(), lng: marker.getPosition().getLng() })} image={{ src: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA2MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBkPSJNMzAgNzRMMTQgNTJDNyA0MyAzIDM1IDMgMjdDMyAxMiAxNSAwIDMwIDBDNDUgMCA1NyAxMiA1NyAyN0M1NyAzNSA1MyA0MyA0NiA1MkwzMCA3NFoiIGZpbGw9IiMwMjA2MTciIHN0cm9rZT0iI0Y1OUUwQiIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPGNpcmNsZSBjeD0iMzAiIGN5PSIyNyIgcj0iMTIiIGZpbGw9IiNGNTlFMEIiLz4KICA8cGF0aCBkPSJNMzAgMTlMMzAgMzVNMjMgMjZMMzcgMjZNMjUgMjNMMzUgMjMiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAyMDYxNyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+", size: { width: 50, height: 65 }, options: { offset: { x: 25, y: 65 } } }} />)}
         </Map>
