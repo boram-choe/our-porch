@@ -265,7 +265,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
   const handleShare = async () => {
     const text = `우리 동네 '${vacancy.landmark || vacancy.address}' 공간에 이런 게 생기면 어떨까요? 함께 상상해봐요! ✨`;
-    const url = window.location.href;
+    // Vercel 기본 주소 등으로 접속했더라도 항상 공식 여긴뭐가.kr 주소로 전환하여 공유되도록 처리
+    const url = window.location.href.replace(window.location.origin, 'https://여긴뭐가.kr');
     if (navigator.share) {
       try {
         await navigator.share({ title: '여긴뭐가 | 우리 동네 상상 시뮬레이터', text, url });
@@ -391,7 +392,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
           <motion.div 
             key="voter"
             initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }}
-            className="absolute bottom-0 left-0 right-0 p-4 md:p-6 pointer-events-none z-20"
+            className="absolute bottom-6 md:bottom-2 left-0 right-0 px-4 md:px-6 pointer-events-none z-20"
           >
             <div className="bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-6 w-full max-w-2xl mx-auto shadow-[0_30px_70px_rgba(0,0,0,0.6)] pointer-events-auto overflow-hidden transition-all duration-500">
               <div className="flex items-center gap-4 mb-6">
@@ -690,7 +691,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
             </div>
           </motion.div>
         ) : (
-          <motion.div key="report" initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }} transition={{ type: "spring", damping: 25 }} className="absolute bottom-0 left-0 right-0 p-4 z-30">
+          <motion.div key="report" initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }} transition={{ type: "spring", damping: 25 }} className="absolute bottom-6 md:bottom-2 left-0 right-0 px-4 z-30">
             <div className="bg-white rounded-[3rem] p-10 w-full max-w-2xl mx-auto shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 to-orange-500" />
               <button onClick={() => setReportMode(null)} className="text-slate-400 text-xs font-black flex items-center gap-1 mb-8 hover:text-slate-600 transition uppercase tracking-widest"><ChevronDown size={14} className="rotate-90" /> 돌아가기</button>

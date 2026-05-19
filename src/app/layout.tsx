@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 export const metadata: Metadata = {
   title: "여긴뭐가 | 우리 동네를 채우는 가장 즐거운 상상",
   description: "내가 사랑하는 동네의 비어있는 공간에 새로운 꿈을 채워보세요.",
-  metadataBase: new URL("https://our-porch.vercel.app"), // 추후 커스텀 도메인 주소로 변경 가능
+  metadataBase: new URL("https://여긴뭐가.kr"),
   openGraph: {
     title: "여긴뭐가 | 우리 동네를 채우는 가장 즐거운 상상",
     description: "내가 사랑하는 동네의 비어있는 공간에 새로운 꿈을 채워보세요.",
