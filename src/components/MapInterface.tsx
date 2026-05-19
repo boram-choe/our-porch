@@ -657,8 +657,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       <div className="absolute top-4 md:top-8 left-0 right-0 px-4 md:px-6 z-[100] pointer-events-none">
         <div className="flex items-center gap-2 md:gap-4 w-full max-w-2xl mx-auto">
           <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-2 md:gap-3 bg-slate-950/80 backdrop-blur-xl px-3 md:px-5 py-2.5 md:py-3 rounded-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl overflow-hidden flex items-center justify-center bg-white shadow-lg shadow-amber-500/10">
-              <img src="/images/logo.png" alt="여긴뭐가 로고" className="w-full h-full object-contain p-0.5" />
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl overflow-hidden flex items-center justify-center bg-[#03091e] shadow-lg shadow-amber-500/10">
+              <img src="/images/logo.png" alt="여긴뭐가 로고" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-sm md:text-base font-black text-white tracking-tighter hidden sm:block">여긴뭐가</h1>
           </motion.div>
