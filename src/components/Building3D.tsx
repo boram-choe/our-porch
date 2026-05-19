@@ -295,7 +295,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
           opacity: 1 
         }}
         transition={{ type: "spring", damping: 20, stiffness: 100 }}
-        className="absolute top-[8%] left-1/2 -translate-x-1/2 w-64 h-80 flex flex-col items-center z-0"
+        className="absolute top-[12%] left-1/2 -translate-x-1/2 w-64 h-80 flex flex-col items-center z-0"
       >
         <div className="relative w-48 h-6 mb-[-4px] z-10">
           <div className="absolute inset-0 bg-slate-800 rounded-t-lg shadow-lg border-b-2 border-slate-700" />
@@ -351,30 +351,32 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
-      {/* 툇마루단 촬영 실사 배경 */}
-      <AnimatePresence>
-        {(vacancy.images?.[0] || vacancy.imageUrl) && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            className="absolute top-0 left-0 right-0 h-[50vh] md:h-[60vh] z-0 pointer-events-none overflow-hidden"
-          >
-            <img 
-              src={vacancy.images?.[0] || vacancy.imageUrl || ""} 
-              className="w-full h-full object-cover" 
-              alt="Field Photo Background" 
-            />
-            {/* 자연스러운 그라데이션 오버레이 */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
-            <div className="absolute inset-0 backdrop-blur-[1px]" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="relative w-full h-full overflow-y-auto no-scrollbar bg-slate-950 flex flex-col">
+      <div className="relative w-full h-[50vh] flex-shrink-0 overflow-hidden flex items-center justify-center">
+        {/* 툇마루단 촬영 실사 배경 */}
+        <AnimatePresence>
+          {(vacancy.images?.[0] || vacancy.imageUrl) && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              className="absolute inset-0 z-0 pointer-events-none"
+            >
+              <img 
+                src={vacancy.images?.[0] || vacancy.imageUrl || ""} 
+                className="w-full h-full object-cover" 
+                alt="Field Photo Background" 
+              />
+              {/* 자연스러운 그라데이션 오버레이 */}
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
+              <div className="absolute inset-0 backdrop-blur-[1px]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <BuildingVisual />
+        <BuildingVisual />
+      </div>
 
-      <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start pointer-events-none z-10">
+      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-start pointer-events-none z-50">
         <button onClick={onClose} className="pointer-events-auto w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition-all">
           <X size={24} />
         </button>
@@ -387,14 +389,18 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        {!reportMode ? (
-          <motion.div 
-            key="voter"
-            initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }}
-            className="absolute bottom-6 md:bottom-2 left-0 right-0 px-4 md:px-6 pointer-events-none z-20"
-          >
-            <div className="bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-6 w-full max-w-2xl mx-auto shadow-[0_30px_70px_rgba(0,0,0,0.6)] pointer-events-auto overflow-hidden transition-all duration-500">
+      {/* 하단 투표/제보 시트 영역 (자연스러운 스크롤 지원) */}
+      <div className="w-full px-4 pb-20 md:pb-10 relative z-20 flex-shrink-0 flex flex-col justify-start">
+        <AnimatePresence mode="wait">
+          {!reportMode ? (
+            <motion.div 
+              key="voter"
+              initial={{ y: 100, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              exit={{ y: 100, opacity: 0 }}
+              className="w-full max-w-2xl mx-auto"
+            >
+              <div className="bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-6 w-full shadow-[0_30px_70px_rgba(0,0,0,0.6)] overflow-hidden transition-all duration-500">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
                   <Gift size={20} className="text-white" />
@@ -691,8 +697,15 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
             </div>
           </motion.div>
         ) : (
-          <motion.div key="report" initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }} transition={{ type: "spring", damping: 25 }} className="absolute bottom-6 md:bottom-2 left-0 right-0 px-4 z-30">
-            <div className="bg-white rounded-[3rem] p-10 w-full max-w-2xl mx-auto shadow-2xl relative overflow-hidden">
+          <motion.div 
+            key="report" 
+            initial={{ y: 100, opacity: 0 }} 
+            animate={{ y: 0, opacity: 1 }} 
+            exit={{ y: 100, opacity: 0 }} 
+            transition={{ type: "spring", damping: 25 }} 
+            className="w-full max-w-2xl mx-auto"
+          >
+            <div className="bg-white rounded-[3rem] p-10 w-full shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 to-orange-500" />
               <button onClick={() => setReportMode(null)} className="text-slate-400 text-xs font-black flex items-center gap-1 mb-8 hover:text-slate-600 transition uppercase tracking-widest"><ChevronDown size={14} className="rotate-90" /> 돌아가기</button>
               <AnimatePresence mode="wait">
@@ -728,6 +741,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
 
       <AnimatePresence>
         {showComments && (
