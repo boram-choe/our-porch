@@ -795,9 +795,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                     <span className="inline-block px-3 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-black rounded-full mb-3 uppercase tracking-widest">
                       ⚠️ 현장 확인 대기 중
                     </span>
-                    <h3 className="font-black text-white text-xl tracking-tight mb-2">검토 리스트에 즉시 접수되었습니다</h3>
+                    <h3 className="font-black text-white text-xl tracking-tight mb-2">소중한 현장 소식이 접수되었어요! 🕯️</h3>
                     <p className="text-[11px] font-bold text-slate-400 mb-6 leading-relaxed max-w-sm mx-auto">
-                      담당 지역 <span className="text-amber-400 font-black">툇마루단, 운영팀장, CEO</span>가 직접 확인해야 할 공실 정정 리스트에 즉시 반영되었습니다.
+                      우리 동네 골목 대장인 <span className="text-amber-400 font-black">여긴뭐가 툇마루단</span>이 제보해주신 현장으로 직접 출동해 꼼꼼히 확인해 볼게요. 동네를 사랑하는 따뜻한 마음에 깊이 감사드립니다!
                     </p>
                     
                     {/* 사용자 제보 내용 표시 */}
