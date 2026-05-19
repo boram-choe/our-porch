@@ -406,7 +406,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                   required: false,
                   checked: consentMarketing,
                   onToggle: () => setConsentMarketing(v => !v),
-                  detail: `우리 동네 상권의 흥미로운 소식을 가장 먼저 받아보세요!\n\n■ 수신 내용: 신규 공실 알림, 우리 동네 투표 결과, 업종 매칭 성공 소식 및 혜택 알림\n■ 수신 방법: 앱 내 알림 및 카카오톡 채널 메시지\n\n※ 선택 동의 항목이므로 거부하셔도 기본 서비스는 정상적으로 이용 가능합니다.`
+                  detail: `우리 동네 상권의 흥미로운 소식을 가장 먼저 받아보세요!\n\n■ 수신 내용: 신규 공실 알림, 우리 동네 투표 결과, 업종 매칭 성공 소식 및 혜택 알림\n■ 수신 방법: 카카오톡 알림톡 및 채널 메시지\n\n※ 선택 동의 항목이므로 거부하셔도 기본 서비스는 정상적으로 이용 가능합니다.`
                 }].map(item => (
                   <div key={item.key}>
                     <button
