@@ -371,24 +371,31 @@ export default function SurveyorPage() {
                       <ArrowRight size={16} className="text-slate-200 group-hover:text-slate-400 transition-all" />
                     </div>
                   </div>
-                  {/* 제보 배지: [신고접수:] 태그를 파싱하여 맨 하단에 표시 */}
+                  {/* 제보 내용: [신고접수:] 줄을 파싱하여 카드 내에 직접 표시 */}
                   {(() => {
                     const reportLines = (v.survey_remarks || "").split('\n').filter((l: string) => l.trim().startsWith('[신고접수:'));
                     return reportLines.length > 0 ? (
-                      <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5">
+                      <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
                         {reportLines.map((line: string, i: number) => {
                           const isMovein = line.includes('입점소식');
+                          const content = line.replace(/^\[신고접수:[^\]]*\]\s*/, '').trim();
                           return (
-                            <span key={i} className={`px-2 py-1 text-[9px] font-black rounded-lg border flex items-center gap-1 ${
+                            <div key={i} className={`px-3 py-2.5 rounded-xl border text-left ${
                               isMovein
-                                ? 'bg-blue-50 text-blue-600 border-blue-100'
-                                : 'bg-orange-50 text-orange-600 border-orange-100'
+                                ? 'bg-blue-50 border-blue-100'
+                                : 'bg-orange-50 border-orange-100'
                             }`}>
-                              {isMovein ? '📢 입점소식 접수' : '⚠️ 정보정정 제보'}
-                            </span>
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <span className={`text-[9px] font-black ${isMovein ? 'text-blue-600' : 'text-orange-600'}`}>
+                                  {isMovein ? '📢 입점소식 제보' : '⚠️ 정보정정 제보'}
+                                </span>
+                              </div>
+                              <p className={`text-[10px] font-bold leading-snug ${isMovein ? 'text-blue-800' : 'text-orange-800'}`}>
+                                "{content}"
+                              </p>
+                            </div>
                           );
                         })}
-                        <span className="text-[8px] text-slate-400 font-bold self-center">(영동합 클릭하면 제보 내용 확인 가능)</span>
                       </div>
                     ) : null;
                   })()}
