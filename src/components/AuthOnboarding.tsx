@@ -529,7 +529,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             <p className="text-slate-400 mb-10 font-bold leading-relaxed break-keep">
               내가 사랑하는 동네의 숨은 매력을 발견하고 <br/>
               비어있는 상상 공간을 함께 채우기 위해 <br/>
-              <span className="block mt-1 text-slate-300 font-extrabold">위치 인증이 필요합니다.</span>
+              <span className="block mt-1">위치 인증이 필요합니다.</span>
             </p>
             
             <button 

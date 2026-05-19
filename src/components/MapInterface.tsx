@@ -566,8 +566,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           </motion.div>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 pointer-events-auto">
             <div className="bg-slate-950/80 backdrop-blur-xl p-1 md:p-1.5 rounded-[1.4rem] md:rounded-[1.8rem] border border-white/10 flex gap-0.5 md:gap-1 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-              <button onClick={() => switchLocation('home')} className={`flex-1 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[11px] md:text-[13px] font-black transition-all flex items-center justify-center gap-1.5 md:gap-2 ${userProfile?.activeLocationType === 'home' ? "bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20" : "text-slate-400 hover:text-white"}`}><Home className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">우리 동네</span><span className="sm:hidden">동네</span></button>
-              <button onClick={() => switchLocation('work')} className={`flex-1 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[11px] md:text-[13px] font-black transition-all flex items-center justify-center gap-1.5 md:gap-2 ${userProfile?.activeLocationType === 'work' ? "bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20" : "text-slate-400 hover:text-white"}`}><Briefcase className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">나의 일터</span><span className="sm:hidden">일터</span></button>
+              <button onClick={() => switchLocation('home')} className={`flex-1 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[13px] md:text-[14px] font-black transition-all flex items-center justify-center gap-1.5 md:gap-2 ${userProfile?.activeLocationType === 'home' ? "bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20" : "text-slate-400 hover:text-white"}`}><Home className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">우리 동네</span><span className="sm:hidden">동네</span></button>
+              <button onClick={() => switchLocation('work')} className={`flex-1 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[13px] md:text-[14px] font-black transition-all flex items-center justify-center gap-1.5 md:gap-2 ${userProfile?.activeLocationType === 'work' ? "bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20" : "text-slate-400 hover:text-white"}`}><Briefcase className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">나의 일터</span><span className="sm:hidden">일터</span></button>
             </div>
           </motion.div>
           <motion.button 
@@ -594,7 +594,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           return (
             <div key={feedIndex} className="bg-white/95 backdrop-blur-md px-3 md:px-4 py-2 md:py-2.5 rounded-xl md:rounded-2xl shadow-xl border border-white/20 flex items-center gap-2 md:gap-3 w-fit max-w-[95%] mx-auto pointer-events-auto animate-[fadeIn_0.5s_ease-out]">
               <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl flex-shrink-0 ${currentFeed.color} flex items-center justify-center text-white shadow-sm`}><MessageSquare className="w-3 h-3 md:w-3.5 md:h-3.5" fill="currentColor" /></div>
-              <div className="overflow-hidden"><p className="text-[10px] md:text-[11px] font-black text-slate-900 leading-tight tracking-tight break-keep"><span className="text-amber-600 mr-1.5 md:mr-2">새소식</span>{currentFeed.text}</p></div>
+              <div className="overflow-hidden"><p className="text-[12px] md:text-[13px] font-black text-slate-900 leading-tight tracking-tight break-keep"><span className="text-amber-600 mr-1.5 md:mr-2">새소식</span>{currentFeed.text}</p></div>
             </div>
           );
         })()}
@@ -619,31 +619,31 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
              <div className="flex items-center justify-between mb-4 mt-2 relative z-10 flex-wrap gap-y-3">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-lg"><History className="w-4 h-4 md:w-5 md:h-5" /></div>
-                  <h2 className="text-sm md:text-base font-black text-slate-950 tracking-tight whitespace-nowrap">나의 상상 조각들 <span className="text-amber-600 ml-1">{votedIds.length}</span></h2>
+                  <h2 className="text-base md:text-lg font-black text-slate-950 tracking-tight whitespace-nowrap">나의 상상 조각들 <span className="text-amber-600 ml-1">{votedIds.length}</span></h2>
                 </div>
                 <div className="flex items-center gap-2 md:gap-3">
                   <button 
                     onClick={() => setShowCurator(true)}
-                    className="flex items-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:px-3 md:py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[9px] md:text-[10px] font-black hover:bg-indigo-100 transition-all border border-indigo-100 whitespace-nowrap"
+                    className="flex items-center gap-1.5 md:gap-2 px-3 py-2 bg-indigo-50 text-indigo-600 rounded-full text-[11px] md:text-[12px] font-black hover:bg-indigo-100 transition-all border border-indigo-100 whitespace-nowrap"
                   >
-                    <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3" fill="currentColor" /> 상상 연습해보기
+                    <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5" fill="currentColor" /> 상상 연습해보기
                   </button>
-                  <button className="text-[9px] font-black text-slate-400 flex items-center gap-1 uppercase tracking-[0.2em] hover:text-amber-600 transition-all whitespace-nowrap">전체 보기 <ChevronRight className="w-2.5 h-2.5" /></button>
+                  <button className="text-[10px] font-black text-slate-400 flex items-center gap-1 uppercase tracking-[0.2em] hover:text-amber-600 transition-all whitespace-nowrap">전체 보기 <ChevronRight className="w-2.5 h-2.5" /></button>
                 </div>
              </div>
              {votedVacancies.length > 0 ? (
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar relative z-10">
                    {votedVacancies.map(v => (
                         <div key={v.id} onClick={() => { setSelectedVacancy(v); mapRef.current?.panTo(new kakao.maps.LatLng(v.lat, v.lng)); }} className="min-w-[220px] bg-white p-5 rounded-[2rem] border-2 border-slate-50 hover:border-amber-300 transition-all cursor-pointer group shadow-sm hover:shadow-xl">
-                           <div className="flex items-start justify-between mb-4"><span className="text-[8px] font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-widest">생생한 제보</span><ArrowRight size={14} className="text-slate-200 group-hover:text-amber-500 transition-all" /></div>
-                           <h3 className="font-black text-slate-950 text-sm mb-1 tracking-tight line-clamp-1">{v.landmark}</h3>
-                           <div className="bg-slate-950 p-4 rounded-2xl shadow-inner mt-3"><div className="flex items-center justify-between"><span className="text-[10px] font-black text-white">✨ {(v.currentVotes || []).sort((a,b)=>b.count-a.count)[0]?.brand || "상상 중"}</span><span className="text-[10px] font-bold text-amber-500">{(v.currentVotes || []).reduce((a,b)=>a+b.count,0)}표</span></div></div>
+                           <div className="flex items-start justify-between mb-4"><span className="text-[10px] font-black text-amber-600 bg-amber-50 px-3.5 py-1 rounded-full uppercase tracking-widest">생생한 제보</span><ArrowRight size={14} className="text-slate-200 group-hover:text-amber-500 transition-all" /></div>
+                           <h3 className="font-black text-slate-950 text-base mb-1 tracking-tight line-clamp-1">{v.landmark}</h3>
+                           <div className="bg-slate-950 p-4 rounded-2xl shadow-inner mt-3"><div className="flex items-center justify-between"><span className="text-xs font-black text-white">✨ {(v.currentVotes || []).sort((a,b)=>b.count-a.count)[0]?.brand || "상상 중"}</span><span className="text-xs font-bold text-amber-500">{(v.currentVotes || []).reduce((a,b)=>a+b.count,0)}표</span></div></div>
                         </div>
                    ))}
                 </div>
              ) : (
                 <div className="py-6 px-4 md:py-8 md:px-6 text-center bg-slate-50 rounded-[2rem] md:rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center gap-3 md:gap-4">
-                  <p className="text-xs font-black text-slate-400 leading-relaxed italic">지도의 핀을 눌러 첫 번째 상상을 시작하세요.</p>
+                  <p className="text-sm font-black text-slate-400 leading-relaxed italic">지도의 핀을 눌러 첫 번째 상상을 시작하세요.</p>
                 </div>
              )}
           </motion.div>

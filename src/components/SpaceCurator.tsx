@@ -135,11 +135,11 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
             <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-8 items-center justify-center p-2 md:p-4 max-w-6xl w-full mx-auto">
               {currentMatch[0] && currentMatch[1] && (
                 <>
-                  <MatchCard candidate={currentMatch[0]} onSelect={() => handleMatchWinner(currentMatch[0])} side="left" />
+                  <MatchCard key={currentMatch[0].id} candidate={currentMatch[0]} onSelect={() => handleMatchWinner(currentMatch[0])} side="left" />
                   <div className="flex-shrink-0 w-12 h-12 md:w-20 md:h-20 bg-slate-900/50 backdrop-blur-xl border-4 border-white/5 rounded-full flex items-center justify-center z-10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
                     <span className="italic font-black text-amber-500 text-xl md:text-3xl tracking-tighter">VS</span>
                   </div>
-                  <MatchCard candidate={currentMatch[1]} onSelect={() => handleMatchWinner(currentMatch[1])} side="right" />
+                  <MatchCard key={currentMatch[1].id} candidate={currentMatch[1]} onSelect={() => handleMatchWinner(currentMatch[1])} side="right" />
                 </>
               )}
             </div>
