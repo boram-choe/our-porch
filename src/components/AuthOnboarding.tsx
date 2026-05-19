@@ -588,7 +588,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                   placeholder="별명을 입력하세요"
                   className="flex-1 bg-transparent text-xl font-bold text-white outline-none placeholder:text-slate-600"
                 />
-                <button onClick={generateRandomNickname} className="p-2 text-amber-400 hover:scale-110 transition-transform"><Globe size={22} /></button>
+                <button onClick={() => generateRandomNickname(neighborhood)} className="p-2 text-amber-400 hover:scale-110 transition-transform"><Globe size={22} /></button>
               </div>
 
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
