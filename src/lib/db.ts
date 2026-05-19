@@ -103,6 +103,9 @@ export const generateSpaceId = (city: string, gu: string, dong: string, serial: 
   let g = "99";
   let d = "99";
 
+  // 동 이름 정규화: 끝의 숫자 제거 ("남가좌1동" -> "남가좌동", "남가좌2동" -> "남가좌동")
+  const normalizeDong = (s: string) => s.replace(/\d+(동)$/, '$1').replace(/[\u00B7\u2027].*/, '');
+
   if (cityEntry) {
     // 구/군 찾기
     const guEntry = Object.entries(cityEntry[1].gus).find(([_, data]) => 
@@ -110,10 +113,12 @@ export const generateSpaceId = (city: string, gu: string, dong: string, serial: 
     );
     if (guEntry) {
       g = guEntry[0];
-      // 행정동 찾기
-      const dongEntry = Object.entries(guEntry[1].dongs).find(([_, name]) => 
-        name.includes(dong) || dong.includes(name)
-      );
+      // 행정동 찾기: 완전 일치 → 양방향 includes → 정규화 동종 비교 순서
+      const dongEntry = Object.entries(guEntry[1].dongs).find(([_, name]) => {
+        if (name === dong || name.includes(dong) || dong.includes(name)) return true;
+        // 정규화 비교: "남가좌동" ↔ "남가좌1동" 등 매칭
+        return normalizeDong(name) === normalizeDong(dong);
+      });
       if (dongEntry) {
         d = dongEntry[0];
       }
@@ -134,15 +139,19 @@ export const generateMemberId = (city: string, gu: string, dong: string, serial:
   let g = "99";
   let d = "99";
 
+  // 동 이름 정규화: 끝의 숫자 제거
+  const normalizeDong = (s: string) => s.replace(/\d+(동)$/, '$1').replace(/[\u00B7\u2027].*/, '');
+
   if (cityEntry) {
     const guEntry = Object.entries(cityEntry[1].gus).find(([_, data]) => 
       data.name.includes(gu) || gu.includes(data.name)
     );
     if (guEntry) {
       g = guEntry[0];
-      const dongEntry = Object.entries(guEntry[1].dongs).find(([_, name]) => 
-        name.includes(dong) || dong.includes(name)
-      );
+      const dongEntry = Object.entries(guEntry[1].dongs).find(([_, name]) => {
+        if (name === dong || name.includes(dong) || dong.includes(name)) return true;
+        return normalizeDong(name) === normalizeDong(dong);
+      });
       if (dongEntry) {
         d = dongEntry[0];
       }

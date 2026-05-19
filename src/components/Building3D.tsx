@@ -300,6 +300,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
         lng: vacancy.lng,
         neighborhood: vacancy.neighborhood || "",
         surveyRemarks: newRemarks,
+        status: vacancy.status,  // ← status는 사용자 신고로 절대 변경 불가
         displayId: vacancy.displayId
       });
       
@@ -502,18 +503,25 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                     ))}
                   </div>
 
-                  {/* 툇마루단 한마디 */}
-                  {vacancy.surveyRemarks && (
-                    <div className="w-full mb-5">
-                      <div className="flex items-center gap-1.5 mb-1.5 ml-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                        <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-none">툇마루단의 한마디</p>
+                  {/* 툇마루단 한마디 (사용자 제보 내용 [신고접수:] 는 제외하고 표시) */}
+                  {(() => {
+                    const publicRemarks = vacancy.surveyRemarks
+                      ?.split('\n')
+                      .filter(line => !line.trim().startsWith('[신고접수:'))
+                      .join('\n')
+                      .trim();
+                    return publicRemarks ? (
+                      <div className="w-full mb-5">
+                        <div className="flex items-center gap-1.5 mb-1.5 ml-1">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-none">툇마루단의 한마디</p>
+                        </div>
+                        <div className="inline-flex px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-2xl text-xs font-bold border border-white/10 shadow-sm">
+                          "{publicRemarks}"
+                        </div>
                       </div>
-                      <div className="inline-flex px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-2xl text-xs font-bold border border-white/10 shadow-sm">
-                        "{vacancy.surveyRemarks}"
-                      </div>
-                    </div>
-                  )}
+                    ) : null;
+                  })()}
 
                   {/* 이웃들의 상상 TOP 3 (대분류 기준 집계) */}
                   {groupedVotes.length > 0 && (

@@ -295,13 +295,20 @@ export default function SurveyorPage() {
 
 
   const renderVacancyList = (title: string, icon: React.ReactNode, filter: (v: DbVacancy) => boolean, color: string) => {
-    // 권한 필터링: CEO/OPS 전체, 일반 단원은 본인 등록 건 OR 본인 담당 동(Neighborhood) 건
+    // 권한 필터링: CEO/OPS 전체, 일반 단원은 본인 등록 건 OR 본인 담당 동(동 이름 포함 관계) 건
     const authorized = allVacancies.filter(v => {
+      const surveyorDong = currentUser?.dong || "";
+      // 담당동 매칭: 완전 일치 OR 부분 포함 (남가좌동 ↔ 남가좌1동/남가좌2동 양방향 지원)
+      const dongMatch = surveyorDong && v.neighborhood && (
+        v.neighborhood === surveyorDong ||
+        v.neighborhood.includes(surveyorDong.replace(/[0-9]+동$/, '동')) ||
+        surveyorDong.includes(v.neighborhood.replace(/[0-9]+동$/, '동'))
+      );
       const isAuthorized = (
         currentUser?.role === "CEO" || 
         currentUser?.role === "OPS" || 
         v.registered_by === currentUser?.id || 
-        v.neighborhood === currentUser?.dong
+        dongMatch
       );
       return isAuthorized && filter(v);
     });
@@ -335,33 +342,56 @@ export default function SurveyorPage() {
               const timeStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
               
               return (
-                <div key={v.id} className="bg-white p-6 rounded-[2rem] shadow-sm border-2 border-slate-50 flex items-center justify-between group hover:border-slate-300 transition-all cursor-pointer" onClick={() => {
+                 <div key={v.id} className="bg-white p-6 rounded-[2rem] shadow-sm border-2 border-slate-50 flex flex-col group hover:border-slate-300 transition-all cursor-pointer" onClick={() => {
                   setEditingVacancyId(v.id);
                   setEditingNeighborhood(v.neighborhood || "");
                   setDetectedAddress(v.address || "");
                   setDetectedLandmark(v.landmark || "");
                   setShowSurveyInput(true);
                 }}>
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color.replace('bg-', 'bg-').replace('-500', '-50')} ${color.replace('bg-', 'text-')}`}>
-                      {icon}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <h4 className="text-base font-black text-slate-950 leading-tight">{v.landmark || "신규 제보"}</h4>
-                        {v.display_id && (
-                          <span className="px-2 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded-md tracking-tighter">
-                            {v.display_id}
-                          </span>
-                        )}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color.replace('bg-', 'bg-').replace('-500', '-50')} ${color.replace('bg-', 'text-')}`}>
+                        {icon}
                       </div>
-                      <p className="text-[10px] font-bold text-slate-400">{v.address}</p>
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h4 className="text-base font-black text-slate-950 leading-tight">{v.landmark || "신규 제보"}</h4>
+                          {v.display_id && (
+                            <span className="px-2 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded-md tracking-tighter">
+                              {v.display_id}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-400">{v.address}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{timeStr}</span>
+                      <ArrowRight size={16} className="text-slate-200 group-hover:text-slate-400 transition-all" />
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{timeStr}</span>
-                    <ArrowRight size={16} className="text-slate-200 group-hover:text-slate-400 transition-all" />
-                  </div>
+                  {/* 제보 배지: [신고접수:] 태그를 파싱하여 맨 하단에 표시 */}
+                  {(() => {
+                    const reportLines = (v.survey_remarks || "").split('\n').filter((l: string) => l.trim().startsWith('[신고접수:'));
+                    return reportLines.length > 0 ? (
+                      <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5">
+                        {reportLines.map((line: string, i: number) => {
+                          const isMovein = line.includes('입점소식');
+                          return (
+                            <span key={i} className={`px-2 py-1 text-[9px] font-black rounded-lg border flex items-center gap-1 ${
+                              isMovein
+                                ? 'bg-blue-50 text-blue-600 border-blue-100'
+                                : 'bg-orange-50 text-orange-600 border-orange-100'
+                            }`}>
+                              {isMovein ? '📢 입점소식 접수' : '⚠️ 정보정정 제보'}
+                            </span>
+                          );
+                        })}
+                        <span className="text-[8px] text-slate-400 font-bold self-center">(영동합 클릭하면 제보 내용 확인 가능)</span>
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
               );
             })}
