@@ -236,7 +236,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
         try {
           const res = await fetch(
             `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`,
-            { headers: { Authorization: "KakaoAK e1b3c72ed82cefa4e8e9021e352e5b5e" } }
+            { headers: { Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY}` } }
           );
           const data = await res.json();
 
@@ -478,8 +478,18 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                           initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="mx-4 mb-2 p-4 bg-slate-900 rounded-xl border border-white/5">
+                          <div className="mx-4 mb-2 p-4 bg-slate-900 rounded-xl border border-white/5 flex flex-col gap-2">
                             <p className="text-[11px] text-slate-400 font-medium leading-relaxed whitespace-pre-line">{item.detail}</p>
+                            {item.key === "privacy" && (
+                              <a 
+                                href="/privacy" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-amber-400 hover:text-amber-300 font-bold underline self-start flex items-center gap-1 mt-1"
+                              >
+                                개인정보 처리방침 전문 보기 ↗
+                              </a>
+                            )}
                           </div>
                         </motion.div>
                       )}
