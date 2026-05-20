@@ -180,7 +180,22 @@ export interface DbUserProfile {
 
 // ─── 사용자 프로필 ─────────────────────────────────────────────────────────
 
+export async function fetchUserProfile(userId: string): Promise<DbUserProfile | null> {
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("프로필 조회 오류:", error.message);
+    return null;
+  }
+  return data;
+}
+
 export async function saveUserProfile(profile: {
+  id?: string;
   nickname: string;
   neighborhood: string;
   lat: number;
@@ -191,19 +206,25 @@ export async function saveUserProfile(profile: {
   personaIds?: string[];
   personaLabel?: string;
 }): Promise<string | null> {
+  const payload: any = {
+    nickname: profile.nickname,
+    neighborhood: profile.neighborhood,
+    lat: profile.lat,
+    lng: profile.lng,
+    gender: profile.gender || null,
+    age_range: profile.ageRange || null,
+    activity_times: profile.activityTimes || [],
+    persona_ids: profile.personaIds || [],
+    persona_label: profile.personaLabel || null,
+  };
+
+  if (profile.id) {
+    payload.id = profile.id;
+  }
+
   const { data, error } = await supabase
     .from("user_profiles")
-    .insert({
-      nickname: profile.nickname,
-      neighborhood: profile.neighborhood,
-      lat: profile.lat,
-      lng: profile.lng,
-      gender: profile.gender || null,
-      age_range: profile.ageRange || null,
-      activity_times: profile.activityTimes || [],
-      persona_ids: profile.personaIds || [],
-      persona_label: profile.personaLabel || null,
-    })
+    .upsert(payload, { onConflict: "id" })
     .select("id");
 
   if (error) {

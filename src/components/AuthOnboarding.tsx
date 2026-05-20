@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, User, ArrowRight, Sparkles, Navigation as NavigationIcon, CheckCircle2, Globe, Heart, MessageSquare, Briefcase, Baby, GraduationCap, Home, Dog, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
-import { saveUserProfile } from "@/lib/db";
+import { saveUserProfile, fetchUserProfile } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 export interface UserLocation {
   neighborhood: string;
@@ -82,19 +82,78 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
     setConsentAll(consentTerms && consentPrivacy && consentLocation && consentMarketing);
   }, [consentTerms, consentPrivacy, consentLocation, consentMarketing]);
 
-  // 카카오 로그인 후 돌아왔을 때 세션이 있으면 다음 단계(약관 동의)로 자동 이동
+  // 카카오 로그인 후 돌아왔을 때 세션이 있고 기존 프로필이 있으면 복원하고 바로 진입, 없으면 다음 단계(약관 동의)로 이동
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session && step === 0) {
-        setStep(1);
+      if (session) {
+        // 기존 프로필이 Supabase에 등록되어 있는지 조회
+        try {
+          const dbProfile = await fetchUserProfile(session.user.id);
+          if (dbProfile) {
+            const profile: UserProfile = {
+              nickname: dbProfile.nickname,
+              activeLocationType: 'home',
+              home: {
+                neighborhood: dbProfile.neighborhood,
+                lat: dbProfile.lat,
+                lng: dbProfile.lng,
+              },
+              personaIds: dbProfile.persona_ids || [],
+              personaLabel: dbProfile.persona_label || "",
+              gender: dbProfile.gender as "male" | "female" | undefined,
+              ageRange: dbProfile.age_range || undefined,
+              activityTimes: dbProfile.activity_times || [],
+              isAdmin: dbProfile.is_admin,
+            };
+            localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
+            localStorage.setItem("gongsil_user_id", dbProfile.id);
+            onComplete(profile);
+            return;
+          }
+        } catch (err) {
+          console.warn("기존 프로필 복원 오류, 온보딩 계속 진행:", err);
+        }
+
+        if (step === 0) {
+          setStep(1);
+        }
       }
     };
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session && step === 0) {
-        setStep(1);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        try {
+          const dbProfile = await fetchUserProfile(session.user.id);
+          if (dbProfile) {
+            const profile: UserProfile = {
+              nickname: dbProfile.nickname,
+              activeLocationType: 'home',
+              home: {
+                neighborhood: dbProfile.neighborhood,
+                lat: dbProfile.lat,
+                lng: dbProfile.lng,
+              },
+              personaIds: dbProfile.persona_ids || [],
+              personaLabel: dbProfile.persona_label || "",
+              gender: dbProfile.gender as "male" | "female" | undefined,
+              ageRange: dbProfile.age_range || undefined,
+              activityTimes: dbProfile.activity_times || [],
+              isAdmin: dbProfile.is_admin,
+            };
+            localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
+            localStorage.setItem("gongsil_user_id", dbProfile.id);
+            onComplete(profile);
+            return;
+          }
+        } catch (err) {
+          console.warn("기존 프로필 복원 오류, 온보딩 계속 진행:", err);
+        }
+
+        if (step === 0) {
+          setStep(1);
+        }
       }
     });
 
@@ -304,7 +363,9 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
 
     // Supabase에 저장 (비동기, 실패해도 앱은 정상 동작)
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const dbId = await saveUserProfile({
+        id: session?.user?.id || undefined, // 카카오 로그인 세션의 UUID 직접 주입
         nickname: finalNickname,
         neighborhood,
         lat: coords.lat,
