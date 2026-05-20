@@ -23,6 +23,7 @@ export interface UserProfile {
   activityTimes?: string[];
   workActivityTimes?: string[];
   isAdmin?: boolean;
+  isGuest?: boolean;
 }
 
 export const PERSONAS = [
@@ -43,6 +44,7 @@ export function loadSavedProfile(): UserProfile | null {
 
 export default function AuthOnboarding({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
   const [step, setStep] = useState(0); // 0: 개인정보동의, 1: Kakao, 2: Location, 3: Nickname, 4: Persona
+  const [isGuest, setIsGuest] = useState(false);
 
   // 개인정보 동의 상태
   const [consentAll, setConsentAll] = useState(false);
@@ -85,79 +87,95 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
   // 카카오 로그인 후 돌아왔을 때 세션이 있고 기존 프로필이 있으면 복원하고 바로 진입, 없으면 다음 단계(약관 동의)로 이동
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // 기존 프로필이 Supabase에 등록되어 있는지 조회
-        try {
-          const dbProfile = await fetchUserProfile(session.user.id);
-          if (dbProfile) {
-            const profile: UserProfile = {
-              nickname: dbProfile.nickname,
-              activeLocationType: 'home',
-              home: {
-                neighborhood: dbProfile.neighborhood,
-                lat: dbProfile.lat,
-                lng: dbProfile.lng,
-              },
-              personaIds: dbProfile.persona_ids || [],
-              personaLabel: dbProfile.persona_label || "",
-              gender: dbProfile.gender as "male" | "female" | undefined,
-              ageRange: dbProfile.age_range || undefined,
-              activityTimes: dbProfile.activity_times || [],
-              isAdmin: dbProfile.is_admin,
-            };
-            localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
-            localStorage.setItem("gongsil_user_id", dbProfile.id);
-            onComplete(profile);
-            return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // 기존 프로필이 Supabase에 등록되어 있는지 조회
+          try {
+            const dbProfile = await fetchUserProfile(session.user.id);
+            if (dbProfile) {
+              const profile: UserProfile = {
+                nickname: dbProfile.nickname,
+                activeLocationType: 'home',
+                home: {
+                  neighborhood: dbProfile.neighborhood,
+                  lat: dbProfile.lat,
+                  lng: dbProfile.lng,
+                },
+                personaIds: dbProfile.persona_ids || [],
+                personaLabel: dbProfile.persona_label || "",
+                gender: dbProfile.gender as "male" | "female" | undefined,
+                ageRange: dbProfile.age_range || undefined,
+                activityTimes: dbProfile.activity_times || [],
+                isAdmin: dbProfile.is_admin,
+              };
+              localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
+              localStorage.setItem("gongsil_user_id", dbProfile.id);
+              onComplete(profile);
+              return;
+            }
+          } catch (err) {
+            console.warn("기존 프로필 복원 오류, 온보딩 계속 진행:", err);
           }
-        } catch (err) {
-          console.warn("기존 프로필 복원 오류, 온보딩 계속 진행:", err);
-        }
 
-        if (step === 0) {
-          setStep(1);
+          if (step === 0) {
+            setStep(1);
+          }
         }
+      } catch (globalErr) {
+        console.error("checkSession global error:", globalErr);
       }
     };
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session) {
+    let subscription: any = null;
+    try {
+      const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
         try {
-          const dbProfile = await fetchUserProfile(session.user.id);
-          if (dbProfile) {
-            const profile: UserProfile = {
-              nickname: dbProfile.nickname,
-              activeLocationType: 'home',
-              home: {
-                neighborhood: dbProfile.neighborhood,
-                lat: dbProfile.lat,
-                lng: dbProfile.lng,
-              },
-              personaIds: dbProfile.persona_ids || [],
-              personaLabel: dbProfile.persona_label || "",
-              gender: dbProfile.gender as "male" | "female" | undefined,
-              ageRange: dbProfile.age_range || undefined,
-              activityTimes: dbProfile.activity_times || [],
-              isAdmin: dbProfile.is_admin,
-            };
-            localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
-            localStorage.setItem("gongsil_user_id", dbProfile.id);
-            onComplete(profile);
-            return;
+          if (session) {
+            const dbProfile = await fetchUserProfile(session.user.id);
+            if (dbProfile) {
+              const profile: UserProfile = {
+                nickname: dbProfile.nickname,
+                activeLocationType: 'home',
+                home: {
+                  neighborhood: dbProfile.neighborhood,
+                  lat: dbProfile.lat,
+                  lng: dbProfile.lng,
+                },
+                personaIds: dbProfile.persona_ids || [],
+                personaLabel: dbProfile.persona_label || "",
+                gender: dbProfile.gender as "male" | "female" | undefined,
+                ageRange: dbProfile.age_range || undefined,
+                activityTimes: dbProfile.activity_times || [],
+                isAdmin: dbProfile.is_admin,
+              };
+              localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
+              localStorage.setItem("gongsil_user_id", dbProfile.id);
+              onComplete(profile);
+              return;
+            }
+            if (step === 0) {
+              setStep(1);
+            }
           }
         } catch (err) {
-          console.warn("기존 프로필 복원 오류, 온보딩 계속 진행:", err);
+          console.warn("onAuthStateChange profile fetch error:", err);
+          if (step === 0) {
+            setStep(1);
+          }
         }
+      });
+      subscription = data?.subscription || null;
+    } catch (err) {
+      console.error("onAuthStateChange subscription error:", err);
+    }
 
-        if (step === 0) {
-          setStep(1);
-        }
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
       }
-    });
-
-    return () => subscription.unsubscribe();
+    };
   }, [step]);
 
   const canProceedConsent = consentTerms && consentPrivacy && consentLocation;
@@ -315,7 +333,11 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
 
             setNeighborhood(dong);
             setIsLocating(false);
-            setStep(3); 
+            if (isGuest) {
+              setStep(5);
+            } else {
+              setStep(3);
+            } 
           } else {
             setLocationError("카카오 API 응답 오류 (데이터 없음).");
             setIsLocating(false);
@@ -347,17 +369,18 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
   };
 
   const finish = async () => {
-    const finalNickname = `${neighborhood} ${nicknameSuffix}`;
-    const personaLabel = getCombinedLabel(selectedPersonaIds, customPersona, gender);
+    const finalNickname = isGuest ? `${neighborhood} 둘러보기 이웃` : `${neighborhood} ${nicknameSuffix}`;
+    const personaLabel = isGuest ? "둘러보기 이웃" : getCombinedLabel(selectedPersonaIds, customPersona, gender);
     const profile: UserProfile = { 
       nickname: finalNickname, 
       activeLocationType: 'home',
       home: { neighborhood, ...coords },
-      personaIds: selectedPersonaIds,
+      personaIds: isGuest ? [] : selectedPersonaIds,
       personaLabel,
-      gender,
-      ageRange,
-      activityTimes: selectedActivityTimes
+      gender: isGuest ? undefined : gender,
+      ageRange: isGuest ? undefined : ageRange,
+      activityTimes: isGuest ? [] : selectedActivityTimes,
+      isGuest: isGuest
     };
     localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
 
@@ -370,10 +393,10 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
         neighborhood,
         lat: coords.lat,
         lng: coords.lng,
-        gender,
-        ageRange,
-        activityTimes: selectedActivityTimes,
-        personaIds: selectedPersonaIds,
+        gender: isGuest ? undefined : gender,
+        ageRange: isGuest ? undefined : ageRange,
+        activityTimes: isGuest ? [] : selectedActivityTimes,
+        personaIds: isGuest ? [] : selectedPersonaIds,
         personaLabel,
       });
       if (dbId) {
@@ -446,7 +469,10 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             </button>
 
             <button
-              onClick={() => setStep(1)}
+              onClick={() => {
+                setIsGuest(true);
+                setStep(1);
+              }}
               className="text-xs text-slate-500 hover:text-slate-300 font-bold underline transition-colors"
             >
               카카오 연동 없이 둘러보기 ↗
@@ -810,7 +836,19 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                <CheckCircle2 size={48} className="text-slate-950" />
             </motion.div>
             <h1 className="text-4xl font-black text-white mb-6 tracking-tighter leading-tight">상상할 준비가 <br/> 완료되었습니다!</h1>
-            <p className="text-slate-400 mb-12 font-bold leading-relaxed">{neighborhood} {nicknameSuffix}님, <br/> {neighborhood}의 빈 공간들을 <br/> 함께 깨워볼까요?</p>
+            <p className="text-slate-400 mb-12 font-bold leading-relaxed">
+              {isGuest ? (
+                <>
+                  <span className="text-amber-400 font-black">{neighborhood} 둘러보기 이웃</span>님,<br/>
+                  주변 공실의 투표 결과를 둘러볼까요?
+                </>
+              ) : (
+                <>
+                  <span className="text-amber-400 font-black">{neighborhood} {nicknameSuffix}</span>님,<br/>
+                  {neighborhood}의 빈 공간들을 함께 깨워볼까요?
+                </>
+              )}
+            </p>
             
             <button 
               onClick={finish}

@@ -76,7 +76,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [inputValue, setInputValue] = useState("");
   
-  const [votingStep, setVotingStep] = useState<"category" | "detail" | "results">(hasVoted ? "results" : "category");
+  const [votingStep, setVotingStep] = useState<"category" | "detail" | "results">(
+    (hasVoted || userProfile?.isGuest) ? "results" : "category"
+  );
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
@@ -103,6 +105,10 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   };
 
   const handleAddComment = async () => {
+    if (userProfile?.isGuest) {
+      alert("의견 작성은 카카오 로그인 회원만 참여할 수 있습니다.");
+      return;
+    }
     if (!newComment.trim() || typeof window === "undefined") return;
     const userId = localStorage.getItem("gongsil_user_id");
     if (!userId) return;
@@ -185,6 +191,10 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   // 삭제됨: getCleanName (사용자가 입력한 원본 텍스트 유지를 위해)
 
   const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
+    if (userProfile?.isGuest) {
+      alert("투표는 카카오 로그인 회원만 참여할 수 있습니다.");
+      return;
+    }
     if (e) e.preventDefault();
     let brand = (customBrand || inputValue).trim();
     if (!brand) return;
@@ -751,10 +761,18 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                           )}
                         </AnimatePresence>
 
-                        {!hasVoted && (
+                        {!hasVoted && !userProfile?.isGuest && (
                           <button onClick={() => setVotingStep("category")} className="w-full py-5 bg-white text-slate-950 rounded-[2rem] text-sm font-black shadow-xl hover:bg-amber-400 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4">
                             <Sparkles size={18} className="group-hover:animate-spin" /> 내가 원하는 건 리스트에 없어요
                           </button>
+                        )}
+
+                        {userProfile?.isGuest && (
+                          <div className="p-5 bg-white/5 border border-white/5 rounded-[2rem] text-center mt-4">
+                            <p className="text-[11px] font-bold text-slate-400 leading-relaxed">
+                              💡 투표와 의견 작성은 <span className="text-amber-400 font-black">카카오 로그인 회원</span>만 참여하실 수 있습니다.
+                            </p>
+                          </div>
                         )}
                         
                         <button 
@@ -1064,13 +1082,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddComment(); } }}
-                      placeholder="이웃들에게 상세 의견을 나눠주세요..." 
-                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/20 transition-all text-slate-800 placeholder-slate-400"
+                      disabled={!!userProfile?.isGuest}
+                      placeholder={userProfile?.isGuest ? "의견 작성은 카카오 로그인 회원만 참여할 수 있습니다." : "이웃들에게 상세 의견을 나눠주세요..."} 
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/20 transition-all text-slate-800 placeholder-slate-400 disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                   </div>
                   <button 
                     onClick={handleAddComment}
-                    disabled={!newComment.trim() || isSubmittingComment}
+                    disabled={!newComment.trim() || isSubmittingComment || !!userProfile?.isGuest}
                     className="w-14 h-14 bg-slate-950 text-white rounded-2xl flex items-center justify-center hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-xl active:scale-90"
                   >
                     {isSubmittingComment ? (
