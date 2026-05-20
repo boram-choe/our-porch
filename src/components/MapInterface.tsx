@@ -1056,13 +1056,16 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           </motion.div>
         )}
       </AnimatePresence>
-      {/* 사업자 정보 푸터 (카카오 비즈니스 채널 심사용) */}
       <div className="hidden md:flex absolute bottom-2 left-4 z-[300] bg-slate-950/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 text-[9px] md:text-[10px] text-slate-400 font-bold flex items-center gap-3 shadow-lg pointer-events-auto">
         <span className="text-white font-black">사업자 정보</span>
         <span className="text-white/20">|</span>
         <span>상호명: 채담</span>
         <span className="text-white/20">|</span>
         <span>사업자등록번호: <span className="text-amber-500 font-black">621-50-01252</span></span>
+        <span className="text-white/20">|</span>
+        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-amber-400 transition-colors underline underline-offset-2">개인정보처리방침</a>
+        <span className="text-white/20">|</span>
+        <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-amber-400 transition-colors underline underline-offset-2">이용약관</a>
       </div>
     </div>
   );
