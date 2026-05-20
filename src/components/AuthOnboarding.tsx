@@ -355,15 +355,23 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             <button 
               onClick={async () => {
                 try {
-                  const { error } = await supabase.auth.signInWithOAuth({
+                  const { data, error } = await supabase.auth.signInWithOAuth({
                     provider: 'kakao',
                     options: {
-                      redirectTo: `${window.location.origin}/?login=success`
+                      redirectTo: `${window.location.origin}/?login=success`,
+                      skipBrowserRedirect: true // SDK 내부 자동 이동 대신 URL만 안전하게 수신
                     }
                   });
                   if (error) {
                     console.error("Kakao Login Error:", error);
                     alert("카카오 로그인 연동 중 문제가 발생했습니다: " + error.message);
+                    return;
+                  }
+                  if (data?.url) {
+                    // 수동 리다이렉트 실행 (Edge 등 브라우저의 보안 필터 우회 효과)
+                    window.location.href = data.url;
+                  } else {
+                    alert("로그인 페이지 주소를 생성하지 못했습니다.");
                   }
                 } catch (err: any) {
                   console.error("Kakao OAuth Exception:", err);
