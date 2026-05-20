@@ -354,23 +354,33 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             
             <button 
               onClick={async () => {
-                const { error } = await supabase.auth.signInWithOAuth({
-                  provider: 'kakao',
-                  options: {
-                    redirectTo: `${window.location.origin}/?login=success`
+                try {
+                  const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'kakao',
+                    options: {
+                      redirectTo: `${window.location.origin}/?login=success`
+                    }
+                  });
+                  if (error) {
+                    console.error("Kakao Login Error:", error);
+                    alert("카카오 로그인 연동 중 문제가 발생했습니다: " + error.message);
                   }
-                });
-                if (error) {
-                  console.error("Kakao Login Error:", error);
-                  alert("카카오 로그인 연동 중 문제가 발생했습니다.");
-                  // 에러 시 기존 UI 플로우(테스트용)로 진행하려면 아래 주석 해제
-                  // setStep(1);
+                } catch (err: any) {
+                  console.error("Kakao OAuth Exception:", err);
+                  alert("카카오 로그인 실행 중 에러가 발생했습니다: " + (err.message || err));
                 }
               }}
-              className="w-full bg-[#FEE500] text-slate-950 py-5 rounded-2xl text-lg font-black shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+              className="w-full bg-[#FEE500] text-slate-950 py-5 rounded-2xl text-lg font-black shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 mb-4"
             >
               <div className="w-6 h-6 bg-slate-950 rounded-full flex items-center justify-center"><MessageSquare size={14} className="text-[#FEE500]" fill="currentColor" /></div>
               카카오로 1초 만에 시작하기
+            </button>
+
+            <button
+              onClick={() => setStep(1)}
+              className="text-xs text-slate-500 hover:text-slate-300 font-bold underline transition-colors"
+            >
+              카카오 연동 없이 둘러보기 ↗
             </button>
           </motion.div>
         )}
