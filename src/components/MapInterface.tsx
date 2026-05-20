@@ -955,7 +955,16 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                   isEntrepreneurMode={isEntrepreneurMode}
                   onModeChange={setIsEntrepreneurMode}
                   onClose={() => setShowMyPage(false)}
-                  onLogout={() => { localStorage.removeItem("gongsil_user_profile"); window.location.reload(); }} 
+                  onLogout={async () => {
+                    localStorage.removeItem("gongsil_user_profile");
+                    localStorage.removeItem("gongsil_user_id");
+                    try {
+                      await supabase.auth.signOut();
+                    } catch (e) {
+                      console.warn("Supabase 로그아웃 오류:", e);
+                    }
+                    window.location.reload();
+                  }}
                   vacancies={vacancies}
                 />
              </div>
