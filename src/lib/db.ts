@@ -419,13 +419,25 @@ export async function saveVote(v: {
   categoryIcon?: string;
   comment?: string;
 }): Promise<boolean> {
-  const { error } = await supabase.from("votes").upsert({
+  // 1. 해당 공실에 대해 동일 유저가 이전에 남긴 투표가 있다면 완전히 삭제 (1인 1공실 1투표 권한 준수)
+  const { error: deleteError } = await supabase
+    .from("votes")
+    .delete()
+    .eq("vacancy_id", v.vacancyId)
+    .eq("user_id", v.userId);
+
+  if (deleteError) {
+    console.warn("기존 투표 제거 실패 (삽입 계속 진행):", deleteError.message);
+  }
+
+  // 2. 신규 투표 삽입
+  const { error } = await supabase.from("votes").insert({
     vacancy_id: v.vacancyId,
     user_id: v.userId,
     category: v.category,
     category_icon: v.categoryIcon || null,
     comment: v.comment || null,
-  }, { onConflict: "vacancy_id,user_id,category" });
+  });
 
   if (error) {
     console.error("투표 저장 오류:", error.message);

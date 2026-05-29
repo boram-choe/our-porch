@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   User as UserIcon, MapPin, Settings, Heart, MessageSquare, ChevronRight, LogOut, 
   Camera, Star, Award, Briefcase, Baby, Dog, Zap, HelpCircle, Edit3, Check, 
-  Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon, X, ArrowLeft
+  Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon, X, ArrowLeft, Gift
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
 import { fetchUserReports, DbReport } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 
 const VOTES_KEY = "gongsil_user_votes";
 
@@ -50,7 +51,9 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [activeTab, setActiveTab] = useState<"profile" | "activity" | "reports" | "settings">(isEntrepreneurMode ? "activity" : "profile");
   const [isEditing, setIsEditing] = useState(false);
   const [editNickname, setEditNickname] = useState("");
-  const [votes, setVotes] = useState<VoteRecord[]>([]);
+  const [dbVotes, setDbVotes] = useState<any[]>([]);
+  const [dbComments, setDbComments] = useState<any[]>([]);
+  const [isLoadingActivity, setIsLoadingActivity] = useState(true);
   
   const [editPersonaIds, setEditPersonaIds] = useState<string[]>([]);
   const [editCustomPersona, setEditCustomPersona] = useState("");
@@ -71,11 +74,66 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       setEditPersonaIds(profile.personaIds || []);
     }
 
-    const savedVotes = localStorage.getItem(VOTES_KEY);
-    if (savedVotes) {
-      setVotes(JSON.parse(savedVotes));
+    async function loadSupabaseActivity() {
+      if (typeof window === "undefined") return;
+      const userId = localStorage.getItem("gongsil_user_id");
+      if (!userId) {
+        setIsLoadingActivity(false);
+        return;
+      }
+      setIsLoadingActivity(true);
+      try {
+        const [votesRes, commentsRes] = await Promise.all([
+          supabase.from("votes").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+          supabase.from("comments").select("*").eq("user_id", userId).order("created_at", { ascending: false })
+        ]);
+        if (votesRes.data) setDbVotes(votesRes.data);
+        if (commentsRes.data) setDbComments(commentsRes.data);
+      } catch (e) {
+        console.warn("Supabase 활동 내역 조회 실패:", e);
+      } finally {
+        setIsLoadingActivity(false);
+      }
     }
-  }, []);
+    loadSupabaseActivity();
+  }, [userProfile]);
+
+  const votes: VoteRecord[] = dbVotes.map(v => {
+    const matched = vacancies.find(vac => vac.id === v.vacancy_id);
+    return {
+      id: v.id,
+      brand: v.comment || v.category,
+      location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
+      timestamp: v.created_at
+    };
+  });
+
+  const activityTimeline = [
+    ...dbVotes.map(v => {
+      const matched = vacancies.find(vac => vac.id === v.vacancy_id);
+      return {
+        id: v.id,
+        type: "vote" as const,
+        title: v.comment || v.category,
+        location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
+        timestamp: v.created_at,
+        points: 50
+      };
+    }),
+    ...dbComments.map(c => {
+      const matched = vacancies.find(vac => vac.id === c.vacancy_id);
+      return {
+        id: c.id,
+        type: "comment" as const,
+        title: c.content,
+        location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
+        timestamp: c.created_at,
+        points: 50
+      };
+    })
+  ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  const totalPoints = (dbVotes.length * 50) + (dbComments.length * 50);
 
   if (!userProfile) return null;
 
@@ -504,20 +562,43 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
-                    <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
-                      <Star size={20} className="text-blue-600" />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                      <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-amber-500/10">
+                        <Star size={20} className="text-amber-600" />
+                      </div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">상상 지수</p>
+                      <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">상상 지수</p>
-                    <p className="text-xl font-black text-slate-900">{votes.length * 150} P</p>
+                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-blue-500/10">
+                        <MessageSquare size={20} className="text-blue-600" />
+                      </div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">남긴 참여</p>
+                      <p className="text-xl font-black text-slate-900">{dbVotes.length + dbComments.length}개</p>
+                    </div>
                   </div>
-                  <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
-                    <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-3">
-                      <MessageSquare size={20} className="text-amber-600" />
+
+                  {/* 🎁 상상 포인트 혜택 안내 가이드 카드 */}
+                  <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 rounded-[2.5rem] border border-amber-500/20 shadow-xl relative overflow-hidden select-none">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 scale-150"><Award size={80} className="text-amber-500" /></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-6 h-6 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-500">
+                          <Gift size={14} fill="currentColor" />
+                        </div>
+                        <h4 className="text-[11px] font-black text-amber-500 uppercase tracking-widest leading-none">상상 포인트 혜택 안내</h4>
+                      </div>
+                      <p className="text-xs font-bold text-slate-200 leading-relaxed break-keep">
+                        이웃님이 모으신 상상 포인트는 향후 '여긴뭐가'를 통해 실제 오프라인 골목에 오픈하는 매장의 <span className="text-amber-400 font-black">할인 쿠폰</span>으로 교환해 이용하실 수 있습니다! 🎁
+                      </p>
+                      <div className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-[10px] text-slate-500 font-black tracking-tighter">
+                        <span>🗳️ 투표참여 50P</span>
+                        <span>•</span>
+                        <span>💬 의견작성 50P</span>
+                      </div>
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">남긴 상상</p>
-                    <p className="text-xl font-black text-slate-900">{votes.length}개</p>
                   </div>
                 </div>
               </div>
@@ -535,19 +616,37 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-widest">Analysis Ready</span>
               )}
             </div>
-            {votes.length === 0 ? (
-              <div className="bg-white p-12 rounded-3xl text-center border border-dashed border-slate-200">
-                <Lightbulb size={48} className="mx-auto text-slate-200 mb-4" />
-                <p className="text-slate-400 font-bold">아직 남긴 상상이 없어요.<br/>동네 공간을 채워주세요!</p>
+
+            {isLoadingActivity ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p className="text-xs font-bold text-slate-400">활동 내역을 불러오고 있어요...</p>
               </div>
-            ) : (
+            ) : (isEntrepreneurMode ? votes.length === 0 : activityTimeline.length === 0) ? (
+              <div className="bg-white p-10 rounded-[2.5rem] text-center border-2 border-dashed border-slate-200/80 flex flex-col items-center justify-center py-14 px-6">
+                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4 text-amber-500 shadow-inner">
+                  <Lightbulb size={28} />
+                </div>
+                <p className="text-slate-900 font-black text-sm mb-1.5 break-keep">아직 상상한 기록이 없어요</p>
+                <p className="text-slate-400 font-bold text-[11px] leading-relaxed max-w-[220px] mx-auto mb-6 break-keep">
+                  우리 동네 지도를 둘러보고 비어 있는 공실 공간에 이웃님만의 상상 조각을 첫 번째로 던져보세요! 🎁
+                </p>
+                <button
+                  onClick={onClose}
+                  className="px-5 py-3 bg-slate-950 text-white font-black text-xs rounded-xl shadow-lg shadow-slate-950/10 hover:scale-[1.03] active:scale-95 transition-all"
+                >
+                  공실 구경하러 가기
+                </button>
+              </div>
+            ) : isEntrepreneurMode ? (
+              /* 예비사장님 관심 공간 */
               <div className="space-y-3">
                 {votes.map((vote) => (
-                  <div key={vote.id} className={`bg-white rounded-3xl shadow-sm border transition-all ${isEntrepreneurMode ? "p-0 overflow-hidden border-blue-100 hover:border-blue-300" : "p-5 border-slate-100 flex items-center justify-between"}`}>
-                    <div className={`${isEntrepreneurMode ? "p-5 flex items-center justify-between" : "flex items-center gap-4"}`}>
+                  <div key={vote.id} className="bg-white rounded-3xl shadow-sm border border-blue-100 hover:border-blue-300 transition-all p-0 overflow-hidden">
+                    <div className="p-5 flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${isEntrepreneurMode ? "bg-blue-600 shadow-blue-500/20" : "bg-amber-500 shadow-amber-500/20"}`}>
-                          {isEntrepreneurMode ? <Briefcase size={24} /> : <Sparkles size={24} />}
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg bg-blue-600 shadow-blue-500/20">
+                          <Briefcase size={24} />
                         </div>
                         <div>
                           <p className="text-sm font-black text-slate-900">{vote.brand}</p>
@@ -557,35 +656,62 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                           </p>
                         </div>
                       </div>
-                      
-                      {!isEntrepreneurMode && (
-                        <div className="text-right">
-                           <p className="text-[10px] font-bold text-slate-300 flex items-center justify-end gap-1 mb-1">
-                             <Clock size={10} />
-                             {new Date(vote.timestamp).toLocaleDateString()}
-                           </p>
-                           <span className="text-[10px] font-black text-amber-500 bg-amber-50 px-2 py-1 rounded-full">+150P</span>
-                        </div>
-                      )}
                     </div>
 
-                    {isEntrepreneurMode && (
-                      <div className="bg-slate-50 p-4 border-t border-slate-100 flex items-center justify-between">
-                         <div className="flex flex-col">
-                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">상태</p>
-                           <p className="text-[11px] font-bold text-slate-900">창업 타당성 분석 가능</p>
-                         </div>
-                         <button 
-                           onClick={() => {
-                             setSelectedLocation(vote.location);
-                             setShowFeasibility(true);
-                           }}
-                           className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2"
-                         >
-                           <Zap size={14} fill="currentColor" /> 재무 리포트 생성
-                         </button>
+                    <div className="bg-slate-50 p-4 border-t border-slate-100 flex items-center justify-between">
+                       <div className="flex flex-col">
+                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">상태</p>
+                         <p className="text-[11px] font-bold text-slate-900">창업 타당성 분석 가능</p>
+                       </div>
+                       <button 
+                         onClick={() => {
+                           setSelectedLocation(vote.location);
+                           setShowFeasibility(true);
+                         }}
+                         className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2"
+                       >
+                         <Zap size={14} fill="currentColor" /> 재무 리포트 생성
+                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* 동네주민 통합 활동 피드 */
+              <div className="space-y-3">
+                {activityTimeline.map((item) => (
+                  <div key={item.id} className="bg-white rounded-3xl shadow-sm border border-slate-100 p-5 flex items-center justify-between hover:border-amber-200 transition-all">
+                    <div className="flex items-center gap-4 flex-1 min-w-0 mr-3">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 ${
+                        item.type === 'vote' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-blue-500 shadow-blue-500/20'
+                      }`}>
+                        {item.type === 'vote' ? <Sparkles size={22} /> : <MessageSquare size={22} />}
                       </div>
-                    )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
+                            item.type === 'vote' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
+                          }`}>
+                            {item.type === 'vote' ? '🗳️ 상상 투표' : '💬 상세 의견'}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-black text-slate-900 tracking-tight truncate">
+                          {item.type === 'vote' ? `'${item.title}' 투표 참여` : `"${item.title}"`}
+                        </h4>
+                        <p className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mt-1 truncate">
+                          <MapPin size={10} />
+                          {item.location}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-right shrink-0">
+                       <p className="text-[10px] font-bold text-slate-300 flex items-center justify-end gap-1 mb-1.5">
+                         <Clock size={10} />
+                         {new Date(item.timestamp).toLocaleDateString()}
+                       </p>
+                       <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">+50P</span>
+                    </div>
                   </div>
                 ))}
               </div>

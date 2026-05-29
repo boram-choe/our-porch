@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Vacancy, VoteItem } from "@/data/dummyVacancies";
-import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star, Info } from "lucide-react";
+import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star, Info, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "./MyPage";
 import { saveVote, saveVacancy, submitDisputeReport } from "@/lib/db";
@@ -82,8 +82,30 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
-  const hasPhoto = !!(vacancy.images?.[0] || vacancy.imageUrl);
+  const [showGallery, setShowGallery] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [showPointsToast, setShowPointsToast] = useState(false);
+
+  const allImages = useMemo(() => {
+    const list: string[] = [];
+    if (vacancy.images && Array.isArray(vacancy.images)) {
+      list.push(...vacancy.images);
+    }
+    if (vacancy.imageUrl && !list.includes(vacancy.imageUrl)) {
+      list.push(vacancy.imageUrl);
+    }
+    return Array.from(new Set(list.filter(Boolean)));
+  }, [vacancy.images, vacancy.imageUrl]);
+
+  const hasPhoto = !!(allImages[0]);
   const showTopVisual = (votingStep === 'results') || hasPhoto;
+
+  // 이미지 로딩 상태 관리
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [vacancy.id]);
 
   // 댓글 관련 상태
   const [showComments, setShowComments] = useState(false);
@@ -106,7 +128,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
   const handleAddComment = async () => {
     if (userProfile?.isGuest) {
-      alert("의견 작성은 카카오 로그인 회원만 참여할 수 있습니다.");
+      alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 50p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
       return;
     }
     if (!newComment.trim() || typeof window === "undefined") return;
@@ -117,12 +139,21 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     const added = await addComment(vacancy.id, userId, newComment.trim());
     if (added) {
       setNewComment("");
+      localStorage.setItem(`gongsil_commented_vacancy_${vacancy.id}`, "1");
+      // MapInterface에 리렌더링 및 핀 동기화 신호를 주기 위해 vacancy 갱신 호출
+      onVacancyUpdate({ ...vacancy });
+      setShowPointsToast(true);
+      setTimeout(() => setShowPointsToast(false), 3500);
       await loadComments();
     }
     setIsSubmittingComment(false);
   };
 
   const handleLike = async (commentId: string, isLiked: boolean) => {
+    if (userProfile?.isGuest) {
+      alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 50p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
+      return;
+    }
     if (typeof window === "undefined") return;
     const userId = localStorage.getItem("gongsil_user_id");
     if (!userId) return;
@@ -134,6 +165,10 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   };
 
   const handleReport = async (commentId: string) => {
+    if (userProfile?.isGuest) {
+      alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 50p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
+      return;
+    }
     if (typeof window === "undefined") return;
     if (!confirm("이 댓글을 신고하시겠습니까?")) return;
     const userId = localStorage.getItem("gongsil_user_id");
@@ -192,7 +227,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
   const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
     if (userProfile?.isGuest) {
-      alert("투표는 카카오 로그인 회원만 참여할 수 있습니다.");
+      alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 50p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
       return;
     }
     if (e) e.preventDefault();
@@ -246,6 +281,10 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
     setSelectedCategory(null);
     onVacancyUpdate(updated);
     recordVote(brand, updated.landmark || updated.address);
+
+    // 포인트 적립 토스트 활성화
+    setShowPointsToast(true);
+    setTimeout(() => setShowPointsToast(false), 3500);
 
     try {
       const userId = localStorage.getItem("gongsil_user_id");
@@ -427,16 +466,31 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: votingStep === 'results' ? 0.6 : 0.95 }}
-                className="absolute inset-0 z-0 pointer-events-none"
+                className="absolute inset-0 z-[5] cursor-pointer pointer-events-auto bg-slate-900"
+                onClick={() => setShowGallery(true)}
               >
+                {!imageLoaded && (
+                  <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center animate-pulse gap-3">
+                    <div className="w-8 h-8 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+                    <span className="text-[10px] font-black text-slate-500 tracking-wider">현장 실사 사진 로드 중...</span>
+                  </div>
+                )}
                 <img 
-                  src={vacancy.images?.[0] || vacancy.imageUrl || ""} 
-                  className="w-full h-full object-cover" 
+                  src={allImages[0] || ""} 
+                  className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
                   alt="Field Photo Background" 
+                  onLoad={() => setImageLoaded(true)}
                 />
                 {/* 자연스러운 그라데이션 오버레이 */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
                 <div className="absolute inset-0 backdrop-blur-[1px]" />
+                {/* 사진 장수 배지 표시 */}
+                {allImages.length > 1 && (
+                  <div className="absolute top-6 right-6 bg-slate-950/80 backdrop-blur-md text-amber-400 text-[10px] font-black px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg border border-white/10 select-none">
+                    <Maximize size={10} />
+                    <span>실사 {allImages.length}장 전체보기</span>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -761,16 +815,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                           )}
                         </AnimatePresence>
 
-                        {!hasVoted && !userProfile?.isGuest && (
-                          <button onClick={() => setVotingStep("category")} className="w-full py-5 bg-white text-slate-950 rounded-[2rem] text-sm font-black shadow-xl hover:bg-amber-400 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4">
-                            <Sparkles size={18} className="group-hover:animate-spin" /> 내가 원하는 건 리스트에 없어요
-                          </button>
-                        )}
 
                         {userProfile?.isGuest && (
-                          <div className="p-5 bg-white/5 border border-white/5 rounded-[2rem] text-center mt-4">
-                            <p className="text-[11px] font-bold text-slate-400 leading-relaxed">
-                              💡 투표와 의견 작성은 <span className="text-amber-400 font-black">카카오 로그인 회원</span>만 참여하실 수 있습니다.
+                          <div className="p-6 bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-slate-900 border border-amber-500/20 rounded-[2.5rem] text-center mt-4 shadow-xl select-none">
+                            <p className="text-xs font-black text-amber-500 mb-2 flex items-center justify-center gap-1.5">
+                              <ShieldCheck size={14} /> 상상 참여 권장
+                            </p>
+                            <p className="text-[11px] font-bold text-slate-300 leading-relaxed break-keep">
+                              지금 <span className="text-amber-400 font-black">카카오 계정으로 로그인</span>하시면 동네 빈 공간 투표와 의견 작성에 참여하고, 오프라인 오픈 매장에서 사용 가능한 <span className="text-amber-400 font-black">상상 할인 포인트(건당 50P)</span>를 바로 모으실 수 있어요! 🔐
                             </p>
                           </div>
                         )}
@@ -1101,6 +1153,109 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                 </div>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* 툇마루단 실사 이미지 슬라이더 갤러리 모달 */}
+      <AnimatePresence>
+        {showGallery && allImages.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[999] bg-slate-950/95 flex flex-col justify-between p-6 backdrop-blur-xl"
+          >
+            {/* 상단바: 닫기 버튼 및 타이틀 */}
+            <div className="flex items-center justify-between w-full relative z-10 max-w-4xl mx-auto mt-4">
+              <div>
+                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">툇마루단 실사 갤러리</p>
+                <h4 className="text-sm font-black text-white">{vacancy.landmark || vacancy.address}</h4>
+              </div>
+              <button
+                onClick={() => { setShowGallery(false); }}
+                className="w-10 h-10 bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-white rounded-full flex items-center justify-center border border-white/10"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* 메인 슬라이드 공간 */}
+            <div className="flex-1 flex items-center justify-center relative max-w-4xl w-full mx-auto my-4 select-none">
+              {/* 왼쪽 화살표 */}
+              {allImages.length > 1 && (
+                <button
+                  onClick={() => setGalleryIndex((prev) => (prev - 1 + allImages.length) % allImages.length)}
+                  className="absolute left-2 md:left-4 z-20 w-12 h-12 bg-black/40 hover:bg-black/60 active:scale-90 transition-all text-white rounded-full flex items-center justify-center border border-white/5 backdrop-blur-sm"
+                >
+                  <ChevronDown className="w-6 h-6 rotate-90" />
+                </button>
+              )}
+
+              {/* 이미지 */}
+              <div className="w-full h-full max-h-[70vh] flex items-center justify-center relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl bg-slate-900">
+                <motion.img
+                  key={galleryIndex}
+                  src={allImages[galleryIndex]}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full h-full object-contain"
+                  alt={`Vacancy Image ${galleryIndex + 1}`}
+                />
+              </div>
+
+              {/* 오른쪽 화살표 */}
+              {allImages.length > 1 && (
+                <button
+                  onClick={() => setGalleryIndex((prev) => (prev + 1) % allImages.length)}
+                  className="absolute right-2 md:right-4 z-20 w-12 h-12 bg-black/40 hover:bg-black/60 active:scale-90 transition-all text-white rounded-full flex items-center justify-center border border-white/5 backdrop-blur-sm"
+                >
+                  <ChevronDown className="w-6 h-6 -rotate-90" />
+                </button>
+              )}
+            </div>
+
+            {/* 하단바: 도트 인디케이터 및 장수 */}
+            <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-4 mb-4">
+              {/* 도트 */}
+              {allImages.length > 1 && (
+                <div className="flex gap-2">
+                  {allImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setGalleryIndex(idx)}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        idx === galleryIndex ? "w-6 bg-amber-500" : "w-2 bg-white/30 hover:bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+              {/* 장수 인디케이터 */}
+              <span className="text-xs font-black text-slate-400">
+                {galleryIndex + 1} / {allImages.length}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showPointsToast && (
+          <motion.div 
+            initial={{ y: -80, opacity: 0, x: "-50%" }} 
+            animate={{ y: 24, opacity: 1, x: "-50%" }} 
+            exit={{ y: -80, opacity: 0, x: "-50%" }} 
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="fixed top-0 left-1/2 z-[9999] bg-slate-900/95 backdrop-blur-xl px-8 py-5 rounded-[2rem] border border-amber-500/30 shadow-2xl flex items-center gap-4 min-w-[320px] select-none"
+          >
+            <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+              <Gift size={20} strokeWidth={3} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-0.5">상상 포인트 적립!</p>
+              <p className="text-sm font-black text-white">+50P 상상 포인트가 적립되었습니다! 🎁</p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -492,8 +492,8 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               <div className="w-16 h-16 bg-amber-400/10 rounded-[1.5rem] flex items-center justify-center mx-auto mb-5">
                 <ShieldCheck size={32} className="text-amber-400" />
               </div>
-              <h1 className="text-2xl font-black text-white tracking-tighter leading-tight mb-2">
-                서비스 이용 전<br/><span className="text-amber-400">약관 동의</span>가 필요해요
+              <h1 className="text-2xl font-black text-white tracking-tighter leading-tight mb-2 break-keep">
+                서비스 이용 전 <span className="text-amber-400 whitespace-nowrap">약관 동의</span>가 필요해요
               </h1>
               <p className="text-slate-500 text-xs font-bold leading-relaxed">
                 여긴뭐가는 주민 참여 기반 서비스로,<br/>
@@ -555,28 +555,32 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                   detail: `우리 동네 상권의 흥미로운 소식을 가장 먼저 받아보세요!\n\n■ 수신 내용: 신규 공실 알림, 우리 동네 투표 결과, 업종 매칭 성공 소식 및 혜택 알림\n■ 수신 방법: 카카오톡 알림톡 및 채널 메시지\n\n※ 선택 동의 항목이므로 거부하셔도 기본 서비스는 정상적으로 이용 가능합니다.`
                 }].map(item => (
                   <div key={item.key}>
-                    <button
-                      onClick={item.onToggle}
+                    <div
                       className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all ${
                         item.checked ? "bg-white/5 border-white/10" : "bg-transparent border-transparent hover:border-white/5"
                       }`}
                     >
-                      <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        item.checked ? "bg-amber-400 border-amber-400" : "border-slate-600"
-                      }`}>
-                        {item.checked && <CheckCircle2 size={12} className="text-slate-950" strokeWidth={3} />}
+                      <div 
+                        onClick={item.onToggle}
+                        className="flex items-center gap-4 flex-1 cursor-pointer select-none"
+                      >
+                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                          item.checked ? "bg-amber-400 border-amber-400" : "border-slate-600"
+                        }`}>
+                          {item.checked && <CheckCircle2 size={12} className="text-slate-950" strokeWidth={3} />}
+                        </div>
+                        <span className="text-sm font-bold text-slate-300 text-left flex-1">{item.label}</span>
                       </div>
-                      <span className="text-sm font-bold text-slate-300 text-left flex-1">{item.label}</span>
                       <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${
                         item.required ? "bg-red-500/20 text-red-400" : "bg-slate-700 text-slate-400"
                       }`}>{item.required ? "필수" : "선택"}</span>
                       <button
                         onClick={(e) => { e.stopPropagation(); setExpandedConsent(expandedConsent === item.key ? null : item.key); }}
-                        className="text-slate-600 hover:text-slate-400 transition-colors ml-1"
+                        className="text-slate-600 hover:text-slate-400 transition-colors ml-1 p-1 hover:bg-white/5 rounded"
                       >
                         {expandedConsent === item.key ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                       </button>
-                    </button>
+                    </div>
                     <AnimatePresence>
                       {expandedConsent === item.key && (
                         <motion.div
@@ -835,16 +839,16 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
             >
                <CheckCircle2 size={48} className="text-slate-950" />
             </motion.div>
-            <h1 className="text-4xl font-black text-white mb-6 tracking-tighter leading-tight">상상할 준비가 <br/> 완료되었습니다!</h1>
-            <p className="text-slate-400 mb-12 font-bold leading-relaxed">
+            <h1 className="text-4xl font-black text-white mb-6 tracking-tighter leading-tight break-keep">상상할 준비가 완료되었습니다!</h1>
+            <p className="text-slate-400 mb-12 font-bold leading-relaxed break-keep">
               {isGuest ? (
                 <>
-                  <span className="text-amber-400 font-black">{neighborhood} 둘러보기 이웃</span>님,<br/>
+                  <span className="whitespace-nowrap"><span className="text-amber-400 font-black">{neighborhood} 둘러보기 이웃</span>님</span>,<br/>
                   주변 공실의 투표 결과를 둘러볼까요?
                 </>
               ) : (
                 <>
-                  <span className="text-amber-400 font-black">{neighborhood} {nicknameSuffix}</span>님,<br/>
+                  <span className="whitespace-nowrap"><span className="text-amber-400 font-black">{neighborhood} {nicknameSuffix}</span>님</span>,<br/>
                   {neighborhood}의 빈 공간들을 함께 깨워볼까요?
                 </>
               )}

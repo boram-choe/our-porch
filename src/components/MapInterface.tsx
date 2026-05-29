@@ -94,6 +94,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   const [showAdmin, setShowAdmin] = useState(false);
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
   const [votedIds, setVotedIds] = useState<string[]>([]);
+  const [userVotedVacancyIds, setUserVotedVacancyIds] = useState<string[]>([]);
   const [showTutorial, setShowTutorial] = useState(false);
   const [floorPickerGroup, setFloorPickerGroup] = useState<Vacancy[] | null>(null); // 같은 건물 다층 선택
   
@@ -159,7 +160,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
         let text = "";
         if (topVote && totalVotes > 0) {
-          text = `${name}에 '${topVote.brand}' 입점을 원하는 이웃이 ${totalVotes}명이에요! ✨`;
+          text = `${name}에 '${topVote.brand}' 입점을 원하는 이웃이 ${topVote.count}명이에요! (총 ${totalVotes}표) ✨`;
         } else {
           const templates = [
             `${name}에 어떤 공간이 생기면 좋을지 투표해 주세요! 🗳️`,
@@ -347,7 +348,67 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       }
     }
 
-    setVotedIds([]);
+    // 투표 및 댓글 기록(votedIds = participatedIds) 복원 로직
+    const userId = localStorage.getItem("gongsil_user_id");
+    if (userId) {
+      Promise.all([
+        supabase.from("votes").select("vacancy_id").eq("user_id", userId),
+        supabase.from("comments").select("vacancy_id").eq("user_id", userId)
+      ]).then(([{ data: votesData, error: votesError }, { data: commentsData, error: commentsError }]) => {
+        if (votesError) {
+          console.warn("투표 이력 로드 실패:", votesError);
+        }
+        if (commentsError) {
+          console.warn("댓글 이력 로드 실패:", commentsError);
+        }
+        const dbVoted = votesData ? votesData.map(v => v.vacancy_id) : [];
+        const dbCommented = commentsData ? commentsData.map(c => c.vacancy_id) : [];
+
+        // 로컬 스토리지에 저장된 항목도 함께 병합
+        const localVotedOnly: string[] = [];
+        const localCommentedOnly: string[] = [];
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key) {
+              if (key.startsWith("gongsil_voted_vacancy_")) {
+                localVotedOnly.push(key.replace("gongsil_voted_vacancy_", ""));
+              } else if (key.startsWith("gongsil_commented_vacancy_")) {
+                localCommentedOnly.push(key.replace("gongsil_commented_vacancy_", ""));
+              }
+            }
+          }
+        } catch (e) {
+          console.error("로컬 참여 내역 스캔 오류:", e);
+        }
+        const mergedAll = Array.from(new Set([...dbVoted, ...dbCommented, ...localVotedOnly, ...localCommentedOnly]));
+        const votedOnly = Array.from(new Set([...dbVoted, ...localVotedOnly]));
+        setVotedIds(mergedAll);
+        setUserVotedVacancyIds(votedOnly);
+      });
+    } else {
+      // 비로그인/게스트 등의 경우 로컬 스토리지에서만 복원
+      const localVotedOnly: string[] = [];
+      const localCommentedOnly: string[] = [];
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key) {
+            if (key.startsWith("gongsil_voted_vacancy_")) {
+              localVotedOnly.push(key.replace("gongsil_voted_vacancy_", ""));
+            } else if (key.startsWith("gongsil_commented_vacancy_")) {
+              localCommentedOnly.push(key.replace("gongsil_commented_vacancy_", ""));
+            }
+          }
+        }
+      } catch (e) {
+        console.error("로컬 참여 내역 스캔 오류:", e);
+      }
+      const mergedAll = Array.from(new Set([...localVotedOnly, ...localCommentedOnly]));
+      const votedOnly = Array.from(new Set(localVotedOnly));
+      setVotedIds(mergedAll);
+      setUserVotedVacancyIds(votedOnly);
+    }
 
     const timer = setInterval(() => {
       setFeedIndex((prev) => prev + 1);
@@ -415,6 +476,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   const handleVacancyUpdate = (updated: Vacancy) => {
     setVacancies(vacancies.map(v => v.id === updated.id ? updated : v));
     if (!votedIds.includes(updated.id)) setVotedIds([...votedIds, updated.id]);
+    if (!userVotedVacancyIds.includes(updated.id)) setUserVotedVacancyIds([...userVotedVacancyIds, updated.id]);
     setSelectedVacancy(updated);
   };
 
@@ -761,7 +823,22 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                         <div key={v.id} onClick={() => { setSelectedVacancy(v); mapRef.current?.panTo(new kakao.maps.LatLng(v.lat, v.lng)); }} className="min-w-[220px] bg-white p-5 rounded-[2rem] border-2 border-slate-50 hover:border-amber-300 transition-all cursor-pointer group shadow-sm hover:shadow-xl">
                            <div className="flex items-start justify-between mb-4"><span className="text-[10px] font-black text-amber-600 bg-amber-50 px-3.5 py-1 rounded-full uppercase tracking-widest">생생한 제보</span><ArrowRight size={14} className="text-slate-200 group-hover:text-amber-500 transition-all" /></div>
                            <h3 className="font-black text-slate-950 text-base mb-1 tracking-tight line-clamp-1">{v.landmark}</h3>
-                           <div className="bg-slate-950 p-4 rounded-2xl shadow-inner mt-3"><div className="flex items-center justify-between"><span className="text-xs font-black text-white">✨ {(v.currentVotes || []).sort((a,b)=>b.count-a.count)[0]?.brand || "상상 중"}</span><span className="text-xs font-bold text-amber-500">{(v.currentVotes || []).reduce((a,b)=>a+b.count,0)}표</span></div></div>
+                           <div className="bg-slate-950 p-4 rounded-2xl shadow-inner mt-3">
+                             <div className="flex items-center justify-between">
+                               {(() => {
+                                 const sorted = [...(v.currentVotes || [])].sort((a, b) => b.count - a.count);
+                                 const top = sorted[0];
+                                 const total = (v.currentVotes || []).reduce((s, vt) => s + vt.count, 0);
+                                 if (!top) return <span className="text-xs font-black text-slate-400">상상 중</span>;
+                                 return (
+                                   <>
+                                     <span className="text-xs font-black text-white line-clamp-1 mr-2">✨ {top.brand}</span>
+                                     <span className="text-[10px] font-bold text-amber-500 whitespace-nowrap">{top.count}표 / 총 {total}표</span>
+                                   </>
+                                 );
+                               })()}
+                             </div>
+                           </div>
                         </div>
                    ))}
                 </div>
@@ -913,7 +990,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                           <div className="flex-1 text-left">
                             <p className="text-sm font-black text-slate-950 tracking-tight">{v.landmark}</p>
                             {topVote && totalVotes > 0 ? (
-                              <p className="text-[11px] font-bold text-amber-600 mt-0.5">1위 '{topVote.brand}' &middot; {totalVotes}표</p>
+                              <p className="text-[11px] font-bold text-amber-600 mt-0.5">1위 '{topVote.brand}' &middot; {topVote.count}표 (총 {totalVotes}표)</p>
                             ) : (
                               <p className="text-[11px] font-bold text-slate-400 mt-0.5">첫 번째 투표를 남겨보세요!</p>
                             )}
@@ -938,7 +1015,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             <Building3D 
               userProfile={userProfile}
               vacancy={selectedVacancy} 
-              hasVoted={votedIds.includes(selectedVacancy.id)} 
+              hasVoted={userVotedVacancyIds.includes(selectedVacancy.id)} 
               isEntrepreneurMode={isEntrepreneurMode}
               recommendedCategory={recommendedCategory}
               onModeSwitch={() => setIsEntrepreneurMode(true)}
@@ -958,6 +1035,15 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                   onLogout={async () => {
                     localStorage.removeItem("gongsil_user_profile");
                     localStorage.removeItem("gongsil_user_id");
+                    localStorage.removeItem("gongsil_user_votes");
+                    if (typeof window !== "undefined") {
+                      for (let i = localStorage.length - 1; i >= 0; i--) {
+                        const key = localStorage.key(i);
+                        if (key && (key.startsWith("gongsil_voted_vacancy_") || key.startsWith("gongsil_commented_vacancy_"))) {
+                          localStorage.removeItem(key);
+                        }
+                      }
+                    }
                     try {
                       await supabase.auth.signOut();
                     } catch (e) {
