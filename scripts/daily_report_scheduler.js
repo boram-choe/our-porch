@@ -31,7 +31,6 @@ function getReporterName(id) {
   if (!id) return '게스트 (비회원)';
   if (MEMBER_MAP[id]) return MEMBER_MAP[id];
   
-  // 만약 닉네임 형태가 아니고 단순히 긴 UUID거나 사용자 고유 ID 형태라면 일부 가독화 처리
   if (id.length > 20) {
     return `${id.substring(0,8)}... (인증회원)`;
   }
@@ -48,17 +47,7 @@ async function run() {
   console.log(`집계 기간 (UTC): ${startTime} ~ ${endTime}`);
 
   try {
-    // 1. 미결 제보내역 쿼리 (status = 'pending')
-    // 공실 등록/분쟁 제보 reports 테이블
-    const { data: pendingReports, error: errRep } = await supabase
-      .from('reports')
-      .select('*, vacancies(landmark, display_id, id)')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
-
-    if (errRep) throw errRep;
-
-    // 2. 툇마루단 즉각 실사 확인 필요 공실 쿼리
+    // 1. 공실 데이터 전체 미리 조회 (인메모리 조인용 및 툇마루단 미비용)
     const { data: allVacancies, error: errVac } = await supabase
       .from('vacancies')
       .select('*')
@@ -66,18 +55,33 @@ async function run() {
 
     if (errVac) throw errVac;
 
+    // 2. 미결 제보내역 쿼리 (status = 'pending')
+    const { data: pendingReports, error: errRep } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (errRep) throw errRep;
+
+    // 인메모리 수동 매핑 (DB 외래키 제약조건 부재 시 안정적 동작 보장)
+    pendingReports.forEach(r => {
+      r.vacancies = allVacancies.find(v => v.id === r.vacancy_id) || null;
+    });
+
+    // 3. 툇마루단 즉각 실사 확인 필요 공실 분류
     const pendingVacancies = allVacancies.filter(v => {
       const isMissingDetails = v.deposit === null || v.monthly_rent === null || v.image_url === null;
       const isNotCompleted = v.status !== 'completed' && v.status !== 'hidden' && v.status !== 'merged';
       return isMissingDetails && isNotCompleted;
     });
 
-    // 3. 신규 활동 통계 (최근 24시간 내 발생 지표)
+    // 4. 신규 활동 통계 (최근 24시간 내 발생 지표)
     const { data: newUsers } = await supabase.from('user_profiles').select('*').gte('created_at', startTime).lte('created_at', endTime);
     const { data: newVotes } = await supabase.from('votes').select('*').gte('created_at', startTime).lte('created_at', endTime);
     const { data: newComments } = await supabase.from('comments').select('*').gte('created_at', startTime).lte('created_at', endTime);
 
-    // 4. UUID별 전체 누적 상상 포인트 & 랭킹 집계
+    // 5. UUID별 전체 누적 상상 포인트 & 랭킹 집계
     const { data: allUsers } = await supabase.from('user_profiles').select('*');
     const { data: allVotes } = await supabase.from('votes').select('*');
     const { data: allComments } = await supabase.from('comments').select('*');
