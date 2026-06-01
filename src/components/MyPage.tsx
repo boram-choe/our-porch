@@ -47,6 +47,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
 }) {
   const [showFeasibility, setShowFeasibility] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [showEntrepreneurModal, setShowEntrepreneurModal] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<"profile" | "activity" | "reports" | "settings">(isEntrepreneurMode ? "activity" : "profile");
   const [isEditing, setIsEditing] = useState(false);
@@ -305,7 +306,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
              <Home size={14} /> 우리동네 주민 모드
            </button>
            <button 
-             onClick={() => onModeChange(true)}
+             onClick={() => setShowEntrepreneurModal(true)}
              className={`flex-1 py-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${isEntrepreneurMode ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-600"}`}
            >
              <Briefcase size={14} /> 예비사장님 모드
@@ -813,6 +814,48 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                  }}
                />
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 예비사장님 모드 고도화 안내 Coming Soon 프리미엄 모달 */}
+      <AnimatePresence>
+        {showEntrepreneurModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[300] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 pointer-events-auto"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 10, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              className="bg-slate-900 border border-slate-800 text-white p-6 md:p-8 rounded-[2.5rem] max-w-sm w-full shadow-2xl relative overflow-hidden text-center"
+            >
+              {/* 상단 다이나믹 앰비언트 글로우 라이팅 */}
+              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/20 rounded-full blur-[80px]" />
+              
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-inner mx-auto mb-6">
+                <Briefcase size={28} />
+              </div>
+              
+              <h3 className="text-lg md:text-xl font-black text-white mb-3 tracking-tight">
+                예비 사장님 모드 고도화 안내 🛠️
+              </h3>
+              
+              <p className="text-[12px] md:text-[13px] font-bold text-slate-300 leading-relaxed mb-6 break-keep">
+                현재 예비사장님을 위한 <span className="text-amber-400 font-black">상권분석리포트 및 수익분석리포트</span>는 부동산, 재무전문가들과 함께 깊이 있는 고도화 작업을 진행 중에 있습니다. 조금만 더 기대해 주세요! ✨
+              </p>
+              
+              <button
+                onClick={() => setShowEntrepreneurModal(false)}
+                className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black rounded-2xl text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-amber-500/10 pointer-events-auto"
+              >
+                확인했습니다
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
