@@ -753,7 +753,7 @@ export default function SurveyorPage() {
       </AnimatePresence>
 
       {/* Floating View Toggle */}
-      <div className="absolute top-12 md:top-28 left-6 right-6 z-[100] flex justify-center pointer-events-none">
+      <div className="absolute top-6 md:top-28 left-6 right-6 z-[100] flex justify-center pointer-events-none">
         <motion.div initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/95 backdrop-blur-md p-1 md:p-2 rounded-2xl md:rounded-[2rem] shadow-2xl border border-white/20 flex gap-1 md:gap-2 pointer-events-auto">
           <button onClick={() => setActiveView("map")} className={`flex items-center gap-1.5 md:gap-3 px-4 py-2.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl text-[11px] md:text-xs font-black uppercase tracking-widest transition-all ${activeView === "map" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
             <MapIcon size={16} className="md:w-5 md:h-5" /> 지도 보기
@@ -772,7 +772,7 @@ export default function SurveyorPage() {
             });
           }
         }}
-        className="absolute right-6 md:right-8 bottom-36 md:bottom-32 z-[100] w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 border border-slate-100 pointer-events-auto"
+        className="absolute right-6 md:right-8 bottom-52 md:bottom-32 z-[100] w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 border border-slate-100 pointer-events-auto"
       >
         <LocateFixed size={20} className="md:w-6 md:h-6" />
       </button>
@@ -830,7 +830,7 @@ export default function SurveyorPage() {
         </Map>
       </div>
 
-      <div className="absolute bottom-20 md:bottom-12 left-0 right-0 px-6 md:px-8 flex justify-center z-[100] pointer-events-none">
+      <div className="absolute bottom-36 md:bottom-12 left-0 right-0 px-6 md:px-8 flex justify-center z-[100] pointer-events-none">
         <AnimatePresence mode="wait">
           {!isPinpointing ? (
             <motion.button 
