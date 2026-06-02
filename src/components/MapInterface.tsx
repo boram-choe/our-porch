@@ -732,11 +732,11 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             animate={{ x: 0, opacity: 1 }} 
             className="w-11 h-11 md:w-14 md:h-14 bg-[#0a0d14] rounded-xl md:rounded-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4)] overflow-hidden flex items-center justify-center pointer-events-auto flex-shrink-0"
           >
-            <div className="w-full h-full flex items-center justify-center p-1.5 bg-[#0a0d14]">
+            <div className="w-full h-full flex items-center justify-center p-0 bg-[#0a0d14]">
               <img 
                 src="/images/logo.png" 
                 alt="여긴뭐가 로고" 
-                className="w-full h-full object-contain" 
+                className="w-full h-full object-cover" 
               />
             </div>
           </motion.div>
