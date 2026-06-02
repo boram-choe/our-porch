@@ -620,6 +620,7 @@ export default function SurveyorPage() {
                           <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                             <th className="px-6 py-4">성명/직급</th>
                             <th className="px-6 py-4">아이디</th>
+                            <th className="px-6 py-4">비밀번호</th>
                             <th className="px-6 py-4">소속</th>
                             <th className="px-6 py-4">급여</th>
                           </tr>
@@ -628,7 +629,8 @@ export default function SurveyorPage() {
                           {teamMembers.map(m => (
                             <tr key={m.id} className="hover:bg-slate-50/50">
                               <td className="px-6 py-4 font-black text-slate-950">{m.real_name} <span className="text-blue-500 ml-1">{calculateRank(m.hire_date)}</span></td>
-                              <td className="px-6 py-4 font-bold text-slate-400">`{m.id}`</td>
+                              <td className="px-6 py-4 font-mono font-bold text-slate-500">{m.id}</td>
+                              <td className="px-6 py-4 font-mono font-bold text-rose-500">{m.password}</td>
                               <td className="px-6 py-4 font-bold text-slate-500">{m.gu} {m.dong}</td>
                               <td className="px-6 py-4 font-black text-emerald-600">{m.base_salary.toLocaleString()}만</td>
                             </tr>
