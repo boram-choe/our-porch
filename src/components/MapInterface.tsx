@@ -997,12 +997,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                       <Building2 size={20} className="text-amber-500" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">이 건물에서 {floorPickerGroup.length}개 층 투표 진행중</p>
-                      <h3 className="text-base font-black text-slate-950 tracking-tight">투표할 층을 선택해주세요</h3>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">이 건물에서 {floorPickerGroup.length}개 공간 투표 진행중</p>
+                      <h3 className="text-base font-black text-slate-950 tracking-tight">투표할 공간을 선택해주세요</h3>
                     </div>
                   </div>
                 </div>
-                <div className="px-6 pb-8 space-y-3">
+                <div className="px-6 pb-8 space-y-3 max-h-[50vh] overflow-y-auto custom-scroll no-scrollbar">
                   {[...(floorPickerGroup || [])]
                     .sort((a, b) => {
                       const order = ["1층", "2층", "3층 이상", "지하"];
