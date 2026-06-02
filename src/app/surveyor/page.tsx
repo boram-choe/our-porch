@@ -342,31 +342,31 @@ export default function SurveyorPage() {
               const timeStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
               
               return (
-                 <div key={v.id} className="bg-white p-6 rounded-[2rem] shadow-sm border-2 border-slate-50 flex flex-col group hover:border-slate-300 transition-all cursor-pointer" onClick={() => {
+                 <div key={v.id} className="bg-white p-5 md:p-6 rounded-[2rem] shadow-sm border-2 border-slate-50 flex flex-col group hover:border-slate-300 transition-all cursor-pointer min-w-0" onClick={() => {
                   setEditingVacancyId(v.id);
                   setEditingNeighborhood(v.neighborhood || "");
                   setDetectedAddress(v.address || "");
                   setDetectedLandmark(v.landmark || "");
                   setShowSurveyInput(true);
                 }}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color.replace('bg-', 'bg-').replace('-500', '-50')} ${color.replace('bg-', 'text-')}`}>
+                  <div className="flex items-center justify-between gap-2 min-w-0 w-full">
+                    <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${color.replace('bg-', 'bg-').replace('-500', '-50')} ${color.replace('bg-', 'text-')}`}>
                         {icon}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <h4 className="text-base font-black text-slate-950 leading-tight">{v.landmark || "신규 제보"}</h4>
-                          {v.display_id && (
+                      <div className="min-w-0 flex-1">
+                        {v.display_id && (
+                          <div className="mb-1">
                             <span className="px-2 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded-md tracking-tighter">
-                              {v.display_id}
+                              ID: {v.display_id}
                             </span>
-                          )}
-                        </div>
-                        <p className="text-[10px] font-bold text-slate-400">{v.address}</p>
+                          </div>
+                        )}
+                        <h4 className="text-base font-black text-slate-950 leading-tight break-keep min-w-0">{v.landmark || "신규 제보"}</h4>
+                        <p className="text-[10px] font-bold text-slate-400 mt-1 break-keep min-w-0">{v.address}</p>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
                       <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{timeStr}</span>
                       <ArrowRight size={16} className="text-slate-200 group-hover:text-slate-400 transition-all" />
                     </div>
@@ -507,20 +507,20 @@ export default function SurveyorPage() {
 
             <div className="flex-1 overflow-y-auto p-6 space-y-12 custom-scroll no-scrollbar pb-32">
               {/* 1. Profile Card */}
-              <div className="bg-slate-950 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
-                <div className="relative z-10 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[1.5rem] flex items-center justify-center text-slate-950">
-                      <User size={40} />
+              <div className="bg-slate-950 rounded-2xl md:rounded-[2.5rem] p-4 md:p-6 text-white relative overflow-hidden shadow-xl">
+                <div className="relative z-10 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl md:rounded-[1.5rem] flex items-center justify-center text-slate-950 flex-shrink-0">
+                      <User size={24} className="md:w-8 md:h-8" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black tracking-tight">{currentUser?.real_name} <span className="text-sm font-bold text-slate-400 ml-1">{currentUser?.calculatedRank}</span></h3>
-                      <p className="text-amber-500/80 text-xs font-bold tracking-widest uppercase">📍 {currentUser?.city} {currentUser?.gu} {currentUser?.dong}</p>
+                      <h3 className="text-base md:text-xl font-black tracking-tight break-keep">{currentUser?.real_name} <span className="text-[10px] md:text-xs font-bold text-slate-400 ml-1">{currentUser?.calculatedRank}</span></h3>
+                      <p className="text-amber-500/80 text-[10px] md:text-xs font-bold tracking-widest uppercase mt-0.5 break-keep">📍 {currentUser?.city} {currentUser?.gu} {currentUser?.dong}</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => setShowChangePw(true)}
-                    className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                    className="px-4 py-2.5 md:px-6 md:py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all break-keep flex-shrink-0"
                   >
                     비밀번호 변경
                   </button>
@@ -772,7 +772,7 @@ export default function SurveyorPage() {
             });
           }
         }}
-        className="absolute right-6 md:right-8 bottom-44 md:bottom-32 z-[100] w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 border border-slate-100 pointer-events-auto"
+        className="absolute right-6 md:right-8 bottom-52 md:bottom-32 z-[100] w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 border border-slate-100 pointer-events-auto"
       >
         <LocateFixed size={20} className="md:w-6 md:h-6" />
       </button>
@@ -830,7 +830,7 @@ export default function SurveyorPage() {
         </Map>
       </div>
 
-      <div className="absolute bottom-24 md:bottom-12 left-0 right-0 px-6 md:px-8 flex justify-center z-[100] pointer-events-none">
+      <div className="absolute bottom-32 md:bottom-12 left-0 right-0 px-6 md:px-8 flex justify-center z-[100] pointer-events-none">
         <AnimatePresence mode="wait">
           {!isPinpointing ? (
             <motion.button 
