@@ -687,40 +687,64 @@ export default function SurveyorPage() {
                                         {isGuExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                       </button>
 
-                                      {isGuExpanded && (
-                                        <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                          {Object.entries(guData.dongs).map(([dongCode, dongName]: [string, any]) => {
-                                            const members = teamMembers.filter(m => m.dong === dongName && m.gu === guData.name && m.city === cityData.name);
-                                            return (
-                                              <div key={dongCode} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                                                <div className="flex items-center justify-between mb-3">
-                                                  <h6 className="font-black text-slate-950 text-xs">{dongName}</h6>
-                                                  {(currentUser?.role === "CEO" || currentUser?.role === "OPS") && (
-                                                    <button 
-                                                      onClick={() => {
-                                                        setNewMemberDong({ city: cityData.name, gu: guData.name, dong: dongName });
-                                                        setShowAddMember(true);
-                                                      }}
-                                                      className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all"
-                                                    >
-                                                      <UserPlus size={14} />
-                                                    </button>
-                                                  )}
+                                      {isGuExpanded && (() => {
+                                        // 1, 2동 구분이 없이 통합하여 그룹화 (남가좌1동, 남가좌2동 -> 남가좌동)
+                                        const normalizedDongsMap: { [key: string]: { code: string; name: string } } = {};
+                                        Object.entries(guData.dongs).forEach(([dongCode, originalDongName]: [string, any]) => {
+                                          const normalizedName = originalDongName
+                                            .replace(/\d+/g, '')
+                                            .replace(/[\u00B7\u2027·]+/g, '')
+                                            .replace(/가동$/, '동')
+                                            .trim();
+                                          if (!normalizedDongsMap[normalizedName]) {
+                                            normalizedDongsMap[normalizedName] = { code: dongCode, name: normalizedName };
+                                          }
+                                        });
+
+                                        return (
+                                          <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {Object.values(normalizedDongsMap).map(({ code, name }) => {
+                                              // 담당자 매칭 시에도 멤버의 dong 이름을 정규화하여 비교
+                                              const members = teamMembers.filter(m => {
+                                                const mNorm = m.dong
+                                                  .replace(/\d+/g, '')
+                                                  .replace(/[\u00B7\u2027·]+/g, '')
+                                                  .replace(/가동$/, '동')
+                                                  .trim();
+                                                return mNorm === name && m.gu === guData.name && m.city === cityData.name;
+                                              });
+
+                                              return (
+                                                <div key={code} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                                                  <div className="flex items-center justify-between mb-3">
+                                                    <h6 className="font-black text-slate-950 text-xs">{name}</h6>
+                                                    {(currentUser?.role === "CEO" || currentUser?.role === "OPS") && (
+                                                      <button 
+                                                        onClick={() => {
+                                                          setNewMemberDong({ city: cityData.name, gu: guData.name, dong: name });
+                                                          setShowAddMember(true);
+                                                        }}
+                                                        className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all"
+                                                      >
+                                                        <UserPlus size={14} />
+                                                      </button>
+                                                    )}
+                                                  </div>
+                                                  <div className="flex flex-wrap gap-1">
+                                                    {members.length > 0 ? members.map(m => (
+                                                      <div key={m.id} className="bg-slate-900 text-white px-2 py-1 rounded-md text-[9px] font-bold flex items-center gap-1">
+                                                        {m.real_name[0]} {m.real_name}
+                                                      </div>
+                                                    )) : (
+                                                      <span className="text-[9px] text-slate-300 font-bold italic">담당자 없음</span>
+                                                    )}
+                                                  </div>
                                                 </div>
-                                                <div className="flex flex-wrap gap-1">
-                                                  {members.length > 0 ? members.map(m => (
-                                                    <div key={m.id} className="bg-slate-900 text-white px-2 py-1 rounded-md text-[9px] font-bold flex items-center gap-1">
-                                                      {m.real_name[0]} {m.real_name}
-                                                    </div>
-                                                  )) : (
-                                                    <span className="text-[9px] text-slate-300 font-bold italic">담당자 없음</span>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      )}
+                                              );
+                                            })}
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
                                   );
                                 })}
