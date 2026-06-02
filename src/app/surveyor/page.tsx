@@ -490,37 +490,37 @@ export default function SurveyorPage() {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed inset-0 z-[200] bg-slate-50 flex flex-col"
           >
-            <div className="bg-white p-8 pb-6 shadow-sm flex items-center justify-between flex-shrink-0 border-b border-slate-100">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-500 shadow-xl">
-                  <ShieldCheck size={24} />
+            <div className="bg-white p-4 md:p-8 pb-3 md:pb-6 shadow-sm flex items-center justify-between flex-shrink-0 border-b border-slate-100 gap-2 w-full min-w-0">
+              <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-950 rounded-xl md:rounded-2xl flex items-center justify-center text-amber-500 shadow-xl flex-shrink-0">
+                  <ShieldCheck size={20} className="md:w-6 md:h-6" />
                 </div>
-                <div>
-                  <h2 className="text-2xl font-black text-slate-950 tracking-tight">툇마루단 관리페이지</h2>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{currentUser?.formattedName}</p>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg md:text-2xl font-black text-slate-950 tracking-tight break-keep min-w-0 truncate">툇마루단 관리페이지</h2>
+                  <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest truncate">{currentUser?.formattedName}</p>
                 </div>
               </div>
-              <button onClick={() => setActiveView("map")} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
-                <ArrowRight size={20} className="rotate-180" />
+              <button onClick={() => setActiveView("map")} className="w-9 h-9 md:w-10 md:h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 flex-shrink-0">
+                <ArrowRight size={18} className="rotate-180 md:w-5 md:h-5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-12 custom-scroll no-scrollbar pb-32">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8 md:space-y-12 custom-scroll no-scrollbar pb-32">
               {/* 1. Profile Card */}
-              <div className="bg-slate-950 rounded-2xl md:rounded-[2.5rem] p-4 md:p-6 text-white relative overflow-hidden shadow-xl">
-                <div className="relative z-10 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl md:rounded-[1.5rem] flex items-center justify-center text-slate-950 flex-shrink-0">
-                      <User size={24} className="md:w-8 md:h-8" />
+              <div className="bg-slate-950 rounded-2xl md:rounded-[2.5rem] p-3 md:p-6 text-white relative overflow-hidden shadow-xl">
+                <div className="relative z-10 flex items-center justify-between gap-2 md:gap-4 min-w-0 w-full">
+                  <div className="flex items-center gap-2.5 md:gap-4 min-w-0 flex-1">
+                    <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl md:rounded-[1.5rem] flex items-center justify-center text-slate-950 flex-shrink-0">
+                      <User size={20} className="md:w-8 md:h-8" />
                     </div>
-                    <div>
-                      <h3 className="text-base md:text-xl font-black tracking-tight break-keep">{currentUser?.real_name} <span className="text-[10px] md:text-xs font-bold text-slate-400 ml-1">{currentUser?.calculatedRank}</span></h3>
-                      <p className="text-amber-500/80 text-[10px] md:text-xs font-bold tracking-widest uppercase mt-0.5 break-keep">📍 {currentUser?.city} {currentUser?.gu} {currentUser?.dong}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm md:text-xl font-black tracking-tight break-keep min-w-0 truncate">{currentUser?.real_name} <span className="text-[9px] md:text-xs font-bold text-slate-400 ml-1">{currentUser?.calculatedRank}</span></h3>
+                      <p className="text-amber-500/80 text-[9px] md:text-xs font-bold tracking-widest uppercase mt-0.5 break-keep min-w-0 truncate">📍 {currentUser?.city} {currentUser?.gu} {currentUser?.dong}</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => setShowChangePw(true)}
-                    className="px-4 py-2.5 md:px-6 md:py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all break-keep flex-shrink-0"
+                    className="px-3.5 py-2 md:px-6 md:py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all break-keep flex-shrink-0"
                   >
                     비밀번호 변경
                   </button>
