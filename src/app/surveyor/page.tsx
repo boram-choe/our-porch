@@ -514,7 +514,7 @@ export default function SurveyorPage() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[200] bg-slate-50 flex flex-col overflow-x-hidden"
+            className="fixed inset-0 w-screen max-w-full z-[200] bg-slate-50 flex flex-col overflow-x-hidden"
           >
             <div className="bg-white p-4 md:p-8 pb-3 md:pb-6 shadow-sm flex items-center justify-between flex-shrink-0 border-b border-slate-100 gap-2 w-full min-w-0">
               <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
@@ -829,7 +829,7 @@ export default function SurveyorPage() {
         <LocateFixed size={20} className="md:w-6 md:h-6" />
       </button>
 
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <Map
           center={pinLocation}
           style={{ width: "100%", height: "100%" }}
