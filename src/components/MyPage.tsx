@@ -66,7 +66,9 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [tempWorkLocation, setTempWorkLocation] = useState<{ neighborhood: string; lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [tempWorkActivityTimes, setTempWorkActivityTimes] = useState<string[]>([]);
+  const [activityFilter, setActivityFilter] = useState<"all" | "vote" | "comment">("all");
 
+  // 1. Load saved profile on mount
   useEffect(() => {
     const profile = loadSavedProfile();
     if (profile) {
@@ -74,7 +76,10 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       setEditNickname(profile.nickname);
       setEditPersonaIds(profile.personaIds || []);
     }
+  }, []);
 
+  // 2. Load Supabase activity once on mount
+  useEffect(() => {
     async function loadSupabaseActivity() {
       if (typeof window === "undefined") return;
       const userId = localStorage.getItem("gongsil_user_id");
@@ -97,7 +102,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       }
     }
     loadSupabaseActivity();
-  }, [userProfile]);
+  }, []);
 
   const votes: VoteRecord[] = dbVotes.map(v => {
     const matched = vacancies.find(vac => vac.id === v.vacancy_id);
@@ -572,13 +577,22 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">상상 지수</p>
                       <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
                     </div>
-                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
-                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-blue-500/10">
+                    <button 
+                      onClick={() => {
+                        setActiveTab("activity");
+                        setActivityFilter("all");
+                      }}
+                      className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 text-left hover:border-blue-300 hover:scale-[1.02] active:scale-95 transition-all w-full cursor-pointer flex flex-col items-start group"
+                    >
+                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-blue-500/10 group-hover:bg-blue-200 transition-all">
                         <MessageSquare size={20} className="text-blue-600" />
                       </div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">남긴 참여</p>
-                      <p className="text-xl font-black text-slate-900">{dbVotes.length + dbComments.length}개</p>
-                    </div>
+                      <div className="flex items-center justify-between w-full">
+                        <p className="text-xl font-black text-slate-900">{dbVotes.length + dbComments.length}개</p>
+                        <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
+                      </div>
+                    </button>
                   </div>
 
                   {/* 🎁 상상 포인트 혜택 안내 가이드 카드 */}
@@ -617,6 +631,24 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-widest">Analysis Ready</span>
               )}
             </div>
+
+            {!isEntrepreneurMode && (
+              <div className="flex gap-2 p-1 bg-slate-200/40 rounded-xl w-fit">
+                {(["all", "vote", "comment"] as const).map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setActivityFilter(filter)}
+                    className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                      activityFilter === filter
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {filter === "all" ? "전체" : filter === "vote" ? "🗳️ 투표" : "💬 의견"}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {isLoadingActivity ? (
               <div className="flex flex-col items-center justify-center py-12">
@@ -680,7 +712,9 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
             ) : (
               /* 동네주민 통합 활동 피드 */
               <div className="space-y-3">
-                {activityTimeline.map((item) => (
+                {activityTimeline
+                  .filter(item => activityFilter === 'all' || item.type === activityFilter)
+                  .map((item) => (
                   <div key={item.id} className="bg-white rounded-3xl shadow-sm border border-slate-100 p-5 flex items-center justify-between hover:border-amber-200 transition-all">
                     <div className="flex items-center gap-4 flex-1 min-w-0 mr-3">
                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 ${
