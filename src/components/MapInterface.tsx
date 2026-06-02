@@ -824,7 +824,13 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         </AnimatePresence>
       </div>
 
-      <div className="absolute right-4 md:right-6 bottom-[24rem] md:bottom-64 flex flex-col gap-3 md:gap-4 z-[100]">
+      <div 
+        className={`absolute right-4 md:right-6 flex flex-col gap-3 md:gap-4 z-[100] transition-all duration-500 ease-out ${
+          showDashboard && !isPinpointing && !selectedVacancy
+            ? "bottom-[16.5rem] md:bottom-72" 
+            : "bottom-6 md:bottom-10"
+        }`}
+      >
         {!isPinpointing && (
           <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} onClick={startDiscovery} className="w-16 h-16 bg-slate-950 text-amber-500 rounded-3xl shadow-2xl flex items-center justify-center border-[5px] border-amber-500 relative group overflow-hidden">
             <div className="absolute inset-0 bg-amber-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
@@ -837,7 +843,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       </div>
 
       {!isPinpointing && !selectedVacancy && (
-        <div className="absolute bottom-28 md:bottom-10 left-0 right-0 px-6 z-10 pointer-events-none">
+        <div className="absolute bottom-4 md:bottom-8 left-0 right-0 px-6 z-10 pointer-events-none">
           <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white p-5 md:p-6 rounded-[2.5rem] md:rounded-[3rem] shadow-xl border border-slate-100 pointer-events-auto overflow-hidden relative">
              <button onClick={() => setShowDashboard(false)} className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
              <div className="flex items-center justify-between mb-4 mt-2 relative z-10 gap-x-2">
