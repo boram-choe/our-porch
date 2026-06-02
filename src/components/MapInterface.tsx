@@ -257,7 +257,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         const dong = activeLoc.neighborhood || "우리동네";
 
         // Supabase에서 공실 불러오기 (동네 필터링)
-        fetchVacancies(activeLoc.neighborhood).then(async (dbVacancies) => {
+        fetchVacancies().then(async (dbVacancies) => {
           if (dbVacancies.length > 0) {
             // 각 공실별로 실시간 투표 데이터를 가져와서 집계합니다.
             const vacanciesWithVotes = await Promise.all(dbVacancies.map(async (v) => {
