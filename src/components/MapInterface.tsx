@@ -1071,6 +1071,13 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                   isEntrepreneurMode={isEntrepreneurMode}
                   onModeChange={setIsEntrepreneurMode}
                   onClose={() => setShowMyPage(false)}
+                  onVacancySelect={(vacancy) => {
+                    setShowMyPage(false);
+                    setSelectedVacancy(vacancy);
+                    if (mapRef.current && vacancy.lat && vacancy.lng) {
+                      mapRef.current.panTo(new kakao.maps.LatLng(vacancy.lat, vacancy.lng));
+                    }
+                  }}
                   onLogout={async () => {
                     localStorage.removeItem("gongsil_user_profile");
                     localStorage.removeItem("gongsil_user_id");

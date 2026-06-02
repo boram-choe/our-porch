@@ -38,12 +38,13 @@ export function recordVote(brand: string, location: string) {
   }
 }
 
-export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onClose, vacancies = [] }: { 
+export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onClose, vacancies = [], onVacancySelect }: { 
   onLogout: () => void,
   isEntrepreneurMode: boolean,
   onModeChange: (val: boolean) => void,
   onClose?: () => void,
-  vacancies?: any[]
+  vacancies?: any[],
+  onVacancySelect?: (vacancy: any) => void
 }) {
   const [showFeasibility, setShowFeasibility] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -104,13 +105,14 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     loadSupabaseActivity();
   }, []);
 
-  const votes: VoteRecord[] = dbVotes.map(v => {
+  const votes = dbVotes.map(v => {
     const matched = vacancies.find(vac => vac.id === v.vacancy_id);
     return {
       id: v.id,
       brand: v.comment || v.category,
       location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
-      timestamp: v.created_at
+      timestamp: v.created_at,
+      vacancyId: v.vacancy_id
     };
   });
 
@@ -123,7 +125,8 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
         title: v.comment || v.category,
         location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
         timestamp: v.created_at,
-        points: 50
+        points: 50,
+        vacancyId: v.vacancy_id
       };
     }),
     ...dbComments.map(c => {
@@ -134,7 +137,8 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
         title: c.content,
         location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
         timestamp: c.created_at,
-        points: 50
+        points: 50,
+        vacancyId: c.vacancy_id
       };
     })
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -674,81 +678,114 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
             ) : isEntrepreneurMode ? (
               /* 예비사장님 관심 공간 */
               <div className="space-y-3">
-                {votes.map((vote) => (
-                  <div key={vote.id} className="bg-white rounded-3xl shadow-sm border border-blue-100 hover:border-blue-300 transition-all p-0 overflow-hidden">
-                    <div className="p-5 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg bg-blue-600 shadow-blue-500/20">
-                          <Briefcase size={24} />
+                {votes.map((vote) => {
+                  const matchedVacancy = vacancies.find(vac => vac.id === vote.vacancyId);
+                  return (
+                    <div key={vote.id} className="bg-white rounded-3xl shadow-sm border border-blue-100 hover:border-blue-300 transition-all p-0 overflow-hidden">
+                      <button 
+                        onClick={() => {
+                          if (matchedVacancy && onVacancySelect) {
+                            onVacancySelect(matchedVacancy);
+                          }
+                        }}
+                        disabled={!matchedVacancy || !onVacancySelect}
+                        className={`w-full p-5 flex items-center justify-between text-left transition-colors ${
+                          matchedVacancy && onVacancySelect ? "hover:bg-slate-50 cursor-pointer" : ""
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg bg-blue-600 shadow-blue-500/20">
+                            <Briefcase size={24} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-slate-900">{vote.brand}</p>
+                            <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                              <MapPin size={10} />
+                              {vote.location}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-black text-slate-900">{vote.brand}</p>
-                          <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                            <MapPin size={10} />
-                            {vote.location}
-                          </p>
-                        </div>
+                        {matchedVacancy && onVacancySelect && <ChevronRight size={18} className="text-slate-300" />}
+                      </button>
+
+                      <div className="bg-slate-50 p-4 border-t border-slate-100 flex items-center justify-between">
+                         <div className="flex flex-col">
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">상태</p>
+                           <p className="text-[11px] font-bold text-slate-900">창업 타당성 분석 가능</p>
+                         </div>
+                         <button 
+                           onClick={() => {
+                             setSelectedLocation(vote.location);
+                             setShowFeasibility(true);
+                           }}
+                           className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2"
+                         >
+                           <Zap size={14} fill="currentColor" /> 재무 리포트 생성
+                         </button>
                       </div>
                     </div>
-
-                    <div className="bg-slate-50 p-4 border-t border-slate-100 flex items-center justify-between">
-                       <div className="flex flex-col">
-                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">상태</p>
-                         <p className="text-[11px] font-bold text-slate-900">창업 타당성 분석 가능</p>
-                       </div>
-                       <button 
-                         onClick={() => {
-                           setSelectedLocation(vote.location);
-                           setShowFeasibility(true);
-                         }}
-                         className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2"
-                       >
-                         <Zap size={14} fill="currentColor" /> 재무 리포트 생성
-                       </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               /* 동네주민 통합 활동 피드 */
               <div className="space-y-3">
                 {activityTimeline
                   .filter(item => activityFilter === 'all' || item.type === activityFilter)
-                  .map((item) => (
-                  <div key={item.id} className="bg-white rounded-3xl shadow-sm border border-slate-100 p-5 flex items-center justify-between hover:border-amber-200 transition-all">
-                    <div className="flex items-center gap-4 flex-1 min-w-0 mr-3">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 ${
-                        item.type === 'vote' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-blue-500 shadow-blue-500/20'
-                      }`}>
-                        {item.type === 'vote' ? <Sparkles size={22} /> : <MessageSquare size={22} />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
-                            item.type === 'vote' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
+                  .map((item) => {
+                    const matchedVacancy = vacancies.find(vac => vac.id === item.vacancyId);
+                    return (
+                      <button 
+                        key={item.id} 
+                        onClick={() => {
+                          if (matchedVacancy && onVacancySelect) {
+                            onVacancySelect(matchedVacancy);
+                          }
+                        }}
+                        disabled={!matchedVacancy || !onVacancySelect}
+                        className={`w-full bg-white rounded-3xl shadow-sm border border-slate-100 p-5 flex items-center justify-between transition-all text-left ${
+                          matchedVacancy && onVacancySelect 
+                            ? "hover:border-amber-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer" 
+                            : "opacity-80"
+                        }`}
+                      >
+                        <div className="flex items-center gap-4 flex-1 min-w-0 mr-3">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 ${
+                            item.type === 'vote' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-blue-500 shadow-blue-500/20'
                           }`}>
-                            {item.type === 'vote' ? '🗳️ 상상 투표' : '💬 상세 의견'}
-                          </span>
+                            {item.type === 'vote' ? <Sparkles size={22} /> : <MessageSquare size={22} />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
+                                item.type === 'vote' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
+                              }`}>
+                                {item.type === 'vote' ? '🗳️ 상상 투표' : '💬 상세 의견'}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-black text-slate-900 tracking-tight truncate">
+                              {item.type === 'vote' ? `'${item.title}' 투표 참여` : `"${item.title}"`}
+                            </h4>
+                            <p className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mt-1 truncate">
+                              <MapPin size={10} />
+                              {item.location}
+                            </p>
+                          </div>
                         </div>
-                        <h4 className="text-sm font-black text-slate-900 tracking-tight truncate">
-                          {item.type === 'vote' ? `'${item.title}' 투표 참여` : `"${item.title}"`}
-                        </h4>
-                        <p className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mt-1 truncate">
-                          <MapPin size={10} />
-                          {item.location}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right shrink-0">
-                       <p className="text-[10px] font-bold text-slate-300 flex items-center justify-end gap-1 mb-1.5">
-                         <Clock size={10} />
-                         {new Date(item.timestamp).toLocaleDateString()}
-                       </p>
-                       <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">+50P</span>
-                    </div>
-                  </div>
-                ))}
+                        
+                        <div className="text-right shrink-0 flex flex-col items-end">
+                           <p className="text-[10px] font-bold text-slate-300 flex items-center gap-1 mb-1.5 justify-end">
+                             <Clock size={10} />
+                             {new Date(item.timestamp).toLocaleDateString()}
+                           </p>
+                           <div className="flex items-center gap-1 justify-end">
+                             <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">+50P</span>
+                             {matchedVacancy && onVacancySelect && <ChevronRight size={14} className="text-slate-300 ml-1 shrink-0" />}
+                           </div>
+                        </div>
+                      </button>
+                    );
+                  })}
               </div>
             )}
           </motion.div>
