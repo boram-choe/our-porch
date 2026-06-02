@@ -753,13 +753,13 @@ export default function SurveyorPage() {
       </AnimatePresence>
 
       {/* Floating View Toggle */}
-      <div className="absolute top-28 left-6 right-6 z-[100] flex justify-center pointer-events-none">
-        <motion.div initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/95 backdrop-blur-md p-2 rounded-[2rem] shadow-2xl border border-white/20 flex gap-2 pointer-events-auto">
-          <button onClick={() => setActiveView("map")} className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeView === "map" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
-            <MapIcon size={20} /> 지도 보기
+      <div className="absolute top-12 md:top-28 left-6 right-6 z-[100] flex justify-center pointer-events-none">
+        <motion.div initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/95 backdrop-blur-md p-1 md:p-2 rounded-2xl md:rounded-[2rem] shadow-2xl border border-white/20 flex gap-1 md:gap-2 pointer-events-auto">
+          <button onClick={() => setActiveView("map")} className={`flex items-center gap-1.5 md:gap-3 px-4 py-2.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl text-[11px] md:text-xs font-black uppercase tracking-widest transition-all ${activeView === "map" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
+            <MapIcon size={16} className="md:w-5 md:h-5" /> 지도 보기
           </button>
-          <button onClick={() => setActiveView("management")} className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeView === "management" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
-            <Users size={20} /> 관리페이지
+          <button onClick={() => setActiveView("management")} className={`flex items-center gap-1.5 md:gap-3 px-4 py-2.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl text-[11px] md:text-xs font-black uppercase tracking-widest transition-all ${activeView === "management" ? 'bg-slate-950 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
+            <Users size={16} className="md:w-5 md:h-5" /> 관리페이지
           </button>
         </motion.div>
       </div>
@@ -772,9 +772,9 @@ export default function SurveyorPage() {
             });
           }
         }}
-        className="absolute right-8 bottom-32 z-[100] w-14 h-14 bg-white rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 border border-slate-100 pointer-events-auto"
+        className="absolute right-6 md:right-8 bottom-44 md:bottom-32 z-[100] w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 border border-slate-100 pointer-events-auto"
       >
-        <LocateFixed size={24} />
+        <LocateFixed size={20} className="md:w-6 md:h-6" />
       </button>
 
       <div className="absolute inset-0 z-0">
@@ -830,7 +830,7 @@ export default function SurveyorPage() {
         </Map>
       </div>
 
-      <div className="absolute bottom-12 left-0 right-0 px-8 flex justify-center z-[100] pointer-events-none">
+      <div className="absolute bottom-24 md:bottom-12 left-0 right-0 px-6 md:px-8 flex justify-center z-[100] pointer-events-none">
         <AnimatePresence mode="wait">
           {!isPinpointing ? (
             <motion.button 
@@ -845,9 +845,9 @@ export default function SurveyorPage() {
                 setDetectedLandmark("");
                 setIsPinpointing(true);
               }}
-              className="bg-slate-950 text-white px-10 py-6 rounded-[2.5rem] text-xl font-black shadow-2xl flex items-center gap-4 pointer-events-auto"
+              className="bg-slate-950 text-white px-6 py-4 md:px-10 md:py-6 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl font-black shadow-2xl flex items-center gap-2 md:gap-4 pointer-events-auto"
             >
-              <Building2 size={24} className="text-amber-500" /> 신규 공실 조사하기
+              <Building2 size={20} className="text-amber-500 md:w-6 md:h-6" /> 신규 공실 조사하기
             </motion.button>
           ) : (
             <motion.div 
@@ -855,11 +855,11 @@ export default function SurveyorPage() {
               initial={{ scale: 0.8, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 20 }}
-              className="flex items-center gap-4"
+              className="flex items-center gap-2 md:gap-4"
             >
-              <button onClick={() => setIsPinpointing(false)} className="bg-white text-slate-400 px-8 py-6 rounded-[2.5rem] text-lg font-black shadow-xl pointer-events-auto border-2 border-slate-100">취소</button>
-              <button onClick={confirmLocation} className="bg-amber-500 text-slate-950 px-12 py-6 rounded-[2.5rem] text-xl font-black shadow-2xl flex items-center gap-4 pointer-events-auto border-4 border-white">
-                <Check size={28} strokeWidth={4} /> 위치 확정 및 데이터 입력
+              <button onClick={() => setIsPinpointing(false)} className="bg-white text-slate-400 px-5 py-4 md:px-8 md:py-6 rounded-2xl md:rounded-[2.5rem] text-sm md:text-lg font-black shadow-xl pointer-events-auto border-2 border-slate-100">취소</button>
+              <button onClick={confirmLocation} className="bg-amber-500 text-slate-950 px-7 py-4 md:px-12 md:py-6 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl font-black shadow-2xl flex items-center gap-2 md:gap-4 pointer-events-auto border-2 md:border-4 border-white">
+                <Check size={20} className="md:w-7 md:h-7" strokeWidth={4} /> 위치 확정 및 데이터 입력
               </button>
             </motion.div>
           )}
