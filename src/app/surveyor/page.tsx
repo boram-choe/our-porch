@@ -479,7 +479,7 @@ export default function SurveyorPage() {
   }
 
   return (
-    <div className="relative w-full h-screen bg-slate-950 font-sans overflow-hidden">
+    <div className="relative w-full bg-slate-950 font-sans overflow-hidden" style={{ height: "100dvh" }}>
       <AnimatePresence mode="wait">
         {activeView === "management" && (
           <motion.div 
@@ -772,7 +772,7 @@ export default function SurveyorPage() {
             });
           }
         }}
-        className="absolute right-6 md:right-8 bottom-52 md:bottom-32 z-[100] w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 border border-slate-100 pointer-events-auto"
+        className="absolute right-6 md:right-8 bottom-36 md:bottom-32 z-[100] w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-slate-900 border border-slate-100 pointer-events-auto"
       >
         <LocateFixed size={20} className="md:w-6 md:h-6" />
       </button>
@@ -830,7 +830,7 @@ export default function SurveyorPage() {
         </Map>
       </div>
 
-      <div className="absolute bottom-32 md:bottom-12 left-0 right-0 px-6 md:px-8 flex justify-center z-[100] pointer-events-none">
+      <div className="absolute bottom-20 md:bottom-12 left-0 right-0 px-6 md:px-8 flex justify-center z-[100] pointer-events-none">
         <AnimatePresence mode="wait">
           {!isPinpointing ? (
             <motion.button 
