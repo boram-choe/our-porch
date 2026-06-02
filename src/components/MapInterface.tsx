@@ -714,7 +714,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   if (loading) return null;
   if (error) return (
-    <div className="flex flex-col items-center justify-center w-full h-screen bg-slate-950 text-white p-8 text-center">
+    <div className="flex flex-col items-center justify-center w-full h-[100dvh] bg-slate-950 text-white p-8 text-center">
       <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-4 text-red-500">
         <span className="text-3xl">⚠️</span>
       </div>
@@ -724,7 +724,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   );
 
   return (
-    <div className="relative w-full h-screen bg-slate-950 font-sans overflow-hidden subpixel-antialiased text-slate-900">
+    <div className="relative w-full h-[100dvh] bg-slate-950 font-sans overflow-hidden subpixel-antialiased text-slate-900">
       <div className="absolute top-4 md:top-8 left-0 right-0 px-4 md:px-6 z-[100] pointer-events-none">
         <div className="flex items-center gap-2 md:gap-4 w-full max-w-2xl mx-auto">
           <motion.div 
