@@ -488,7 +488,7 @@ export default function SurveyorPage() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[200] bg-slate-50 flex flex-col"
+            className="fixed inset-0 z-[200] bg-slate-50 flex flex-col overflow-x-hidden"
           >
             <div className="bg-white p-4 md:p-8 pb-3 md:pb-6 shadow-sm flex items-center justify-between flex-shrink-0 border-b border-slate-100 gap-2 w-full min-w-0">
               <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
