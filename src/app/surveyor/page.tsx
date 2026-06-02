@@ -20,6 +20,32 @@ const calculateRank = (hireDate: string) => {
   return RANKS[rankIdx];
 };
 
+const isSameCity = (c1: string, c2: string) => {
+  if (!c1 || !c2) return false;
+  const getBase = (c: string) => {
+    const s = c.trim();
+    if (s.startsWith("서울")) return "서울";
+    if (s.startsWith("부산")) return "부산";
+    if (s.startsWith("대구")) return "대구";
+    if (s.startsWith("인천")) return "인천";
+    if (s.startsWith("광주")) return "광주";
+    if (s.startsWith("대전")) return "대전";
+    if (s.startsWith("울산")) return "울산";
+    if (s.startsWith("세종")) return "세종";
+    if (s.startsWith("경기")) return "경기";
+    if (s.startsWith("강원")) return "강원";
+    if (s.startsWith("충북") || s.startsWith("충청북")) return "충북";
+    if (s.startsWith("충남") || s.startsWith("충청남")) return "충남";
+    if (s.startsWith("전북") || s.startsWith("전라북")) return "전북";
+    if (s.startsWith("전남") || s.startsWith("전라남")) return "전남";
+    if (s.startsWith("경북") || s.startsWith("경상북")) return "경북";
+    if (s.startsWith("경남") || s.startsWith("경상남")) return "경남";
+    if (s.startsWith("제주")) return "제주";
+    return s.substring(0, 2);
+  };
+  return getBase(c1) === getBase(c2);
+};
+
 interface SurveyorProfile extends TeamMember {
   formattedName: string;
   calculatedRank: string;
@@ -711,7 +737,7 @@ export default function SurveyorPage() {
                                                   .replace(/[\u00B7\u2027·]+/g, '')
                                                   .replace(/가동$/, '동')
                                                   .trim();
-                                                return mNorm === name && m.gu === guData.name && m.city === cityData.name;
+                                                return mNorm === name && m.gu === guData.name && isSameCity(m.city, cityData.name);
                                               });
 
                                               return (
