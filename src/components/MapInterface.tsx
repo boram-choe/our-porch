@@ -652,7 +652,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         setShowAddModal(false);
         setSelectedFeatures([]);
         setShowSuccessToast(`'${finalLandmark}' 공간이 성공적으로 등록되었습니다!`);
-        setTimeout(() => setShowSuccessToast(null), 4000);
+        // 기프티콘 신청 버튼을 보고 누를 수 있도록 토스트 노출 시간을 15초로 늘려줍니다.
+        setTimeout(() => setShowSuccessToast(null), 15000);
       }
     } catch (e) {
       console.warn("공실 저장 실패:", e);
@@ -1123,10 +1124,23 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
       <AnimatePresence>
         {showSuccessToast && (
-          <motion.div initial={{ y: -100, opacity: 0, x: "-50%" }} animate={{ y: 40, opacity: 1, x: "-50%" }} exit={{ y: -100, opacity: 0, x: "-50%" }} className="fixed top-0 left-1/2 z-[300] bg-slate-900 px-8 py-5 rounded-[2rem] border border-slate-700 shadow-2xl flex items-center gap-4 min-w-[320px]">
-            <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)]"><Check size={20} strokeWidth={4} /></div>
-            <div><p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-0.5">상상 현실화 완료</p><p className="text-sm font-black text-white">{showSuccessToast}</p></div>
-            <button onClick={() => setShowSuccessToast(null)} className="ml-4 text-slate-500 hover:text-white transition-colors"><X size={18} /></button>
+          <motion.div initial={{ y: -100, opacity: 0, x: "-50%" }} animate={{ y: 40, opacity: 1, x: "-50%" }} exit={{ y: -100, opacity: 0, x: "-50%" }} className="fixed top-0 left-1/2 z-[300] bg-slate-900 px-8 py-5 rounded-[2rem] border border-slate-700 shadow-2xl flex items-center gap-4 min-w-[320px] max-w-[90vw]">
+            <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-950 flex-shrink-0 shadow-[0_0_20px_rgba(245,158,11,0.5)]"><Check size={20} strokeWidth={4} /></div>
+            <div className="flex-1">
+              <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-0.5">상상 현실화 완료</p>
+              <p className="text-sm font-black text-white leading-tight mb-2">{showSuccessToast}</p>
+              {showSuccessToast.includes('성공적으로 등록되었습니다') && (
+                <a 
+                  href="http://pf.kakao.com/_dGUsX/chat" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 bg-yellow-400 hover:bg-yellow-300 text-slate-950 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all shadow-md active:scale-95"
+                >
+                  🎁 즉시 커피 기프티콘 받기
+                </a>
+              )}
+            </div>
+            <button onClick={() => setShowSuccessToast(null)} className="ml-2 text-slate-500 hover:text-white transition-colors flex-shrink-0"><X size={18} /></button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,0 +1,254 @@
+
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; color: #334155; }
+          .container { max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+          .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 35px 24px; text-align: center; border-bottom: 4px solid #f59e0b; }
+          .header h1 { color: #f59e0b; margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; }
+          .header p { color: #94a3b8; margin: 8px 0 0 0; font-size: 13px; font-weight: bold; }
+          .content { padding: 24px; }
+          .section-title { font-size: 16px; font-weight: 900; color: #0f172a; margin-top: 28px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; display: flex; align-items: center; }
+          .stats-card { background-color: #f8fafc; border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid #f1f5f9; display: flex; justify-content: space-around; text-align: center; }
+          .stat-item h3 { font-size: 22px; margin: 0; color: #0f172a; font-weight: 900; }
+          .stat-item p { font-size: 11px; margin: 4px 0 0 0; color: #64748b; font-weight: bold; }
+          .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+          .table th { background-color: #f8fafc; text-align: left; padding: 10px 8px; font-size: 11px; text-transform: uppercase; color: #475569; border-bottom: 2px solid #cbd5e1; }
+          .footer { background-color: #f8fafc; text-align: center; padding: 20px; font-size: 11px; color: #94a3b8; border-top: 1px solid #f1f5f9; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>여긴뭐가 실시간 데일리 비즈니스 리포트</h1>
+            <p>골목 공실 상상 프로젝트 • 베타 버전 활성화 분석</p>
+          </div>
+          <div class="content">
+            <div style="font-size: 12px; color: #64748b; margin-bottom: 20px; font-weight: bold; text-align: right;">
+              📅 집계 일시: 2026. 6. 4. AM 9:00:02
+            </div>
+
+            <!-- 최근 24시간 실시간 지표 -->
+            <div class="stats-card">
+              <div class="stat-item">
+                <h3>+1</h3>
+                <p>신규 가입 유저</p>
+              </div>
+              <div class="stat-item">
+                <h3>+0</h3>
+                <p>신규 상상 투표</p>
+              </div>
+              <div class="stat-item">
+                <h3>+0</h3>
+                <p>신규 작성 의견</p>
+              </div>
+            </div>
+
+            <!-- 미결 제보내역 목록 -->
+            <div class="section-title">🗳️ 미결 주민 분쟁 / 제보내역 [회신 대기]</div>
+            <p style="font-size: 12px; color: #64748b; margin-top: -6px; margin-bottom: 12px;">※ 관리자 회신 및 해결 처리가 완료되면 다음날 보고서에서 자동으로 지워집니다.</p>
+            <p style="color: #64748b; font-size: 13px; text-align: center; padding: 20px; border: 1px dashed #cbd5e1; border-radius: 12px; margin: 0;">현재 해결 대기 중인 주민 분쟁/등록 제보내역이 없습니다. 🎉</p>
+
+            <!-- 툇마루단 실사 대기 목록 -->
+            <div class="section-title">🔍 툇마루단 즉각 실사조사 필요 공실 목록</div>
+            <p style="font-size: 12px; color: #64748b; margin-top: -6px; margin-bottom: 12px;">※ 보증금/월세 조건 및 실사 사진 정보가 비어 있는 신규 등록 공실 목록입니다.</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width: 22%;">공실명</th>
+                  <th style="width: 15%;">공실 ID</th>
+                  <th style="width: 25%;">제보 주소</th>
+                  <th style="width: 15%;">누락 항목</th>
+                  <th style="width: 15%;">최초 제보자</th>
+                  <th style="width: 8%;">등록일</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">dmc래미안이편한세상 202동 상가2</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1113130002</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 서대문구 북가좌동 481</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 6. 2.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">LK 빌딩 1층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1124220001</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 송파구 잠실동 196-8</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 5. 30.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">길훈빌딩 2층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1123060002</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 강남구 삼성동 169-6</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 5. 19.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">삼성동 3층 이상 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1123060001</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 강남구 삼성동 168-27</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 5. 19.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">남가좌동 1층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1113110006</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 서대문구 남가좌동 385-14</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">11131101</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 5. 19.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">현대아파트 상가동 1층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>4101090001</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">경기 수원시 장안구 천천동 566</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 5. 9.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">상가동 2층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>2806010001</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">인천 부평구 부평동 950</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 5. 8.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">금융감독원 1층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1119990002</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 영등포구 여의도동 27</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 5. 6.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">여의도동 1층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1119990001</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 영등포구 여의도동 35-6</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 5. 6.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">성산동 3층 이상 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1114200001</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 마포구 성산동 99-1</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 4. 30.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">DMC 래미안 e편한세상 202동 1층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1113130002</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 서대문구 북가좌동 481</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 4. 29.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">연희동 1층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1113050001</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 서대문구 연희동 446-171</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">최보람 (대표)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 4. 29.</td>
+          </tr>
+        
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 12px 8px; font-size: 13px; font-weight: bold; color: #0f172a;">DMC파크뷰자이 205동 1층 공간</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #475569; font-family: monospace;"><code>1113110002</code></td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #334155;">서울 서대문구 남가좌동 385</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #ef4444; font-weight: bold;">📸 현장 실사사진</td>
+            <td style="padding: 12px 8px; font-size: 12px; color: #475569; font-weight: bold;">박주민 (툇마루단 조사원)</td>
+            <td style="padding: 12px 8px; font-size: 11px; color: #94a3b8;">2026. 4. 29.</td>
+          </tr>
+        
+              </tbody>
+            </table>
+
+            <!-- 상위 활동 랭킹 -->
+            <div class="section-title">👑 골목 상상 리더보드 (탑 이웃 5선)</div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="text-align: center; width: 10%;">순위</th>
+                  <th style="width: 25%;">닉네임</th>
+                  <th style="width: 20%;">고유 UUID</th>
+                  <th style="text-align: center; width: 25%;">참여 이력</th>
+                  <th style="text-align: right; width: 20%;">누적 상상 포인트</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+        <tr style="border-bottom: 1px solid #f1f5f9; background-color: #fffbeb;">
+          <td style="padding: 10px 8px; text-align: center; font-weight: bold; color: #d97706;">1위</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: bold; color: #1e293b;">남가좌동 티라노사우르스</td>
+          <td style="padding: 10px 8px; font-size: 11px; font-family: monospace; color: #94a3b8;">131b1660...</td>
+          <td style="padding: 10px 8px; font-size: 12px; text-align: center; color: #334155;">🗳️ 5 | 💬 3</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: 900; text-align: right; color: #b45309;">400p</td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid #f1f5f9; background-color: #ffffff;">
+          <td style="padding: 10px 8px; text-align: center; font-weight: bold; color: #64748b;">2위</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: bold; color: #1e293b;">남가좌동 안킬로사우르스</td>
+          <td style="padding: 10px 8px; font-size: 11px; font-family: monospace; color: #94a3b8;">b0329b63...</td>
+          <td style="padding: 10px 8px; font-size: 12px; text-align: center; color: #334155;">🗳️ 1 | 💬 2</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: 900; text-align: right; color: #b45309;">150p</td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid #f1f5f9; background-color: #ffffff;">
+          <td style="padding: 10px 8px; text-align: center; font-weight: bold; color: #64748b;">3위</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: bold; color: #1e293b;">남가좌동 로즈마리</td>
+          <td style="padding: 10px 8px; font-size: 11px; font-family: monospace; color: #94a3b8;">b8119951...</td>
+          <td style="padding: 10px 8px; font-size: 12px; text-align: center; color: #334155;">🗳️ 3 | 💬 0</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: 900; text-align: right; color: #b45309;">150p</td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid #f1f5f9; background-color: #ffffff;">
+          <td style="padding: 10px 8px; text-align: center; font-weight: bold; color: #64748b;">4위</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: bold; color: #1e293b;">남가좌동 알파카</td>
+          <td style="padding: 10px 8px; font-size: 11px; font-family: monospace; color: #94a3b8;">e36ec01e...</td>
+          <td style="padding: 10px 8px; font-size: 12px; text-align: center; color: #334155;">🗳️ 2 | 💬 1</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: 900; text-align: right; color: #b45309;">150p</td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid #f1f5f9; background-color: #ffffff;">
+          <td style="padding: 10px 8px; text-align: center; font-weight: bold; color: #64748b;">5위</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: bold; color: #1e293b;">남가좌동 고양이</td>
+          <td style="padding: 10px 8px; font-size: 11px; font-family: monospace; color: #94a3b8;">2b01f84c...</td>
+          <td style="padding: 10px 8px; font-size: 12px; text-align: center; color: #334155;">🗳️ 2 | 💬 0</td>
+          <td style="padding: 10px 8px; font-size: 13px; font-weight: 900; text-align: right; color: #b45309;">100p</td>
+        </tr>
+      
+              </tbody>
+            </table>
+          </div>
+          <div class="footer">
+            본 메일은 여긴뭐가 자동화 모듈에 의해 발송되었습니다.<br>
+            © 2026 여긴뭐가 골목상상 프로젝트. All Rights Reserved.
+          </div>
+        </div>
+      </body>
+      </html>
+    

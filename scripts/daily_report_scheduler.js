@@ -6,8 +6,9 @@ const nodemailer = require('nodemailer');
 // Next.js 환경변수 로더 적용 (.env.local 로드)
 try {
   const { loadEnvConfig } = require('@next/env');
-  loadEnvConfig(process.cwd());
-  console.log("Next.js 환경 변수를 성공적으로 로드했습니다.");
+  const projectRoot = path.join(__dirname, '..');
+  loadEnvConfig(projectRoot);
+  console.log(`Next.js 환경 변수를 성공적으로 로드했습니다. (경로: ${projectRoot})`);
 } catch (e) {
   console.warn("Next.js 환경 변수 로더 로드 실패. process.env로 직접 대체합니다.");
 }
