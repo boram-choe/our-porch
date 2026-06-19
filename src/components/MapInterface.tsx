@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   MapPin, Building2, X, User, Sparkles, Lightbulb, Plus, ArrowRight, LocateFixed, Check, 
   Search, Navigation as NavigationIcon, Heart, MessageSquare, TrendingUp, Info, History, ChevronRight, Zap,
-  Clock, Maximize, ShieldCheck, ShoppingBag, BarChart3, CreditCard, Settings, Home, Briefcase
+  Clock, Maximize, ShieldCheck, ShoppingBag, BarChart3, CreditCard, Settings, Home, Briefcase, Compass
 } from "lucide-react";
 import { Vacancy } from "@/data/dummyVacancies";
 import Building3D from "./Building3D";
@@ -15,9 +15,11 @@ import MyPage from "./MyPage";
 import AdminDashboard from "./AdminDashboard";
 import SpaceCurator from "./SpaceCurator";
 import SurveyInput from "./SurveyInput";
+import FengShuiTarot from "./FengShuiTarot";
 import { UserProfile, loadSavedProfile } from "./AuthOnboarding";
 import { fetchVacancies, saveVacancy } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
+import { getGeneralBuildingFengShui } from "@/lib/fengShuiEngine";
 
 // ─── 위치 기반 필터링 ─────────────────────────────────────────────────────────
 const FILTER_RADIUS_KM = 2.5; // 인증 위치 기준 반경 (인접 행정동 포함)
@@ -83,6 +85,16 @@ const getCategoryIdFromVote = (categoryText: string): string => {
   return "etc";
 };
 
+function getShortAreaName(fullName: string): string {
+  const parts = fullName.split(" 부근 ");
+  let suffix = parts.length > 1 ? parts[1] : fullName;
+  suffix = suffix.replace("배산임수 ", "");
+  suffix = suffix.replace("인덕 상생 ", "");
+  suffix = suffix.replace(/.*지맥 /, "");
+  suffix = suffix.replace(/.*수역 /, "");
+  return suffix;
+}
+
 export default function MapInterface({ userProfile, onProfileUpdate }: { userProfile: UserProfile | null, onProfileUpdate: (updated: UserProfile | null) => void }) {
   const [loading, error] = useKakaoLoader({
     appkey: "4e959900c93f0a3268a637079835bb73",
@@ -107,6 +119,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   const [isPinpointing, setIsPinpointing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showCurator, setShowCurator] = useState(false);
+  const [showFengShui, setShowFengShui] = useState(false);
+  const [highlightFengShuiId, setHighlightFengShuiId] = useState<string | null>(null);
+  const [highlightFortuneArea, setHighlightFortuneArea] = useState<{ lat: number, lng: number, areaName: string } | null>(null);
+  const [isPulsing, setIsPulsing] = useState<boolean>(false);
+  const [showFengShuiNudge, setShowFengShuiNudge] = useState<boolean>(true);
+  const [showRegisterNudgePopup, setShowRegisterNudgePopup] = useState(false);
   const [recommendedCategory, setRecommendedCategory] = useState<string | null>(null);
   const [showSuccessToast, setShowSuccessToast] = useState<string | null>(null);
   
@@ -415,7 +433,14 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       setFeedIndex((prev) => prev + 1);
     }, 6000);
 
-    return () => clearInterval(timer);
+    const nudgeTimer = setTimeout(() => {
+      setShowFengShuiNudge(false);
+    }, 8000);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(nudgeTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -651,7 +676,14 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         setVacancies([newV, ...vacancies]);
         setShowAddModal(false);
         setSelectedFeatures([]);
-        setShowSuccessToast(`'${finalLandmark}' 공간이 성공적으로 등록되었습니다!`);
+        
+        // 풍수지리 격식 가져와 성공 멘트에 주입
+        const fsInfo = getGeneralBuildingFengShui(newV);
+        setShowSuccessToast(`🎉 [${fsInfo.grade}] 명당 터를 발견했습니다! 아래에서 첫 투표를 마치고 기프티콘을 받아가세요!`);
+        
+        // 3D 상세 분석 뷰로 자동 전환!
+        setSelectedVacancy(newV);
+        
         // 기프티콘 신청 버튼을 보고 누를 수 있도록 토스트 노출 시간을 15초로 늘려줍니다.
         setTimeout(() => setShowSuccessToast(null), 15000);
       }
@@ -692,15 +724,25 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       const rep = group[0];
       const hasVoted = group.some(v => votedIds.includes(v.id));
       const multiFloor = group.length > 1;
+      const isHighlightedFs = highlightFengShuiId && group.some(v => v.id === highlightFengShuiId);
       return (
-        <CustomOverlayMap key={`${rep.id}-${hasVoted}`} position={{ lat: rep.lat, lng: rep.lng }}>
+        <CustomOverlayMap key={`${rep.id}-${hasVoted}-${isHighlightedFs}`} position={{ lat: rep.lat, lng: rep.lng }}>
           <button onClick={() => handlePinClick(rep)} className="relative group">
+            {isHighlightedFs && (
+              <span className="absolute -inset-4 bg-amber-400/35 rounded-full animate-ping pointer-events-none z-[-1] border-2 border-amber-400" />
+            )}
+            {isHighlightedFs && (
+              <span className="absolute -inset-2 bg-amber-400/25 rounded-full blur-sm pointer-events-none z-[-1]" />
+            )}
             <div className={`relative w-12 h-12 rounded-[1.5rem] flex items-center justify-center border-2 shadow-md transition-all duration-300 ${
+              isHighlightedFs ? "bg-amber-500 text-slate-950 border-amber-400 scale-120 ring-4 ring-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.6)]" :
               rep.status === 'completed' ? "bg-emerald-500 text-white border-white scale-105" :
               hasVoted ? "bg-amber-500 text-slate-950 border-white scale-110" : 
               "bg-slate-950 text-white border-white/20 hover:border-white/50"
             }`}>
-              {rep.status === 'completed' ? <Sparkles size={24} /> : <Lightbulb size={24} fill="currentColor" />}
+              {isHighlightedFs ? <Compass size={24} className="text-slate-950 animate-spin-slow" /> : 
+               rep.status === 'completed' ? <Sparkles size={24} /> : 
+               <Lightbulb size={24} fill="currentColor" />}
             </div>
             {multiFloor && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-400 rounded-full border-2 border-white flex items-center justify-center shadow">
@@ -711,7 +753,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         </CustomOverlayMap>
       );
     });
-  }, [filteredVacancies, isPinpointing, votedIds]);
+  }, [filteredVacancies, isPinpointing, votedIds, highlightFengShuiId]);
 
   if (loading) return null;
   if (error) return (
@@ -779,6 +821,26 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           }}
         >
           {mapMarkers}
+          {highlightFortuneArea && (
+            <CustomOverlayMap position={{ lat: highlightFortuneArea.lat, lng: highlightFortuneArea.lng }}>
+              <div className="relative flex items-center justify-center pointer-events-none">
+                {/* Glowing ripple effects */}
+                {isPulsing && (
+                  <div className="absolute w-44 h-44 bg-purple-500/20 rounded-full animate-ping border-2 border-purple-400" />
+                )}
+                <div className="absolute w-32 h-32 bg-purple-600/30 rounded-full blur-md" />
+                <div className="absolute w-12 h-12 bg-amber-400/50 rounded-full blur-sm animate-pulse" />
+                {/* Central compass/glowing node */}
+                <div className="w-10 h-10 rounded-full bg-slate-950 border-2 border-amber-400 flex items-center justify-center shadow-lg relative animate-spin-slow">
+                  <Compass className="w-5 h-5 text-amber-400" />
+                </div>
+                {/* Area label */}
+                <div className="absolute top-12 bg-slate-950/90 text-white font-black text-[9px] px-3 py-1.5 rounded-xl border border-amber-400/30 whitespace-nowrap shadow-lg">
+                  {getShortAreaName(highlightFortuneArea.areaName)}
+                </div>
+              </div>
+            </CustomOverlayMap>
+          )}
           {isPinpointing && (<MapMarker position={pinLocation} draggable={true} onDragEnd={(marker) => setPinLocation({ lat: marker.getPosition().getLat(), lng: marker.getPosition().getLng() })} image={{ src: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA2MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBkPSJNMzAgNzRMMTQgNTJDNyA0MyAzIDM1IDMgMjdDMyAxMiAxNSAwIDMwIDBDNDUgMCA1NyAxMiA1NyAyN0M1NyAzNSA1MyA0MyA0NiA1MkwzMCA3NFoiIGZpbGw9IiMwMjA2MTciIHN0cm9rZT0iI0Y1OUUwQiIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPGNpcmNsZSBjeD0iMzAiIGN5PSIyNyIgcj0iMTIiIGZpbGw9IiNGNTlFMEIiLz4KICA8cGF0aCBkPSJNMzAgMTlMMzAgMzVNMjMgMjZMMzcgMjZNMjUgMjNMMzUgMjMiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAyMDYxNyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+", size: { width: 50, height: 65 }, options: { offset: { x: 25, y: 65 } } }} />)}
         </Map>
       </div>
@@ -839,6 +901,40 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           </motion.button>
         )}
         {isPinpointing && (<motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} onClick={() => setIsPinpointing(false)} className="w-16 h-16 bg-white rounded-3xl shadow-2xl flex items-center justify-center text-slate-400 hover:text-red-500 transition-all border-4 border-slate-50"><X size={32} /></motion.button>)}
+        {!isPinpointing && !selectedVacancy && (
+          <div className="relative group">
+            {/* 풍수타로 넛지 툴팁 */}
+            <AnimatePresence>
+              {showFengShuiNudge && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8, x: 10, y: "-50%" }}
+                  animate={{ opacity: 1, scale: 1, x: 0, y: "-50%" }}
+                  exit={{ opacity: 0, scale: 0.8, x: 10, y: "-50%" }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute right-16 top-1/2 bg-gradient-to-r from-purple-600 via-indigo-600 to-amber-500 text-white font-black text-[10px] px-3.5 py-2 rounded-xl whitespace-nowrap shadow-[0_10px_25px_rgba(147,51,234,0.3)] border border-amber-400/35 pointer-events-none animate-pulse flex items-center gap-1.5 z-[200]"
+                >
+                  <span className="animate-spin-slow">🔮</span>
+                  <span>우리 집 재물운 &amp; 명당 분석하기</span>
+                  <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-amber-500 rotate-45 border-r border-t border-amber-400/35" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            <motion.button 
+              initial={{ scale: 0, x: 20 }} 
+              animate={{ scale: 1, x: 0 }} 
+              onClick={() => {
+                setShowFengShui(true);
+                setShowFengShuiNudge(false);
+              }} 
+              className="w-14 h-14 bg-slate-950 text-amber-400 rounded-2xl shadow-2xl flex flex-col items-center justify-center border-2 border-amber-500/30 hover:border-amber-400 hover:scale-105 active:scale-95 transition-all relative overflow-hidden group"
+            >
+              <span className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-amber-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Compass size={20} className="text-amber-400 animate-spin-slow" />
+              <span className="text-[8px] font-black mt-0.5 text-amber-400">풍수타로</span>
+            </motion.button>
+          </div>
+        )}
         {!showDashboard && !isPinpointing && !selectedVacancy && (<motion.button initial={{ scale: 0, x: 20 }} animate={{ scale: 1, x: 0 }} onClick={() => setShowDashboard(true)} className="w-14 h-14 bg-amber-500 text-slate-950 rounded-2xl shadow-2xl flex flex-col items-center justify-center border-2 border-white"><History size={20} /><span className="text-[8px] font-black mt-0.5">상상목록</span></motion.button>)}
         <motion.button whileHover={{ scale: 1.1 }} onClick={moveToMyLocation} className="w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center text-slate-900 border border-slate-100"><LocateFixed size={28} /></motion.button>
       </div>
@@ -893,6 +989,26 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                   <p className="text-sm font-black text-slate-400 leading-relaxed italic">지도의 핀을 눌러 첫 번째 상상을 시작하세요.</p>
                 </div>
              )}
+          </motion.div>
+        </div>
+      )}
+
+      {isPinpointing && (
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4 pointer-events-none">
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="bg-slate-950/90 backdrop-blur-md border border-amber-500/30 text-white rounded-3xl p-4 shadow-2xl flex items-center gap-3 text-left pointer-events-auto"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center flex-shrink-0 animate-pulse text-lg select-none">
+              📍
+            </div>
+            <div>
+              <p className="text-xs font-black text-amber-400">우리 동네 빈 공간 지정</p>
+              <p className="text-[11px] font-bold text-slate-350 mt-0.5 leading-relaxed">
+                지도를 움직이거나 마우스로 탭하여, 풍수를 정체시키는 빈 공간(공실)의 위치를 지정하고 아래 버튼을 누르세요.
+              </p>
+            </div>
           </motion.div>
         </div>
       )}
@@ -1120,6 +1236,58 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             }}
           />
         )}
+        {showFengShui && (
+          <FengShuiTarot
+            isOpen={showFengShui}
+            onClose={(showNudge = false) => {
+              setShowFengShui(false);
+              if (showNudge) {
+                setShowRegisterNudgePopup(true);
+              }
+            }}
+            vacancies={vacancies}
+            mapCenter={mapCenter}
+            userProfile={userProfile}
+            onSelectVacancy={(vacancy, openDetail = true) => {
+              setMapCenter({ lat: vacancy.lat, lng: vacancy.lng });
+              if (openDetail) {
+                setSelectedVacancy(vacancy);
+              } else {
+                setSelectedVacancy(null);
+              }
+              setHighlightFengShuiId(vacancy.id);
+              if (!openDetail) {
+                setShowSuccessToast(`🔮 사주와 맞는 명당 공간이 지도에 표시되었습니다. 주변 공실 마커와 함께 살펴보세요!`);
+              }
+              setTimeout(() => {
+                setHighlightFengShuiId(null);
+              }, 8000);
+            }}
+            onSelectFortuneArea={(lat, lng, areaName, fortuneName) => {
+              setMapCenter({ lat, lng });
+              setHighlightFortuneArea({ lat, lng, areaName });
+              setIsPulsing(true);
+              
+              let fortuneTitle = "명당 구역";
+              if (fortuneName) {
+                if (fortuneName.includes("재물")) fortuneTitle = "재물운이 좋은 곳";
+                else if (fortuneName.includes("성공")) fortuneTitle = "성공운이 좋은 곳";
+                else if (fortuneName.includes("연애")) fortuneTitle = "연애운이 좋은 곳";
+                else if (fortuneName.includes("안정")) fortuneTitle = "안정운이 좋은 곳";
+              }
+              
+              setShowSuccessToast(`🔮 ${fortuneTitle}이 지도에 표시되었습니다.`);
+              setTimeout(() => {
+                setShowSuccessToast(null);
+                setIsPulsing(false);
+              }, 8000);
+            }}
+            onStartDiscovery={() => {
+              setShowFengShui(false);
+              startDiscovery();
+            }}
+          />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>
@@ -1199,6 +1367,16 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                       <p className="text-[11px] text-slate-500 font-bold mt-1">여러 이웃의 투표가 모여 동네가 바뀌어요</p>
                     </div>
                   </div>
+                  <div className="flex items-start gap-4 bg-purple-50 rounded-2xl p-5">
+                    <div className="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-600/30 text-white text-lg select-none">
+                      🔮
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">TIP 3 &middot; 풍수와 동네 기운 살리기</p>
+                      <p className="text-sm font-black text-slate-900 leading-snug">나쁜 음기를 뿜는 방치된 빈 상가를 찾아 제보하면 즉시 풍수 명당을 분석해 드려요.</p>
+                      <p className="text-[11px] text-slate-500 font-bold mt-1">등록 시 기프티콘용 500P 지급 🎁</p>
+                    </div>
+                  </div>
                 </div>
                 <div className="px-6 pb-8">
                   <button
@@ -1217,6 +1395,54 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 🔮 장기 공실 등록 권유 바텀 배너 (지도 확인 후 제보 유도) */}
+      <AnimatePresence>
+        {showRegisterNudgePopup && (
+          <div className="fixed bottom-6 left-0 right-0 z-[400] px-4 flex justify-center pointer-events-none">
+            <motion.div
+              key="register-nudge"
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200, delay: 1.5 }} // 지도를 먼저 1.5초간 보게 함
+              className="w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-t-2 border-l-2 border-r-2 border-b-4 border-slate-700/50 border-b-amber-500/50 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 shadow-lg shadow-amber-500/20">
+                  🏡
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-black text-white leading-tight">
+                    우리 집 길운을 더 높이려면?
+                  </h3>
+                  <p className="text-[11px] font-bold text-slate-300 leading-relaxed mt-1.5 break-keep">
+                    오래 방치된 빈 공간은 주변의 좋은 기운을 흐리게 할 수 있어요. 장기 공실을 찾아 제보하고, 어떤 공간으로 다시 태어나면 좋을지 이웃들과 함께 상상해 보세요!
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowRegisterNudgePopup(false)}
+                  className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white flex-shrink-0"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setShowRegisterNudgePopup(false);
+                  startDiscovery();
+                }}
+                className="w-full mt-4 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black rounded-xl shadow-lg shadow-amber-500/10 active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
+              >
+                <Plus size={18} strokeWidth={3} />
+                내가 알고 있는 장기 공실 등록하기
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="hidden md:flex absolute bottom-2 left-4 z-[300] bg-slate-950/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 text-[9px] md:text-[10px] text-slate-400 font-bold flex items-center gap-3 shadow-lg pointer-events-auto">
         <span className="text-white font-black">사업자 정보</span>
         <span className="text-white/20">|</span>

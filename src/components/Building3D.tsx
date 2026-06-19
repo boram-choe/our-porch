@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Vacancy, VoteItem } from "@/data/dummyVacancies";
-import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star, Info, ShieldCheck } from "lucide-react";
+import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star, Info, ShieldCheck, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "./MyPage";
 import { saveVote, saveVacancy, submitDisputeReport } from "@/lib/db";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "../lib/comments";
+import { getGeneralBuildingFengShui, getPersonaFengShuiTip } from "@/lib/fengShuiEngine";
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
@@ -585,6 +586,59 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                         </div>
                       </div>
                     ) : null;
+                  })()}
+
+                  {/* 🔮 풍수 명당 정보 (지나가는 사용자 대상 흥미 유도) */}
+                  {(() => {
+                    const fs = getGeneralBuildingFengShui(vacancy);
+                    const primaryPersonaId = userProfile?.personaIds?.find(id => 
+                      ["homemaker", "worker", "parenting", "student", "solo", "pet", "senior"].includes(id)
+                    ) || "default";
+                    const personaTip = getPersonaFengShuiTip(primaryPersonaId);
+                    
+                    return (
+                      <div className="w-full bg-gradient-to-br from-amber-500/10 to-yellow-500/5 border border-amber-500/20 rounded-[2rem] p-6 mb-5 shadow-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Compass size={16} className="text-amber-400 animate-spin-slow" />
+                            <span className="text-xs font-black text-amber-400 uppercase tracking-widest leading-none">이 터의 풍수지리 명당 진단</span>
+                          </div>
+                          <div className="text-[10px] font-black bg-amber-500/25 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
+                            {fs.fortuneTypeKr} &middot; {fs.score}점
+                          </div>
+                        </div>
+                        <h5 className="text-sm font-black text-white mb-2">{fs.grade} ({fs.entranceDirection})</h5>
+                        <p className="text-[11px] font-bold text-slate-350 leading-relaxed mb-4">
+                          {fs.summary}
+                        </p>
+                        
+                        {/* 페르소나 맞춤형 개운 솔루션 */}
+                        <div className="mb-4 p-4 bg-slate-950/60 border border-amber-500/15 rounded-2xl text-left">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Compass size={12} className="text-amber-500" />
+                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">
+                              {primaryPersonaId === "default" ? "이웃" : personaTip.personaName} 맞춤형 오늘의 개운(開運) 비법
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-black text-slate-350 leading-relaxed mb-2.5">
+                            Q. &ldquo;{personaTip.question}&rdquo;
+                          </p>
+                          <div className="text-[11.5px] font-bold text-slate-200 leading-normal space-y-1">
+                            <p>📍 <strong>행운의 터</strong>: {personaTip.spotType} ({personaTip.direction})</p>
+                            <p>🥤 <strong>행운의 음료/음식</strong>: {personaTip.food}</p>
+                            <p>🏃 <strong>행운의 행동</strong>: {personaTip.action}</p>
+                          </div>
+                        </div>
+
+                        <div className="text-[10px] font-bold text-slate-400 border-t border-white/5 pt-3.5 flex items-start gap-1.5 leading-relaxed">
+                          <span className="text-amber-400 text-xs mt-0.5">💡</span>
+                          <span>
+                            이 좋은 명당 기운이 현재 <strong>{vacancy.vacancyPeriod || "장기 공실"}</strong> 상태로 비어 있습니다. 
+                            이 터에 어떤 상상(가게)이 들어오면 이 에너지를 가장 잘 살릴 수 있을까요? 아래에서 원하시는 업종을 선택하여 투표해 주세요!
+                          </span>
+                        </div>
+                      </div>
+                    );
                   })()}
 
                   {/* 이웃들의 상상 TOP 3 (대분류 기준 집계) */}

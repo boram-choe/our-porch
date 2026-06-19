@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning className="h-full overflow-hidden antialiased">
       <head>
-        <link rel="stylesheet" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+        <link rel="stylesheet" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" crossOrigin="anonymous" />
       </head>
       <body className="min-h-full flex flex-col m-0 p-0 overflow-hidden bg-slate-950 text-white font-sans">
         {children}
