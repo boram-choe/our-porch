@@ -296,7 +296,10 @@ export default function FengShuiTarot({
       const dataUrl = await htmlToImage.toPng(el, {
         pixelRatio: 2,
         backgroundColor: "#0f172a",
-        style: { display: "flex" }
+        filter: (node: any) => {
+          if (node?.classList?.contains("no-capture")) return false;
+          return true;
+        }
       });
       
       setShareImageUrl(dataUrl);
@@ -641,7 +644,6 @@ export default function FengShuiTarot({
     <AnimatePresence>
       <div className="fixed inset-0 z-[400] flex items-start justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
         <motion.div
-          ref={contentRef}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -684,7 +686,7 @@ export default function FengShuiTarot({
             </div>
           </div>
 
-          <div className="p-6 md:p-8 relative z-10">
+          <div className="p-6 md:p-8 relative z-10" ref={contentRef}>
             {/* [1단계] 정보 입력 */}
             {step === "input" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -1539,7 +1541,7 @@ export default function FengShuiTarot({
                       </div>
 
                       {/* 하단 도트 인디케이터 (점점점점점) */}
-                      <div className="flex items-center justify-center gap-2 py-3 mt-4">
+                      <div className="flex items-center justify-center gap-2 py-3 mt-4 no-capture">
                         {[0, 1, 2, 3, 4].map((idx) => (
                           <button
                             key={idx}
@@ -1557,7 +1559,7 @@ export default function FengShuiTarot({
                       </div>
 
                       {/* SNS 공유 버튼 */}
-                      <div className="pt-2 mt-1 space-y-3">
+                      <div className="pt-2 mt-1 space-y-3 no-capture">
                         <button
                           onClick={async () => {
                             setShowShareModal(true);
