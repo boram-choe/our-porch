@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as htmlToImage from "html-to-image";
-import { X, Sparkles, AlertCircle, RefreshCw, Compass, ArrowRight, Home, MapPin, Info, Check, ShieldCheck, ChevronLeft, ChevronRight, Share2, Download, Link2 } from "lucide-react";
+import { X, Sparkles, AlertCircle, RefreshCw, Compass, ArrowRight, Home, MapPin, Info, Check, ShieldCheck, ChevronLeft, ChevronRight, Share2, Download, Link2, Camera } from "lucide-react";
 import { Vacancy } from "../data/dummyVacancies";
 import { 
   analyzeFengShui, 
@@ -284,14 +284,13 @@ export default function FengShuiTarot({
   const [shareImageUrl, setShareImageUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
-  const shareCardRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const generateShareImage = useCallback(async () => {
-    if (!homeFsResult) return null;
     setIsGeneratingImage(true);
     setShareImageUrl(null);
     try {
-      const el = shareCardRef.current;
+      const el = contentRef.current;
       if (!el) return null;
       
       const dataUrl = await htmlToImage.toPng(el, {
@@ -642,6 +641,7 @@ export default function FengShuiTarot({
     <AnimatePresence>
       <div className="fixed inset-0 z-[400] flex items-start justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
         <motion.div
+          ref={contentRef}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -664,12 +664,24 @@ export default function FengShuiTarot({
                 <p className="text-[11px] font-bold text-slate-400">나의 오행과 주거 공간의 방향이 이루는 기운 진단</p>
               </div>
             </div>
-            <button
-              onClick={() => onClose(step === "result")}
-              className="w-10 h-10 rounded-2xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-all"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  setShowShareModal(true);
+                  await generateShareImage();
+                }}
+                className="w-10 h-10 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 flex items-center justify-center transition-all border border-amber-500/20"
+                title="현재 화면 캡처 및 공유"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onClose(step === "result")}
+                className="w-10 h-10 rounded-2xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <div className="p-6 md:p-8 relative z-10">
@@ -1548,37 +1560,10 @@ export default function FengShuiTarot({
                       <div className="pt-2 mt-1 space-y-3">
                         <button
                           onClick={async () => {
-                            try {
-                              setShowShareModal(true);
-                              const dataUrl = await generateShareImage();
-                              
-                              if (!dataUrl) {
-                                alert("이미지 캡처에 실패했습니다. (html2canvas 오류)");
-                                return;
-                              }
-                              
-                              // Web Share API 지원 시 (모바일 등) 바로 시스템 공유 띄우기
-                              if (navigator.share) {
-                                try {
-                                  const res = await fetch(dataUrl);
-                                  const blob = await res.blob();
-                                  const file = new File([blob], 'fengshui-result.png', { type: 'image/png' });
-                                  
-                                  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                                    await navigator.share({
-                                      title: '우리집 풍수지리 분석 결과',
-                                      text: `우리 집 풍수 점수가 ${homeFsResult?.score}점이에요! 🏡✨\n#명당찾기 #풍수타로 #우리집풍수`,
-                                      url: window.location.href,
-                                      files: [file]
-                                    });
-                                    setShowShareModal(false); // 공유 성공 시 모달 닫기
-                                  }
-                                } catch (err) {
-                                  console.log("Share API failed or user cancelled", err);
-                                }
-                              }
-                            } catch (err: any) {
-                              alert("공유 처리 중 오류가 발생했습니다: " + err.message);
+                            setShowShareModal(true);
+                            const dataUrl = await generateShareImage();
+                            if (!dataUrl) {
+                              alert("이미지 캡처에 실패했습니다. (html2canvas 오류)");
                             }
                           }}
                           className="w-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 hover:opacity-90 active:scale-[0.98] text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-purple-500/20 transition-all flex items-center justify-center gap-2.5 text-sm select-none"
@@ -1636,7 +1621,6 @@ export default function FengShuiTarot({
       })();
       return (
         <div
-          ref={shareCardRef}
           style={{
             display: "none",
             position: "fixed",
