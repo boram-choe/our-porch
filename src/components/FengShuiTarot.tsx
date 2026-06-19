@@ -293,15 +293,35 @@ export default function FengShuiTarot({
       const el = contentRef.current;
       if (!el) return null;
       
+      // 숨길 요소들 임시 숨김 처리 (캔버스 높이 최적화)
+      const noCaptureEls = el.querySelectorAll('.no-capture');
+      noCaptureEls.forEach((node: any) => {
+        node.dataset.originalDisplay = node.style.display || '';
+        node.style.display = 'none';
+      });
+
+      // 슬라이더 래퍼의 overflow-hidden 임시 해제 (잘림 방지)
+      const sliderWrapper = el.querySelector('.overflow-hidden.min-h-\\[460px\\]');
+      if (sliderWrapper) {
+        sliderWrapper.classList.remove('overflow-hidden');
+      }
+
       const dataUrl = await htmlToImage.toPng(el, {
         pixelRatio: 2,
         backgroundColor: "#0f172a",
-        filter: (node: any) => {
-          if (node?.classList?.contains("no-capture")) return false;
-          return true;
+        style: {
+          transform: 'translate(0, 0)',
         }
       });
       
+      // 복구
+      noCaptureEls.forEach((node: any) => {
+        node.style.display = node.dataset.originalDisplay;
+      });
+      if (sliderWrapper) {
+        sliderWrapper.classList.add('overflow-hidden');
+      }
+
       setShareImageUrl(dataUrl);
       return dataUrl;
     } catch (e: any) {
