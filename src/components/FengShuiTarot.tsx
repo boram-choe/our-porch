@@ -875,7 +875,7 @@ export default function FengShuiTarot({
                     return (
                       <motion.div
                         key={idx}
-                        className={`relative w-36 h-56 rounded-2xl cursor-pointer border-2 transition-all overflow-hidden ${
+                        className={`relative w-36 h-56 rounded-2xl cursor-pointer border-2 transition-all [transform-style:preserve-3d] ${
                           isPicked
                             ? "border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.6)] z-20 scale-105"
                             : isAnyPicked
@@ -895,7 +895,7 @@ export default function FengShuiTarot({
                         transition={{ duration: 0.6, ease: "easeInOut" }}
                       >
                         {/* 카드 뒷면 */}
-                        <div className="absolute inset-0 p-4 flex flex-col items-center justify-between bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-900">
+                        <div className="absolute inset-0 p-4 flex flex-col items-center justify-between bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-900 rounded-2xl [backface-visibility:hidden]">
                           <div className="absolute inset-2 border border-amber-500/28 rounded-xl pointer-events-none" />
                           <div className="w-full h-full flex flex-col items-center justify-between relative z-10 py-4">
                             <span className="text-[9px] font-black text-amber-500/65 uppercase tracking-widest">FENG SHUI TAROT</span>
