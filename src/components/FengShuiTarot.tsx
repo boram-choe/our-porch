@@ -1426,7 +1426,7 @@ export default function FengShuiTarot({
                                   </div>
                                   <div className="text-left space-y-0.5">
                                     <h4 className="text-base md:text-lg font-bold text-white tracking-tight">우리 동네 행운의 명당 찾기</h4>
-                                    <p className="text-xs text-slate-400 font-medium">사주에 따른 2.5km 이내의 맞춤형 공실 추천</p>
+                                    <p className="text-xs text-slate-400 font-medium">사주에 따른 2.5km 이내의 맞춤형 길운 장소 추천</p>
                                   </div>
                                 </div>
 

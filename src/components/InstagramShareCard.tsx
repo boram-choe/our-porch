@@ -17,7 +17,13 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
     
     // Render the messages correctly handling newlines
     const renderMessage = (msg: string) => {
-      return msg.split('\n').map((line, i, arr) => (
+      // Remove neighborhood from message for privacy
+      const neighborhood = userProfile?.home?.neighborhood || "";
+      let cleanMsg = msg;
+      if (neighborhood) {
+        cleanMsg = cleanMsg.replace(new RegExp(neighborhood + "\\s*", "g"), "");
+      }
+      return cleanMsg.split('\n').map((line, i, arr) => (
         <React.Fragment key={i}>
           {line}
           {i !== arr.length - 1 && <br />}
@@ -55,12 +61,13 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
           
           {/* Header */}
           <div className="flex flex-col items-center justify-center mb-10 mt-8">
-            <p className="text-4xl font-bold text-slate-400 mb-6 tracking-wider flex items-center gap-3">
-              <Home className="text-amber-400" size={40} />
-              우리 집 주거 풍수 진단서
-            </p>
-            <h1 className="text-[5.5rem] font-black text-white tracking-tight mb-8 text-center leading-tight">
-              {userProfile?.home?.neighborhood || "우리 동네"}
+            <div className="flex items-center justify-center gap-4 mb-8 bg-slate-800/80 px-8 py-3.5 rounded-full border border-slate-700 shadow-lg">
+              <Compass className="text-amber-400" size={32} />
+              <span className="text-2xl font-black text-slate-200 tracking-widest">여긴뭐가 풍수타로</span>
+            </div>
+            <h1 className="text-[6.5rem] font-black text-white tracking-tight mb-8 text-center leading-tight flex items-center justify-center gap-6 w-full">
+              <Home className="text-amber-400 shrink-0" size={70} />
+              우리집 주거 풍수 진단서
             </h1>
             <div className="bg-slate-950/80 px-16 py-8 rounded-[3rem] border border-amber-500/30 text-center shadow-xl flex items-center gap-8">
               <span className="text-3xl font-bold text-slate-400 uppercase tracking-widest block">종합 점수</span>
@@ -108,8 +115,11 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
                   <Compass className="text-slate-400" size={50} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-2xl font-bold text-slate-400 mb-3">풍수타로</p>
-                  <p className="text-4xl font-black text-white">여긴뭐가.kr</p>
+                  <p className="text-2xl font-bold text-slate-400 mb-3">주거 격식 등급</p>
+                  <p className="text-4xl font-black text-white flex items-center justify-between">
+                    <span>{homeFsResult.grade || "배산임수형 주거명당"}</span>
+                    <span className="text-amber-400 font-black text-3xl px-6 py-2 bg-amber-500/10 rounded-2xl border border-amber-500/20">대길 (大吉)</span>
+                  </p>
                 </div>
               </div>
             )}
