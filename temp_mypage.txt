@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,7 +10,6 @@ import {
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
 import { fetchUserReports, DbReport } from "@/lib/db";
-import { fetchGifticonRequests, purchaseGifticon, STORE_ITEMS, GifticonRequest } from "@/lib/gifticon";
 import { supabase } from "@/lib/supabase";
 
 const VOTES_KEY = "gongsil_user_votes";
@@ -51,15 +50,12 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [selectedLocation, setSelectedLocation] = useState("");
   const [showEntrepreneurModal, setShowEntrepreneurModal] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<"profile" | "activity" | "reports" | "store" | "settings">(isEntrepreneurMode ? "activity" : "profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "activity" | "reports" | "settings">(isEntrepreneurMode ? "activity" : "profile");
   const [isEditing, setIsEditing] = useState(false);
   const [editNickname, setEditNickname] = useState("");
   const [dbVotes, setDbVotes] = useState<any[]>([]);
   const [dbComments, setDbComments] = useState<any[]>([]);
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
-  const [gifticonRequests, setGifticonRequests] = useState<GifticonRequest[]>([]);
-  const [reportedVacancies, setReportedVacancies] = useState<any[]>([]);
-  const [isPurchasing, setIsPurchasing] = useState(false);
   
   const [editPersonaIds, setEditPersonaIds] = useState<string[]>([]);
   const [editCustomPersona, setEditCustomPersona] = useState("");
@@ -101,7 +97,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
         if (votesRes.data) setDbVotes(votesRes.data);
         if (commentsRes.data) setDbComments(commentsRes.data);
       } catch (e) {
-        console.warn("Supabase 활동 내역 조회 실패:", e);
+        console.warn("Supabase ?쒕룞 ?댁뿭 議고쉶 ?ㅽ뙣:", e);
       } finally {
         setIsLoadingActivity(false);
       }
@@ -114,7 +110,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     return {
       id: v.id,
       brand: v.comment || v.category,
-      location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
+      location: matched ? (matched.landmark || matched.address) : "?곕━?숇꽕 怨듭떎",
       timestamp: v.created_at,
       vacancyId: v.vacancy_id
     };
@@ -127,7 +123,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
         id: v.id,
         type: "vote" as const,
         title: v.comment || v.category,
-        location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
+        location: matched ? (matched.landmark || matched.address) : "?곕━?숇꽕 怨듭떎",
         timestamp: v.created_at,
         points: 50,
         vacancyId: v.vacancy_id
@@ -139,7 +135,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
         id: c.id,
         type: "comment" as const,
         title: c.content,
-        location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
+        location: matched ? (matched.landmark || matched.address) : "?곕━?숇꽕 怨듭떎",
         timestamp: c.created_at,
         points: 50,
         vacancyId: c.vacancy_id
@@ -147,10 +143,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     })
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  const approvedReports = reportedVacancies.filter(v => v.status === "available" || v.status === "completed");
-  const totalEarnedPoints = (dbVotes.length * 50) + (dbComments.length * 50) + (approvedReports.length * 500);
-  const totalSpentPoints = gifticonRequests.reduce((sum, req) => sum + req.price, 0);
-  const totalPoints = totalEarnedPoints - totalSpentPoints;
+  const totalPoints = (dbVotes.length * 50) + (dbComments.length * 50);
 
   if (!userProfile) return null;
 
@@ -159,7 +152,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       setEditPersonaIds(editPersonaIds.filter(i => i !== id));
     } else {
       if (editPersonaIds.length >= 3) {
-        alert("나의 조각은 최대 3개까지 선택할 수 있습니다.");
+        alert("?섏쓽 議곌컖? 理쒕? 3媛쒓퉴吏 ?좏깮?????덉뒿?덈떎.");
         return;
       }
       setEditPersonaIds([...editPersonaIds, id]);
@@ -170,36 +163,36 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     if (ids.length === 0) return "";
     const has = (id: string) => ids.includes(id);
     const getCat = (id: string) => {
-       if (id === "other") return custom.trim() || "미스테리한 이웃";
+       if (id === "other") return custom.trim() || "誘몄뒪?뚮━???댁썐";
        const p = PERSONAS.find(item => item.id === id);
-       if (id === "senior") return "터줏대감";
+       if (id === "senior") return "?곗쨵?媛?;
        return p?.name || ""; 
     };
 
     if (ids.length === 1) {
        const id = ids[0];
-       if (id === "other") return custom.trim() || "정체를 알 수 없는 이웃";
+       if (id === "other") return custom.trim() || "?뺤껜瑜??????녿뒗 ?댁썐";
        return PERSONAS.find(p => p.id === id)?.name || "";
     }
 
-    if (has("worker") && has("parenting")) return gender === "female" ? "갓생 사는 워킹맘" : "갓생 사는 워킹대디";
-    if (has("worker") && has("student")) return "성장을 꿈꾸는 공부하는 직장인";
-    if (has("worker") && has("senior")) return "동네를 훤히 꿰고 있는 베테랑 직장인";
-    if (has("parenting") && has("senior")) return "아이와 함께 동네를 지키는 든든한 터줏대감";
-    if (has("student") && has("solo")) return "자취하며 꿈을 키우는 힙스터";
-    if (has("solo") && has("senior")) return "혼자서도 동네를 꽉 잡고 있는 터줏대감";
-    if (has("worker") && has("pet")) return "댕냥이가 기다리는 프로 퇴근러";
-    if (has("parenting") && has("pet")) return "아이와 댕냥이의 든든한 수호신";
-    if (has("worker") && has("solo")) return "자유를 만끽하는 직장인";
-    if (has("solo") && has("pet")) return "반려동물과 힐링 중인 1인 가구";
+    if (has("worker") && has("parenting")) return gender === "female" ? "媛볦깮 ?щ뒗 ?뚰궧留? : "媛볦깮 ?щ뒗 ?뚰궧???;
+    if (has("worker") && has("student")) return "?깆옣??轅덇씀??怨듬??섎뒗 吏곸옣??;
+    if (has("worker") && has("senior")) return "?숇꽕瑜??ㅽ엳 轅곌퀬 ?덈뒗 踰좏뀒??吏곸옣??;
+    if (has("parenting") && has("senior")) return "?꾩씠? ?④퍡 ?숇꽕瑜?吏?ㅻ뒗 ?좊뱺???곗쨵?媛?;
+    if (has("student") && has("solo")) return "?먯랬?섎ŉ 轅덉쓣 ?ㅼ슦???숈뒪??;
+    if (has("solo") && has("senior")) return "?쇱옄?쒕룄 ?숇꽕瑜?苑??↔퀬 ?덈뒗 ?곗쨵?媛?;
+    if (has("worker") && has("pet")) return "?뺣깷?닿? 湲곕떎由щ뒗 ?꾨줈 ?닿렐??;
+    if (has("parenting") && has("pet")) return "?꾩씠? ?뺣깷?댁쓽 ?좊뱺???섑샇??;
+    if (has("worker") && has("solo")) return "?먯쑀瑜?留뚮겱?섎뒗 吏곸옣??;
+    if (has("solo") && has("pet")) return "諛섎젮?숇Ъ怨??먮쭅 以묒씤 1??媛援?;
 
     const selectedCats = ids.map(getCat);
     if (ids.length === 2) {
-       const josa = (selectedCats[0].charCodeAt(selectedCats[0].length - 1) - 0xac00) % 28 > 0 ? "과" : "와";
-       return `${selectedCats[0]}${josa} ${selectedCats[1]}의 삶을 꾸리는 분`;
+       const josa = (selectedCats[0].charCodeAt(selectedCats[0].length - 1) - 0xac00) % 28 > 0 ? "怨? : "?";
+       return `${selectedCats[0]}${josa} ${selectedCats[1]}???띠쓣 袁몃━??遺?;
     }
 
-    return `동네의 슈퍼 히어로! ${selectedCats.join('·')}`;
+    return `?숇꽕???덊띁 ?덉뼱濡? ${selectedCats.join('쨌')}`;
   };
 
   const saveChanges = () => {
@@ -220,11 +213,11 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       const updatedProfile = { ...userProfile, isAdmin: true };
       setUserProfile(updatedProfile);
       localStorage.setItem("gongsil_user_profile", JSON.stringify(updatedProfile));
-      alert("관리자 권한이 승인되었습니다! 🔐");
+      alert("愿由ъ옄 沅뚰븳???뱀씤?섏뿀?듬땲?? ?뵍");
       setAdminCode("");
       setShowAdminAuth(false);
     } else {
-      alert("코드가 일치하지 않습니다.");
+      alert("肄붾뱶媛 ?쇱튂?섏? ?딆뒿?덈떎.");
     }
   };
 
@@ -241,19 +234,19 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
             if (status === (window as any).kakao.maps.services.Status.OK) {
               const addr = result[0].address.address_name;
               const parts = addr.split(' ');
-              const dong = parts.find((p: string) => p.endsWith('동') || p.endsWith('가')) || parts[parts.length - 1];
+              const dong = parts.find((p: string) => p.endsWith('??) || p.endsWith('媛')) || parts[parts.length - 1];
               
               setTempWorkLocation({ neighborhood: dong, lat: latitude, lng: longitude });
             } else {
-              setLocationError("주소 변환에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+              setLocationError("二쇱냼 蹂?섏뿉 ?ㅽ뙣?덉뒿?덈떎. ?좎떆 ???ㅼ떆 ?쒕룄??二쇱꽭??");
               setIsRegisteringWork(false);
             }
           });
         },
         (error) => {
-          let msg = "위치 인식에 실패했습니다.";
-          if (error.code === 1) msg = "위치 권한 허용이 필요합니다.";
-          else if (error.code === 3) msg = "인증 시간이 초과되었습니다. 다시 시도해 주세요.";
+          let msg = "?꾩튂 ?몄떇???ㅽ뙣?덉뒿?덈떎.";
+          if (error.code === 1) msg = "?꾩튂 沅뚰븳 ?덉슜???꾩슂?⑸땲??";
+          else if (error.code === 3) msg = "?몄쬆 ?쒓컙??珥덇낵?섏뿀?듬땲?? ?ㅼ떆 ?쒕룄??二쇱꽭??";
           
           setLocationError(msg);
           setIsRegisteringWork(false);
@@ -274,14 +267,14 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     setUserProfile(updatedProfile);
     localStorage.setItem("gongsil_user_profile", JSON.stringify(updatedProfile));
     
-    alert(`'${tempWorkLocation.neighborhood}'이 나의 일터로 등록되었습니다! 🏢`);
+    alert(`'${tempWorkLocation.neighborhood}'???섏쓽 ?쇳꽣濡??깅줉?섏뿀?듬땲?? ?룫`);
     setTempWorkLocation(null);
     setTempWorkActivityTimes([]);
     setIsRegisteringWork(false);
   };
 
   const removeWorkLocation = () => {
-    if (confirm("등록된 직장 정보를 삭제하시겠어요?")) {
+    if (confirm("?깅줉??吏곸옣 ?뺣낫瑜???젣?섏떆寃좎뼱??")) {
       const updatedProfile: UserProfile = {
         ...userProfile,
         work: undefined,
@@ -304,7 +297,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               </button>
             )}
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              나의 페이지
+              ?섏쓽 ?섏씠吏
               {userProfile.isAdmin && <ShieldCheck className="text-amber-500" size={20} />}
             </h1>
           </div>
@@ -319,13 +312,13 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
              onClick={() => onModeChange(false)}
              className={`flex-1 py-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${!isEntrepreneurMode ? "bg-white text-slate-950 shadow-md" : "text-slate-400 hover:text-slate-600"}`}
            >
-             <Home size={14} /> 우리동네 주민 모드
+             <Home size={14} /> ?곕━?숇꽕 二쇰? 紐⑤뱶
            </button>
            <button 
              onClick={() => setShowEntrepreneurModal(true)}
              className={`flex-1 py-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${isEntrepreneurMode ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-600"}`}
            >
-             <Briefcase size={14} /> 예비사장님 모드
+             <Briefcase size={14} /> ?덈퉬?ъ옣??紐⑤뱶
            </button>
         </div>
 
@@ -335,7 +328,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
           </div>
           <div>
             <p className="text-xs text-amber-600 font-bold mb-0.5">
-              {isEntrepreneurMode ? "성장을 꿈꾸는 예비사장님" : (userProfile.personaLabel || `${userProfile.home?.neighborhood || "우리동네"} 활동 이웃`)}
+              {isEntrepreneurMode ? "?깆옣??轅덇씀???덈퉬?ъ옣?? : (userProfile.personaLabel || `${userProfile.home?.neighborhood || "?곕━?숇꽕"} ?쒕룞 ?댁썐`)}
             </p>
             <h2 className="text-xl font-black text-slate-900">{userProfile.nickname}</h2>
           </div>
@@ -345,7 +338,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       <div className="px-6 space-y-6">
         {/* Tabs */}
         <div className="flex p-1 bg-slate-200/50 rounded-2xl">
-          {(!isEntrepreneurMode ? ["profile", "activity", "reports", "store", "settings"] : ["activity", "reports", "store", "settings"]).map((tab) => (
+          {(!isEntrepreneurMode ? ["profile", "activity", "reports", "settings"] : ["activity", "reports", "settings"]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
@@ -353,7 +346,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 activeTab === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
               }`}
             >
-              {tab === "profile" ? "내 정보" : tab === "activity" ? (isEntrepreneurMode ? "관심공간" : "활동 내역") : tab === "reports" ? "제보 & 알림함" : "설정"}
+              {tab === "profile" ? "???뺣낫" : tab === "activity" ? (isEntrepreneurMode ? "愿?ш났媛? : "?쒕룞 ?댁뿭") : tab === "reports" ? "?쒕낫 & ?뚮┝?? : "?ㅼ젙"}
             </button>
           ))}
         </div>
@@ -363,7 +356,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
             {isEditing ? (
               <div className="bg-white p-6 rounded-3xl shadow-sm space-y-6 border border-slate-100">
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">닉네임 수정</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">?됰꽕???섏젙</label>
                   <input
                     type="text"
                     value={editNickname}
@@ -373,11 +366,11 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 </div>
                 
                 <button onClick={saveChanges} className="w-full bg-slate-950 text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all">
-                  닉네임 저장하기
+                  ?됰꽕????ν븯湲?
                 </button>
 
                 <div className="pt-4 border-t border-slate-100">
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-4">동네를 채우는 나의 조각 수정 (최대 3개)</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-4">?숇꽕瑜?梨꾩슦???섏쓽 議곌컖 ?섏젙 (理쒕? 3媛?</label>
                   <div className="grid grid-cols-2 gap-3">
                     {PERSONAS.map((p) => {
                       const isSelected = editPersonaIds.includes(p.id);
@@ -407,21 +400,21 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                          type="text" 
                          value={editCustomPersona}
                          onChange={(e) => setEditCustomPersona(e.target.value)}
-                         placeholder="나만의 조각 입력"
+                         placeholder="?섎쭔??議곌컖 ?낅젰"
                          className="flex-1 bg-transparent focus:outline-none font-bold text-sm"
                       />
                     </div>
                   )}
                   
                   <div className="mt-6 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-center">
-                    <p className="text-xs text-amber-600 font-bold mb-1">예상 프로필</p>
+                    <p className="text-xs text-amber-600 font-bold mb-1">?덉긽 ?꾨줈??/p>
                     <p className="text-sm font-black text-slate-900">
-                      ✨ "{getCombinedLabel(editPersonaIds, editCustomPersona, userProfile.gender)}"
+                      ??"{getCombinedLabel(editPersonaIds, editCustomPersona, userProfile.gender)}"
                     </p>
                   </div>
 
                   <button onClick={saveChanges} className="w-full bg-amber-500 text-slate-950 font-black py-4 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-95 transition-all mt-4">
-                    조각 수정 완료
+                    議곌컖 ?섏젙 ?꾨즺
                   </button>
                 </div>
               </div>
@@ -431,19 +424,19 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-black text-slate-900 flex items-center gap-2">
                       <Award size={18} className="text-amber-500" />
-                      나의 동네 프로필
+                      ?섏쓽 ?숇꽕 ?꾨줈??
                     </h3>
                     <button onClick={() => setIsEditing(true)} className="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg hover:bg-amber-100">
-                      수정하기
+                      ?섏젙?섍린
                     </button>
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
-                      <span className="text-xs font-bold text-slate-500">인증 지역</span>
-                      <span className="text-sm font-black text-slate-900">{userProfile.home?.neighborhood || "미인증"}</span>
+                      <span className="text-xs font-bold text-slate-500">?몄쬆 吏??/span>
+                      <span className="text-sm font-black text-slate-900">{userProfile.home?.neighborhood || "誘몄씤利?}</span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
-                      <span className="text-xs font-bold text-slate-500">나의 조각</span>
+                      <span className="text-xs font-bold text-slate-500">?섏쓽 議곌컖</span>
                       <span className="text-sm font-black text-slate-900 text-right">{userProfile.personaLabel}</span>
                     </div>
                   </div>
@@ -452,7 +445,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                   <h3 className="font-black text-slate-900 flex items-center gap-2 mb-6">
                     <NavigationIcon size={18} className="text-blue-500" />
-                    나의 생활 반경
+                    ?섏쓽 ?앺솢 諛섍꼍
                   </h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -461,11 +454,11 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                            <Home size={20} />
                          </div>
                          <div>
-                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">우리 동네</p>
+                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">?곕━ ?숇꽕</p>
                            <p className="text-sm font-black text-slate-900">{userProfile.home.neighborhood}</p>
                          </div>
                        </div>
-                       <div className="px-3 py-1 bg-amber-50 text-[10px] font-black text-amber-600 rounded-lg">기본</div>
+                       <div className="px-3 py-1 bg-amber-50 text-[10px] font-black text-amber-600 rounded-lg">湲곕낯</div>
                     </div>
 
                     {userProfile.work ? (
@@ -475,7 +468,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                              <Briefcase size={20} />
                            </div>
                            <div>
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">나의 일터</p>
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">?섏쓽 ?쇳꽣</p>
                              <div className="flex items-center gap-2">
                                <p className="text-sm font-black text-slate-900">{userProfile.work.neighborhood}</p>
                                <div className="flex gap-1">
@@ -488,7 +481,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                              </div>
                            </div>
                          </div>
-                         <button onClick={removeWorkLocation} className="text-[10px] font-bold text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">삭제</button>
+                         <button onClick={removeWorkLocation} className="text-[10px] font-bold text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">??젣</button>
                       </div>
                     ) : (
                       <div className="relative">
@@ -499,7 +492,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         >
                           <NavigationIcon size={18} className={`${isRegisteringWork ? "animate-pulse text-blue-500" : "text-slate-300 group-hover:text-blue-500"}`} />
                           <span className="text-sm font-bold text-slate-400 group-hover:text-blue-600">
-                            {isRegisteringWork ? "위치 인증 중..." : "나의 일터 추가하기"}
+                            {isRegisteringWork ? "?꾩튂 ?몄쬆 以?.." : "?섏쓽 ?쇳꽣 異붽??섍린"}
                           </span>
                         </button>
 
@@ -509,19 +502,19 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
                               className="mt-3 p-5 bg-red-50 border-2 border-red-100 rounded-3xl text-center"
                             >
-                              <p className="text-sm font-black text-red-600 mb-1">인증 실패</p>
-                              <p className="text-[11px] font-bold text-red-400 mb-4">정확한 정보를 위해 <br/>위치 권한 허용이 반드시 필요해요.</p>
+                              <p className="text-sm font-black text-red-600 mb-1">?몄쬆 ?ㅽ뙣</p>
+                              <p className="text-[11px] font-bold text-red-400 mb-4">?뺥솗???뺣낫瑜??꾪빐 <br/>?꾩튂 沅뚰븳 ?덉슜??諛섎뱶???꾩슂?댁슂.</p>
                               <button 
                                 onClick={addWorkLocation}
                                 className="w-full py-3 bg-white text-red-600 border-2 border-red-100 rounded-2xl text-xs font-black shadow-sm active:scale-95 transition-all"
                               >
-                                다시 시도하기
+                                ?ㅼ떆 ?쒕룄?섍린
                               </button>
                               <button 
                                 onClick={() => setLocationError(null)}
                                 className="mt-3 text-[10px] font-bold text-red-300 underline"
                               >
-                                닫기
+                                ?リ린
                               </button>
                             </motion.div>
                           )}
@@ -531,9 +524,9 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
                               className="mt-3 p-5 bg-white border-2 border-blue-100 rounded-3xl shadow-xl shadow-blue-500/5 relative z-20"
                             >
-                              <p className="text-xs font-black text-slate-400 mb-4 text-center uppercase tracking-widest">일터 활동 시간 선택</p>
+                              <p className="text-xs font-black text-slate-400 mb-4 text-center uppercase tracking-widest">?쇳꽣 ?쒕룞 ?쒓컙 ?좏깮</p>
                               <div className="grid grid-cols-3 gap-2">
-                                {["평일 낮", "평일 저녁", "주말"].map(time => {
+                                {["?됱씪 ??, "?됱씪 ???, "二쇰쭚"].map(time => {
                                   const isHomeTime = userProfile.activityTimes?.includes(time);
                                   const isSelected = tempWorkActivityTimes.includes(time);
                                   return (
@@ -553,7 +546,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                                       }`}
                                     >
                                       {time}
-                                      {isHomeTime && <div className="text-[8px] mt-0.5 text-slate-300">홈 시간</div>}
+                                      {isHomeTime && <div className="text-[8px] mt-0.5 text-slate-300">???쒓컙</div>}
                                     </button>
                                   );
                                 })}
@@ -563,13 +556,13 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                                 disabled={tempWorkActivityTimes.length === 0}
                                 className="w-full mt-4 py-3 bg-blue-600 text-white rounded-2xl text-xs font-black shadow-lg shadow-blue-600/20 disabled:opacity-30 disabled:shadow-none transition-all"
                               >
-                                선택 완료
+                                ?좏깮 ?꾨즺
                               </button>
                               <button 
                                 onClick={() => { setTempWorkLocation(null); setTempWorkActivityTimes([]); setIsRegisteringWork(false); }}
                                 className="w-full mt-3 text-[10px] font-bold text-slate-300 hover:text-slate-500"
                               >
-                                취소
+                                痍⑥냼
                               </button>
                             </motion.div>
                           )}
@@ -585,10 +578,10 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-amber-500/10">
                         <Star size={20} className="text-amber-600" />
                       </div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">상상 포인트</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">?곸긽 ?ъ씤??/p>
                       <div className="flex flex-col items-start gap-1">
                         <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
-                        <span className="text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md">5,000P부터 사용 가능</span>
+                        <span className="text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md">5,000P遺???ъ슜 媛??/span>
                       </div>
                     </div>
                     <button 
@@ -601,15 +594,15 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-blue-500/10 group-hover:bg-blue-200 transition-all">
                         <MessageSquare size={20} className="text-blue-600" />
                       </div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">남긴 참여</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">?④릿 李몄뿬</p>
                       <div className="flex items-center justify-between w-full">
-                        <p className="text-xl font-black text-slate-900">{dbVotes.length + dbComments.length}개</p>
+                        <p className="text-xl font-black text-slate-900">{dbVotes.length + dbComments.length}媛?/p>
                         <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
                       </div>
                     </button>
                   </div>
 
-                  {/* 🎁 상상 포인트 혜택 안내 가이드 카드 */}
+                  {/* ?럞 ?곸긽 ?ъ씤???쒗깮 ?덈궡 媛?대뱶 移대뱶 */}
                   <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 rounded-[2.5rem] border border-amber-500/20 shadow-xl relative overflow-hidden select-none">
                     <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 scale-150"><Award size={80} className="text-amber-500" /></div>
                     <div className="relative z-10">
@@ -617,15 +610,15 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         <div className="w-6 h-6 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-500">
                           <Gift size={14} fill="currentColor" />
                         </div>
-                        <h4 className="text-[11px] font-black text-amber-500 uppercase tracking-widest leading-none">상상 포인트 혜택 안내</h4>
+                        <h4 className="text-[11px] font-black text-amber-500 uppercase tracking-widest leading-none">?곸긽 ?ъ씤???쒗깮 ?덈궡</h4>
                       </div>
                       <p className="text-xs font-bold text-slate-200 leading-relaxed break-keep">
-                        이웃님이 모으신 상상 포인트는 <span className="text-amber-400 font-black">기프티콘</span>으로 교환해 드릴 예정이며, 향후 '여긴뭐가'를 통해 실제 오프라인 골목에 오픈하는 매장의 <span className="text-amber-400 font-black">할인 쿠폰</span>으로도 교환될 수 있게 준비 중입니다! 🎁
+                        ?댁썐?섏씠 紐⑥쑝???곸긽 ?ъ씤?몃뒗 <span className="text-amber-400 font-black">湲고봽?곗퐯</span>?쇰줈 援먰솚???쒕┫ ?덉젙?대ŉ, ?ν썑 '?ш릿萸먭?'瑜??듯빐 ?ㅼ젣 ?ㅽ봽?쇱씤 怨⑤ぉ???ㅽ뵂?섎뒗 留ㅼ옣??<span className="text-amber-400 font-black">?좎씤 荑좏룿</span>?쇰줈??援먰솚?????덇쾶 以鍮?以묒엯?덈떎! ?럞
                       </p>
                       <div className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-[10px] text-slate-500 font-black tracking-tighter">
-                        <span>🗳️ 투표참여 50P</span>
-                        <span>•</span>
-                        <span>💬 의견작성 50P</span>
+                        <span>?뿳截??ы몴李몄뿬 50P</span>
+                        <span>??/span>
+                        <span>?뮠 ?섍껄?묒꽦 50P</span>
                       </div>
                     </div>
                   </div>
@@ -639,7 +632,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex items-center justify-between px-1">
               <h3 className="text-lg font-black text-slate-900">
-                {isEntrepreneurMode ? "관심공간" : "최근 상상 더하기 내역"}
+                {isEntrepreneurMode ? "愿?ш났媛? : "理쒓렐 ?곸긽 ?뷀븯湲??댁뿭"}
               </h3>
               {isEntrepreneurMode && (
                 <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-widest">Analysis Ready</span>
@@ -658,7 +651,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
-                    {filter === "all" ? "전체" : filter === "vote" ? "🗳️ 투표" : "💬 의견"}
+                    {filter === "all" ? "?꾩껜" : filter === "vote" ? "?뿳截??ы몴" : "?뮠 ?섍껄"}
                   </button>
                 ))}
               </div>
@@ -667,26 +660,26 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
             {isLoadingActivity ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p className="text-xs font-bold text-slate-400">활동 내역을 불러오고 있어요...</p>
+                <p className="text-xs font-bold text-slate-400">?쒕룞 ?댁뿭??遺덈윭?ㅺ퀬 ?덉뼱??..</p>
               </div>
             ) : (isEntrepreneurMode ? votes.length === 0 : activityTimeline.length === 0) ? (
               <div className="bg-white p-10 rounded-[2.5rem] text-center border-2 border-dashed border-slate-200/80 flex flex-col items-center justify-center py-14 px-6">
                 <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4 text-amber-500 shadow-inner">
                   <Lightbulb size={28} />
                 </div>
-                <p className="text-slate-900 font-black text-sm mb-1.5 break-keep">아직 상상한 기록이 없어요</p>
+                <p className="text-slate-900 font-black text-sm mb-1.5 break-keep">?꾩쭅 ?곸긽??湲곕줉???놁뼱??/p>
                 <p className="text-slate-400 font-bold text-[11px] leading-relaxed max-w-[220px] mx-auto mb-6 break-keep">
-                  우리 동네 지도를 둘러보고 비어 있는 공실 공간에 이웃님만의 상상 조각을 첫 번째로 던져보세요! 🎁
+                  ?곕━ ?숇꽕 吏?꾨? ?섎윭蹂닿퀬 鍮꾩뼱 ?덈뒗 怨듭떎 怨듦컙???댁썐?섎쭔???곸긽 議곌컖??泥?踰덉㎏濡??섏졇蹂댁꽭?? ?럞
                 </p>
                 <button
                   onClick={onClose}
                   className="px-5 py-3 bg-slate-950 text-white font-black text-xs rounded-xl shadow-lg shadow-slate-950/10 hover:scale-[1.03] active:scale-95 transition-all"
                 >
-                  공실 구경하러 가기
+                  怨듭떎 援ш꼍?섎윭 媛湲?
                 </button>
               </div>
             ) : isEntrepreneurMode ? (
-              /* 예비사장님 관심 공간 */
+              /* ?덈퉬?ъ옣??愿??怨듦컙 */
               <div className="space-y-3">
                 {votes.map((vote) => {
                   const matchedVacancy = vacancies.find(vac => vac.id === vote.vacancyId);
@@ -720,8 +713,8 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
 
                       <div className="bg-slate-50 p-4 border-t border-slate-100 flex items-center justify-between">
                          <div className="flex flex-col">
-                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">상태</p>
-                           <p className="text-[11px] font-bold text-slate-900">창업 타당성 분석 가능</p>
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">?곹깭</p>
+                           <p className="text-[11px] font-bold text-slate-900">李쎌뾽 ??뱀꽦 遺꾩꽍 媛??/p>
                          </div>
                          <button 
                            onClick={() => {
@@ -730,7 +723,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                            }}
                            className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2"
                          >
-                           <Zap size={14} fill="currentColor" /> 재무 리포트 생성
+                           <Zap size={14} fill="currentColor" /> ?щТ 由ы룷???앹꽦
                          </button>
                       </div>
                     </div>
@@ -738,7 +731,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 })}
               </div>
             ) : (
-              /* 동네주민 통합 활동 피드 */
+              /* ?숇꽕二쇰? ?듯빀 ?쒕룞 ?쇰뱶 */
               <div className="space-y-3">
                 {activityTimeline
                   .filter(item => activityFilter === 'all' || item.type === activityFilter)
@@ -770,11 +763,11 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                               <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
                                 item.type === 'vote' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
                               }`}>
-                                {item.type === 'vote' ? '🗳️ 상상 투표' : '💬 상세 의견'}
+                                {item.type === 'vote' ? '?뿳截??곸긽 ?ы몴' : '?뮠 ?곸꽭 ?섍껄'}
                               </span>
                             </div>
                             <h4 className="text-sm font-black text-slate-900 tracking-tight truncate">
-                              {item.type === 'vote' ? `'${item.title}' 투표 참여` : `"${item.title}"`}
+                              {item.type === 'vote' ? `'${item.title}' ?ы몴 李몄뿬` : `"${item.title}"`}
                             </h4>
                             <p className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mt-1 truncate">
                               <MapPin size={10} />
@@ -805,83 +798,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
           <UserReportsSection vacancies={vacancies} />
         )}
 
-        
-        {activeTab === "store" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-             <div className="flex items-center justify-between px-1">
-               <h3 className="text-lg font-black text-slate-900">상상 스토어 🎁</h3>
-               <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-widest">
-                 잔여 {totalPoints.toLocaleString()} P
-               </span>
-             </div>
-             
-             {/* 상점 아이템 */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               {STORE_ITEMS.map((item) => (
-                 <div key={item.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                     <div className="text-3xl">{item.image}</div>
-                     <div>
-                       <p className="text-sm font-black text-slate-900">{item.name}</p>
-                       <p className="text-xs font-bold text-amber-500">{item.price.toLocaleString()} P</p>
-                     </div>
-                   </div>
-                   <button 
-                     onClick={async () => {
-                       if (totalPoints < item.price) {
-                         alert("포인트가 부족합니다!");
-                         return;
-                       }
-                       if (confirm(`'${item.name}' 상품을 교환하시겠습니까?\n차감 포인트: ${item.price}P`)) {
-                         setIsPurchasing(true);
-                         const userId = localStorage.getItem("gongsil_user_id");
-                         if (!userId) {
-                           setIsPurchasing(false);
-                           return;
-                         }
-                         const res = await purchaseGifticon(userId, item.id, item.name, item.price);
-                         alert(res.message);
-                         if (res.success) {
-                           const newReqs = await fetchGifticonRequests(userId);
-                           setGifticonRequests(newReqs);
-                         }
-                         setIsPurchasing(false);
-                       }
-                     }}
-                     disabled={isPurchasing || totalPoints < item.price}
-                     className="px-4 py-2 bg-slate-900 text-white text-xs font-black rounded-xl disabled:bg-slate-200 disabled:text-slate-400 transition-all active:scale-95"
-                   >
-                     교환
-                   </button>
-                 </div>
-               ))}
-             </div>
-
-             {/* 교환 내역 */}
-             {gifticonRequests.length > 0 && (
-               <div className="mt-8">
-                 <h4 className="text-sm font-black text-slate-900 mb-4 px-1">기프티콘 교환 내역</h4>
-                 <div className="space-y-3">
-                   {gifticonRequests.map(req => (
-                     <div key={req.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                       <div>
-                         <p className="text-xs font-black text-slate-900">{req.item_name}</p>
-                         <p className="text-[10px] font-bold text-slate-400">{new Date(req.created_at).toLocaleString()}</p>
-                       </div>
-                       <div className="text-right">
-                         <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">발송 완료</span>
-                         <p className="text-[10px] font-bold text-slate-400 mt-1">-${req.price.toLocaleString()} P</p>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             )}
-          </motion.div>
-        )}
-
         {activeTab === "settings" && (
-
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
               <div className="divide-y divide-slate-50">
@@ -889,7 +806,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                   <button onClick={() => (window as any).showAdminDashboard()} className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition-all text-left group">
                     <div className="flex items-center gap-3">
                       <LayoutDashboard size={18} className="text-amber-500" />
-                      <span className="text-sm font-bold text-slate-700">마을 인사이트 리포트</span>
+                      <span className="text-sm font-bold text-slate-700">留덉쓣 ?몄궗?댄듃 由ы룷??/span>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="text-[10px] font-black text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">DATA</span>
@@ -898,16 +815,16 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                   </button>
                 )}
                 <button className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition-all text-left">
-                  <span className="text-sm font-bold text-slate-700">알림 설정</span>
+                  <span className="text-sm font-bold text-slate-700">?뚮┝ ?ㅼ젙</span>
                   <ChevronRight size={18} className="text-slate-300" />
                 </button>
                 <button className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition-all text-left">
-                  <span className="text-sm font-bold text-slate-700">개인정보 처리방침</span>
+                  <span className="text-sm font-bold text-slate-700">媛쒖씤?뺣낫 泥섎━諛⑹묠</span>
                   <ChevronRight size={18} className="text-slate-300" />
                 </button>
                 <button onClick={onLogout} className="w-full px-6 py-5 flex items-center gap-3 text-red-500 hover:bg-red-50 transition-all">
                   <LogOut size={18} />
-                  <span className="text-sm font-black">로그아웃</span>
+                  <span className="text-sm font-black">濡쒓렇?꾩썐</span>
                 </button>
               </div>
             </div>
@@ -917,7 +834,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                 <div className="flex items-center gap-2 mb-4">
                    <Key size={16} className="text-slate-400" />
-                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">관리자 인증</h3>
+                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">愿由ъ옄 ?몄쬆</h3>
                 </div>
                 
                 {showAdminAuth ? (
@@ -926,12 +843,12 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       type="password"
                       value={adminCode}
                       onChange={(e) => setAdminCode(e.target.value)}
-                      placeholder="관리자 코드를 입력하세요"
+                      placeholder="愿由ъ옄 肄붾뱶瑜??낅젰?섏꽭??
                       className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold focus:border-amber-500 transition-all outline-none text-sm"
                     />
                     <div className="flex gap-2">
-                       <button onClick={() => setShowAdminAuth(false)} className="flex-1 py-3 bg-slate-50 text-slate-400 font-bold rounded-xl text-sm">취소</button>
-                       <button onClick={handleAdminAuth} className="flex-1 py-3 bg-slate-900 text-white font-bold rounded-xl text-sm">인증하기</button>
+                       <button onClick={() => setShowAdminAuth(false)} className="flex-1 py-3 bg-slate-50 text-slate-400 font-bold rounded-xl text-sm">痍⑥냼</button>
+                       <button onClick={handleAdminAuth} className="flex-1 py-3 bg-slate-900 text-white font-bold rounded-xl text-sm">?몄쬆?섍린</button>
                     </div>
                   </div>
                 ) : (
@@ -939,7 +856,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                     onClick={() => setShowAdminAuth(true)}
                     className="text-xs font-bold text-slate-300 hover:text-slate-500 transition-all"
                   >
-                    마을 인사이트 권한 요청하기
+                    留덉쓣 ?몄궗?댄듃 沅뚰븳 ?붿껌?섍린
                   </button>
                 )}
               </div>
@@ -975,7 +892,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
         )}
       </AnimatePresence>
 
-      {/* 예비사장님 모드 고도화 안내 Coming Soon 프리미엄 모달 */}
+      {/* ?덈퉬?ъ옣??紐⑤뱶 怨좊룄???덈궡 Coming Soon ?꾨━誘몄뾼 紐⑤떖 */}
       <AnimatePresence>
         {showEntrepreneurModal && (
           <motion.div 
@@ -991,7 +908,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
               className="bg-slate-900 border border-slate-800 text-white p-6 md:p-8 rounded-[2.5rem] max-w-sm w-full shadow-2xl relative overflow-hidden text-center"
             >
-              {/* 상단 다이나믹 앰비언트 글로우 라이팅 */}
+              {/* ?곷떒 ?ㅼ씠?섎? ?곕퉬?명듃 湲濡쒖슦 ?쇱씠??*/}
               <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/20 rounded-full blur-[80px]" />
               
               <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-inner mx-auto mb-6">
@@ -999,18 +916,18 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               </div>
               
               <h3 className="text-lg md:text-xl font-black text-white mb-3 tracking-tight">
-                예비 사장님 모드 고도화 안내 🛠️
+                ?덈퉬 ?ъ옣??紐⑤뱶 怨좊룄???덈궡 ?썱截?
               </h3>
               
               <p className="text-[12px] md:text-[13px] font-bold text-slate-300 leading-relaxed mb-6 break-keep">
-                현재 예비사장님을 위한 <span className="text-amber-400 font-black">상권분석리포트 및 수익분석리포트</span>는 부동산, 재무전문가들과 함께 깊이 있는 고도화 작업을 진행 중에 있습니다. 조금만 더 기다려 주세요! ✨
+                ?꾩옱 ?덈퉬?ъ옣?섏쓣 ?꾪븳 <span className="text-amber-400 font-black">?곴텒遺꾩꽍由ы룷??諛??섏씡遺꾩꽍由ы룷??/span>??遺?숈궛, ?щТ?꾨Ц媛?ㅺ낵 ?④퍡 源딆씠 ?덈뒗 怨좊룄???묒뾽??吏꾪뻾 以묒뿉 ?덉뒿?덈떎. 議곌툑留???湲곕떎??二쇱꽭?? ??
               </p>
               
               <button
                 onClick={() => setShowEntrepreneurModal(false)}
                 className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black rounded-2xl text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-amber-500/10 pointer-events-auto"
               >
-                확인했습니다
+                ?뺤씤?덉뒿?덈떎
               </button>
             </motion.div>
           </motion.div>
@@ -1020,7 +937,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   );
 }
 
-// ─── 제보 & 알림함 컴포넌트 ──────────────────────────────────────────────────
+// ??? ?쒕낫 & ?뚮┝??而댄룷?뚰듃 ??????????????????????????????????????????????????
 
 function UserReportsSection({ vacancies }: { vacancies: any[] }) {
   const [reports, setReports] = useState<DbReport[]>([]);
@@ -1042,7 +959,7 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p className="text-xs font-bold text-slate-400">제보 내역을 불러오고 있어요...</p>
+        <p className="text-xs font-bold text-slate-400">?쒕낫 ?댁뿭??遺덈윭?ㅺ퀬 ?덉뼱??..</p>
       </div>
     );
   }
@@ -1050,9 +967,9 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-lg font-black text-slate-900">나의 공간 제보 내역</h3>
+        <h3 className="text-lg font-black text-slate-900">?섏쓽 怨듦컙 ?쒕낫 ?댁뿭</h3>
         <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-widest">
-          {reports.length} 건 접수됨
+          {reports.length} 嫄??묒닔??
         </span>
       </div>
 
@@ -1060,16 +977,16 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
         <div className="bg-white p-12 rounded-[2rem] text-center border-2 border-dashed border-slate-200">
           <MessageSquare size={48} className="mx-auto text-slate-200 mb-4" />
           <p className="text-slate-400 font-bold text-sm leading-relaxed">
-            아직 제보하신 내역이 없습니다.<br/>
-            실제와 다른 공실 정보가 있다면<br/>
-            <span className="text-amber-500 font-black">"정보 정정하기"</span>를 통해 제보해 주세요! ✍️
+            ?꾩쭅 ?쒕낫?섏떊 ?댁뿭???놁뒿?덈떎.<br/>
+            ?ㅼ젣? ?ㅻⅨ 怨듭떎 ?뺣낫媛 ?덈떎硫?br/>
+            <span className="text-amber-500 font-black">"?뺣낫 ?뺤젙?섍린"</span>瑜??듯빐 ?쒕낫??二쇱꽭?? ?랃툘
           </p>
         </div>
       ) : (
         <div className="space-y-4">
           {reports.map((report) => {
             const matchedVacancy = vacancies.find(v => v.id === report.vacancy_id);
-            const spaceName = matchedVacancy?.landmark || matchedVacancy?.address || "우리동네 공실";
+            const spaceName = matchedVacancy?.landmark || matchedVacancy?.address || "?곕━?숇꽕 怨듭떎";
             const isResolved = report.status === 'resolved';
 
             return (
@@ -1079,7 +996,7 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
                     <span className={`inline-block text-[9px] font-black px-2 py-0.5 rounded-md ${
                       report.report_type === 'movein' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-orange-50 text-orange-600 border border-orange-100'
                     }`}>
-                      {report.report_type === 'movein' ? '🎉 입점 소식 제보' : '🚨 정보 정정 제보'}
+                      {report.report_type === 'movein' ? '?럦 ?낆젏 ?뚯떇 ?쒕낫' : '?슚 ?뺣낫 ?뺤젙 ?쒕낫'}
                     </span>
                     <h4 className="text-sm font-black text-slate-900 tracking-tight">{spaceName}</h4>
                   </div>
@@ -1090,11 +1007,11 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
                     }`}>
                       {isResolved ? (
                         <>
-                          <Check size={10} strokeWidth={3} /> 답변 완료
+                          <Check size={10} strokeWidth={3} /> ?듬? ?꾨즺
                         </>
                       ) : (
                         <>
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> 확인 중
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> ?뺤씤 以?
                         </>
                       )}
                     </span>
@@ -1102,7 +1019,7 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
                 </div>
 
                 <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
-                  <p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest text-[9px]">내가 접수한 내용</p>
+                  <p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest text-[9px]">?닿? ?묒닔???댁슜</p>
                   <p className="text-xs font-bold text-slate-700 leading-relaxed">
                     "{report.content}"
                   </p>
@@ -1117,19 +1034,19 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
                       <Sparkles size={14} fill="currentColor" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">툇마루단 & 운영팀의 감사 메시지</p>
+                      <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">?뉖쭏猷⑤떒 & ?댁쁺???媛먯궗 硫붿떆吏</p>
                       <p className="text-xs font-bold text-emerald-800 leading-relaxed">
                         {report.reply_content}
                       </p>
                       <p className="text-[9px] font-bold text-emerald-600/70 mt-1">
-                        ✓ 확인 완료 • 정정 사항이 동네 지도에 반영되었습니다.
+                        ???뺤씤 ?꾨즺 ???뺤젙 ?ы빆???숇꽕 吏?꾩뿉 諛섏쁺?섏뿀?듬땲??
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div className="bg-amber-50/20 p-3.5 rounded-2xl border border-dashed border-amber-200/50 text-center">
                     <p className="text-[10px] font-bold text-amber-600/70 leading-relaxed">
-                      🕰️ 담당 툇마루단이 현장에 출동하여 꼼꼼하게 실사 중에 있습니다. 확인이 완료되면 즉시 이곳으로 소식을 전해드릴게요!
+                      ?빊截??대떦 ?뉖쭏猷⑤떒???꾩옣??異쒕룞?섏뿬 瑗쇨세?섍쾶 ?ㅼ궗 以묒뿉 ?덉뒿?덈떎. ?뺤씤???꾨즺?섎㈃ 利됱떆 ?닿납?쇰줈 ?뚯떇???꾪빐?쒕┫寃뚯슂!
                     </p>
                   </div>
                 )}

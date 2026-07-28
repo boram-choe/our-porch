@@ -295,7 +295,7 @@ export async function saveVacancy(v: {
     realtor_phone: v.realtorPhone || null,
     area: v.area || null,
     images: v.images && v.images.length > 0 ? v.images.join(',') : null,
-    status: v.status || 'available',
+    status: v.status || 'pending',
     hidden_reason: v.hiddenReason || null,
     hidden_comment: v.hiddenComment || null,
     merged_into_id: v.mergedIntoId || null,
