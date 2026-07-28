@@ -60,6 +60,9 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [gifticonRequests, setGifticonRequests] = useState<GifticonRequest[]>([]);
   const [reportedVacancies, setReportedVacancies] = useState<any[]>([]);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [selectedGifticon, setSelectedGifticon] = useState<any>(null);
+  const [phoneNumber, setPhoneNumber] = useState("");
   
   const [editPersonaIds, setEditPersonaIds] = useState<string[]>([]);
   const [editCustomPersona, setEditCustomPersona] = useState("");
@@ -833,26 +836,14 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                      </div>
                    </div>
                    <button 
-                     onClick={async () => {
+                     onClick={() => {
                        if (totalPoints < item.price) {
                          alert("포인트가 부족합니다!");
                          return;
                        }
-                       if (confirm(`'${item.name}' 상품을 교환하시겠습니까?\n차감 포인트: ${item.price}P`)) {
-                         setIsPurchasing(true);
-                         const userId = localStorage.getItem("gongsil_user_id");
-                         if (!userId) {
-                           setIsPurchasing(false);
-                           return;
-                         }
-                         const res = await purchaseGifticon(userId, item.id, item.name, item.price);
-                         alert(res.message);
-                         if (res.success) {
-                           const newReqs = await fetchGifticonRequests(userId);
-                           setGifticonRequests(newReqs);
-                         }
-                         setIsPurchasing(false);
-                       }
+                       setSelectedGifticon(item);
+                       setPhoneNumber("");
+                       setShowPhoneModal(true);
                      }}
                      disabled={isPurchasing || totalPoints < item.price}
                      className="px-4 py-2 bg-slate-900 text-white text-xs font-black rounded-xl disabled:bg-slate-200 disabled:text-slate-400 transition-all active:scale-95"

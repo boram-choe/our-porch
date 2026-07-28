@@ -7,6 +7,7 @@ export interface GifticonRequest {
   item_name: string;
   price: number;
   status: 'pending' | 'completed' | 'failed';
+  phone_number?: string;
   created_at: string;
 }
 
@@ -30,7 +31,7 @@ export async function fetchGifticonRequests(userId: string): Promise<GifticonReq
   return data || [];
 }
 
-export async function purchaseGifticon(userId: string, itemId: string, itemName: string, price: number): Promise<{ success: boolean; message: string }> {
+export async function purchaseGifticon(userId: string, itemId: string, itemName: string, price: number, phoneNumber: string): Promise<{ success: boolean; message: string }> {
   if (!userId) return { success: false, message: "로그인이 필요합니다." };
 
   try {
@@ -49,7 +50,8 @@ export async function purchaseGifticon(userId: string, itemId: string, itemName:
         item_id: itemId,
         item_name: itemName,
         price: price,
-        status: 'completed' // Mock이므로 즉시 완료 처리
+        status: 'completed',
+        phone_number: phoneNumber
       }]);
 
     if (error) {
