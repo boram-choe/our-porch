@@ -579,9 +579,9 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         <Star size={20} className="text-amber-600" />
                       </div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">상상 포인트</p>
-                      <div className="flex items-end gap-1.5">
+                      <div className="flex flex-col items-start gap-1">
                         <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
-                        <span className="text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md mb-1 pb-0">5,000P부터 사용 가능</span>
+                        <span className="text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md">5,000P부터 사용 가능</span>
                       </div>
                     </div>
                     <button 
@@ -920,7 +920,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               </h3>
               
               <p className="text-[12px] md:text-[13px] font-bold text-slate-300 leading-relaxed mb-6 break-keep">
-                현재 예비사장님을 위한 <span className="text-amber-400 font-black">상권분석리포트 및 수익분석리포트</span>는 부동산, 재무전문가들과 함께 깊이 있는 고도화 작업을 진행 중에 있습니다. 조금만 더 기대해 주세요! ✨
+                현재 예비사장님을 위한 <span className="text-amber-400 font-black">상권분석리포트 및 수익분석리포트</span>는 부동산, 재무전문가들과 함께 깊이 있는 고도화 작업을 진행 중에 있습니다. 조금만 더 기다려 주세요! ✨
               </p>
               
               <button
