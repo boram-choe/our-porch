@@ -807,14 +807,20 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
           <motion.div 
             initial={{ x: -20, opacity: 0 }} 
             animate={{ x: 0, opacity: 1 }} 
-            className="w-11 h-11 md:w-14 md:h-14 bg-[#0a0d14] rounded-xl md:rounded-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4)] overflow-hidden flex items-center justify-center pointer-events-auto flex-shrink-0"
+            className="w-11 h-11 md:w-14 md:h-14 bg-black rounded-xl md:rounded-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4)] overflow-hidden flex items-center justify-center pointer-events-auto flex-shrink-0"
           >
-            <div className="w-full h-full flex items-center justify-center p-0 bg-[#0a0d14]">
-              <img 
-                src="/images/logo.png" 
-                alt="여긴뭐가 로고" 
-                className="w-full h-full object-cover" 
-              />
+            <div 
+              className="w-full h-full flex flex-col items-center justify-center bg-black p-1 font-black text-amber-500 tracking-tighter leading-none"
+              style={{ fontFamily: '"Black Han Sans", "Pretendard Black", sans-serif' }}
+            >
+              <div className="flex w-full justify-between px-0.5">
+                <span className="text-[16px] md:text-[21px]">여</span>
+                <span className="text-[16px] md:text-[21px]">긴</span>
+              </div>
+              <div className="flex w-full justify-between px-0.5 -mt-[1px] md:-mt-[2px]">
+                <span className="text-[16px] md:text-[21px]">뭐</span>
+                <span className="text-[16px] md:text-[21px]">가</span>
+              </div>
             </div>
           </motion.div>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 pointer-events-auto">
