@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import * as htmlToImage from "html-to-image";
 import { X, Sparkles, AlertCircle, RefreshCw, Compass, ArrowRight, Home, MapPin, Info, Check, ShieldCheck, ChevronLeft, ChevronRight, Share2, Download, Link2, Camera } from "lucide-react";
 import { Vacancy } from "../data/dummyVacancies";
+import { InstagramShareCard } from "./InstagramShareCard";
 import { 
   analyzeFengShui, 
   getGeneralBuildingFengShui, 
@@ -291,42 +292,22 @@ export default function FengShuiTarot({
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const instagramCardRef = useRef<HTMLDivElement>(null);
 
   const generateShareImage = useCallback(async () => {
     setIsGeneratingImage(true);
     setShareImageUrl(null);
     try {
-      const el = contentRef.current;
+      const el = instagramCardRef.current;
       if (!el) return null;
-      
-      // 숨길 요소들 임시 숨김 처리 (캔버스 높이 최적화)
-      const noCaptureEls = el.querySelectorAll('.no-capture');
-      noCaptureEls.forEach((node: any) => {
-        node.dataset.originalDisplay = node.style.display || '';
-        node.style.display = 'none';
-      });
-
-      // 슬라이더 래퍼의 overflow-hidden 임시 해제 (잘림 방지)
-      const sliderWrapper = el.querySelector('.overflow-hidden.min-h-\\[460px\\]');
-      if (sliderWrapper) {
-        sliderWrapper.classList.remove('overflow-hidden');
-      }
 
       const dataUrl = await htmlToImage.toPng(el, {
-        pixelRatio: 2,
+        pixelRatio: 1.5, // 1080x1920 is already large, 1.5 is enough (1620x2880)
         backgroundColor: "#0f172a",
         style: {
           transform: 'translate(0, 0)',
         }
       });
-      
-      // 복구
-      noCaptureEls.forEach((node: any) => {
-        node.style.display = node.dataset.originalDisplay;
-      });
-      if (sliderWrapper) {
-        sliderWrapper.classList.add('overflow-hidden');
-      }
 
       setShareImageUrl(dataUrl);
       return dataUrl;
@@ -1652,99 +1633,23 @@ export default function FengShuiTarot({
       </div>
     </AnimatePresence>
 
-    {/* ===== 히든 공유 카드 (트레이스 / html2canvas용) ===== */}
+    {/* ===== 히든 공유 카드 (인스타그램 카드뉴스용) ===== */}
     {homeFsResult && (() => {
-      const allChars = [
-        "/images/characters/toad_1.png","/images/characters/toad_2.png","/images/characters/toad_3.png",
-        "/images/characters/toad_4.png","/images/characters/toad_5.png",
-        "/images/characters/haetae_1.png","/images/characters/haetae_2.png","/images/characters/haetae_3.png",
-        "/images/characters/haetae_4.png","/images/characters/haetae_5.png",
-        "/images/characters/tiger_dragon_1.png","/images/characters/tiger_dragon_2.png",
-        "/images/characters/tiger_dragon_3.png","/images/characters/tiger_dragon_4.png",
-        "/images/characters/tiger_dragon_5.png",
-      ];
-      const rndChar = allChars[getDeterministicHash(birthDate + desiredFortune) % allChars.length];
-      const matchedForCard = (() => {
-        const spaces = getMatchedSpaces();
-        const preferredItem = spaces.find(s => s.id === desiredFortune) || spaces[0];
-        return preferredItem.match;
-      })();
+      const mascot = getDynamicMascot(homeFsResult.score, desiredFortune, userProfile?.nickname);
+      const remedyMascot = getDynamicRemedyMascot(homeFsResult.score, desiredFortune, homeFsResult.remedy.title);
+      
       return (
-        <div
-          style={{
-            display: "none",
-            position: "fixed",
-            top: "-9999px",
-            left: 0,
-            width: "400px",
-            minHeight: "600px",
-            background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)",
-            borderRadius: "24px",
-            padding: "32px 28px",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "20px",
-            fontFamily: "'Noto Sans KR', sans-serif",
-            overflow: "hidden",
-            zIndex: -1,
-          }}
-        >
-          {/* 배경 홀로그래픽 원 */}
-          <div style={{ position: "absolute", top: "-60px", right: "-60px", width: "200px", height: "200px", borderRadius: "50%", background: "radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(139,92,246,0) 70%)" }} />
-          <div style={{ position: "absolute", bottom: "-60px", left: "-40px", width: "160px", height: "160px", borderRadius: "50%", background: "radial-gradient(circle, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0) 70%)" }} />
-
-          {/* 사이트 로고 */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <span style={{ fontSize: "22px" }}>🏡</span>
-            <span style={{ color: "#e2e8f0", fontWeight: 900, fontSize: "14px", letterSpacing: "-0.3px" }}>우리집 풍수지리 분석</span>
-          </div>
-
-          {/* 캐릭터 */}
-          <img
-            src={rndChar}
-            alt="풍수 수호신"
-            style={{ width: "120px", height: "120px", objectFit: "contain" }}
-          />
-
-          {/* 점수 원형 */}
-          <div style={{
-            width: "110px", height: "110px", borderRadius: "50%",
-            background: "linear-gradient(135deg, #7c3aed, #db2777)",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 0 30px rgba(139,92,246,0.4)"
-          }}>
-            <span style={{ color: "#fbbf24", fontSize: "11px", fontWeight: 700, marginBottom: "2px" }}>풍수 점수</span>
-            <span style={{ color: "#ffffff", fontSize: "36px", fontWeight: 900, lineHeight: 1 }}>{homeFsResult.score}</span>
-            <span style={{ color: "#e2e8f0", fontSize: "11px", fontWeight: 600 }}>/ 100</span>
-          </div>
-
-          {/* 등급 + 요약 */}
-          <div style={{ width: "100%", background: "rgba(255,255,255,0.05)", borderRadius: "16px", padding: "16px 20px", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <div style={{ color: "#fbbf24", fontWeight: 800, fontSize: "13px", marginBottom: "6px" }}>🏅 {homeFsResult.grade}</div>
-            <div style={{ color: "#e2e8f0", fontSize: "12px", lineHeight: 1.6, fontWeight: 400 }}>{homeFsResult.summary.slice(0, 60)}{homeFsResult.summary.length > 60 ? "..." : ""}</div>
-          </div>
-
-          {/* 개운 처방 */}
-          <div style={{ width: "100%", background: "rgba(139,92,246,0.12)", borderRadius: "16px", padding: "14px 18px", border: "1px solid rgba(139,92,246,0.25)" }}>
-            <div style={{ color: "#c4b5fd", fontWeight: 700, fontSize: "11px", marginBottom: "5px" }}>✨ 개운 인테리어 처방</div>
-            <div style={{ color: "white", fontWeight: 800, fontSize: "13px" }}>{homeFsResult.remedy.icon} {homeFsResult.remedy.title}</div>
-          </div>
-
-          {/* 명당 */}
-          {matchedForCard && (
-            <div style={{ width: "100%", background: "rgba(245,158,11,0.08)", borderRadius: "16px", padding: "14px 18px", border: "1px solid rgba(245,158,11,0.2)" }}>
-              <div style={{ color: "#fbbf24", fontWeight: 700, fontSize: "11px", marginBottom: "5px" }}>🧭 근처 풍수 명당</div>
-              <div style={{ color: "white", fontWeight: 800, fontSize: "13px" }}>{matchedForCard.areaName}</div>
-              <div style={{ color: "#94a3b8", fontSize: "11px", marginTop: "3px" }}>{matchedForCard.grade} · {matchedForCard.score}점</div>
-            </div>
-          )}
-
-          {/* 해시태그 & URL */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{ color: "#64748b", fontSize: "10px", marginBottom: "4px" }}>#명당찾기 #풍수타로 #우리집풍수</div>
-            <div style={{ color: "#fbbf24", fontWeight: 700, fontSize: "11px" }}>🌐 gongsil.vercel.app</div>
-          </div>
-        </div>
+        <InstagramShareCard
+          ref={instagramCardRef}
+          userProfile={userProfile}
+          homeFsResult={homeFsResult}
+          desiredFortune={desiredFortune}
+          matchedVacancy={matchedVacancy || null}
+          mascot={mascot}
+          remedyMascot={remedyMascot}
+          getShortAreaName={getShortAreaName}
+          remedyTitle={homeFsResult.remedy.title}
+        />
       );
     })()}
 
