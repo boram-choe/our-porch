@@ -713,7 +713,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         
         // 풍수지리 격식 가져와 성공 멘트에 주입
         const fsInfo = getGeneralBuildingFengShui(newV);
-        setShowSuccessToast(`🎉 [${fsInfo.grade}] 명당 터를 발견했습니다! 아래에서 첫 투표를 마치고 기프티콘을 받아가세요!`);
+        setShowSuccessToast(`🎉 공간 제보가 접수되었습니다! (검토 후 500P 지급)\n이곳은 [${fsInfo.grade}] 명당이네요. 어떤 공간으로 바꿀지 먼저 투표해 보세요!`);
         
         // 3D 상세 분석 뷰로 자동 전환!
         setSelectedVacancy(newV);
@@ -1339,7 +1339,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-950 flex-shrink-0 shadow-[0_0_20px_rgba(245,158,11,0.5)]"><Check size={20} strokeWidth={4} /></div>
             <div className="flex-1">
               <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-0.5">상상 현실화 완료</p>
-              <p className="text-sm font-black text-white leading-tight mb-2">{showSuccessToast}</p>
+              <p className="text-sm font-black text-white leading-tight mb-2 whitespace-pre-line">{showSuccessToast}</p>
               {showSuccessToast.includes('성공적으로 등록되었습니다') && (
                 <a 
                   href="http://pf.kakao.com/_dGUsX/chat" 
@@ -1479,7 +1479,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                 className="w-full mt-4 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black rounded-xl shadow-lg shadow-amber-500/10 active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
               >
                 <Plus size={18} strokeWidth={3} />
-                내가 알고 있는 빈 공간 등록하고 500P 받기
+                내가 알고 있는 빈 공간 제보하기 (확인 후 500P 지급)
               </button>
             </motion.div>
           </div>
