@@ -130,7 +130,7 @@ function getDynamicMascot(
       return {
         src: "/images/characters/haetae_2.png",
         alt: "달려가는 아기 해치",
-        message: `집 기운이 너무 좋아서 저도 신나게 달려가고 싶어요! 🏃\n나쁜 기운은 완전히 차단했어요~ 🏡✨`
+        message: `집 기운이 너무 좋아서 저도 신나게 달려가고 싶어요! 🏃\n좋은 기운이 가득해서 아주 든든해요~ 🏡✨`
       };
     } else if (score >= 83) {
       return {
@@ -549,7 +549,10 @@ export default function FengShuiTarot({
       const dist = calculateDistanceM(mapCenter.lat, mapCenter.lng, bestVacancy.lat, bestVacancy.lng);
       setNearestVacancyDistance(dist);
       setMatchedVacancy(bestVacancy);
-      setFsResult(bestResult);
+      
+      // 카드 모디파이어를 적용하여 점수 반영 (최대 98점 제한)
+      const finalNeighborhoodScore = Math.min(98, Math.max(40, bestResult.score + cardModifiers[cardIdx]));
+      setFsResult({ ...bestResult, score: finalNeighborhoodScore });
 
     } else {
       // 2. 우리 집 풍수 모의 분석 모드
@@ -606,7 +609,7 @@ export default function FengShuiTarot({
       }
 
       // 카드 모디파이어를 적용하여 점수가 명확하게(대길, 평길, 소길) 달라지도록 처리
-      const finalScore = Math.min(100, Math.max(40, baseScore + alignmentBonus + cardModifiers[cardIdx]));
+      const finalScore = Math.min(98, Math.max(40, baseScore + alignmentBonus + cardModifiers[cardIdx]));
 
       const homeGrades = [
         {
