@@ -1650,7 +1650,6 @@ export default function FengShuiTarot({
           matchedVacancy={matchedVacancy || null}
           mascot={mascot}
           remedyMascot={remedyMascot}
-          getShortAreaName={getShortAreaName}
           remedyTitle={homeFsResult.remedy.title}
         />
       );

@@ -9,12 +9,11 @@ export interface InstagramShareCardProps {
   matchedVacancy: Vacancy | null;
   mascot: { src: string; message: string; alt: string };
   remedyMascot: { src: string; message: string; alt: string };
-  getShortAreaName: (name: string) => string;
   remedyTitle: string;
 }
 
 export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShareCardProps>(
-  ({ userProfile, homeFsResult, desiredFortune, matchedVacancy, mascot, remedyMascot, getShortAreaName, remedyTitle }, ref) => {
+  ({ userProfile, homeFsResult, desiredFortune, matchedVacancy, mascot, remedyMascot, remedyTitle }, ref) => {
     
     // Render the messages correctly handling newlines
     const renderMessage = (msg: string) => {
