@@ -1441,7 +1441,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
       {/* 🔮 장기 공실 등록 권유 바텀 배너 (지도 확인 후 제보 유도) */}
       <AnimatePresence>
-        {showRegisterNudgePopup && (
+        {showRegisterNudgePopup && !showFengShui && !isDiscoveryMode && !showDashboard && (
           <div className="fixed bottom-6 left-0 right-0 z-[400] px-4 flex justify-center pointer-events-none">
             <motion.div
               key="register-nudge"
