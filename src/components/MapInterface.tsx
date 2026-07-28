@@ -961,7 +961,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             >
               <span className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-amber-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <Compass size={20} className="text-amber-400 animate-spin-slow" />
-              <span className="text-[8px] font-black mt-0.5 text-amber-400">풍수수호신</span>
+              <span className="text-[8px] font-black mt-0.5 text-amber-400">풍수운세</span>
             </motion.button>
           </div>
         )}
