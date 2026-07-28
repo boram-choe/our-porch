@@ -1479,7 +1479,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                 className="w-full mt-4 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black rounded-xl shadow-lg shadow-amber-500/10 active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
               >
                 <Plus size={18} strokeWidth={3} />
-                내가 알고 있는 빈 공간 제보하기 (확인 후 500P 지급)
+                빈 공간 등록하고 500P받기(등록 확정시 바로 지급)
               </button>
             </motion.div>
           </div>

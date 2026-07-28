@@ -579,7 +579,10 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         <Star size={20} className="text-amber-600" />
                       </div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">상상 지수</p>
-                      <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
+                      <div className="flex items-end gap-1.5">
+                        <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
+                        <span className="text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md mb-1 pb-0">5,000P부터 사용 가능</span>
+                      </div>
                     </div>
                     <button 
                       onClick={() => {
