@@ -1,6 +1,6 @@
 import React from 'react';
 import { Home, Compass, Target, Info, Sparkles, MapPin, Map } from 'lucide-react';
-import { Vacancy } from '../types';
+import { Vacancy } from '../data/dummyVacancies';
 
 export interface InstagramShareCardProps {
   userProfile: any;
