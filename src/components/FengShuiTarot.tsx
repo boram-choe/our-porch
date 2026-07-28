@@ -1587,26 +1587,29 @@ export default function FengShuiTarot({
                         ))}
                       </div>
 
-                      {/* SNS 공유 버튼 */}
+                      {/* SNS 공유 버튼 (마지막 페이지에서만 표시) */}
                       <div className="pt-2 mt-1 space-y-3 no-capture">
-                        <button
-                          onClick={async () => {
-                            setShowShareModal(true);
-                            const dataUrl = await generateShareImage();
-                            if (!dataUrl) {
-                              alert("이미지 캡처에 실패했습니다. (html2canvas 오류)");
-                            }
-                          }}
-                          className="w-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 hover:opacity-90 active:scale-[0.98] text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-purple-500/20 transition-all flex items-center justify-center gap-2.5 text-sm select-none"
-                        >
-                          <Share2 className="w-4 h-4" />
-                          내 풍수 결과 공유하기 ✨
-                        </button>
+                        {currentHomeSlide === 4 && (
+                          <button
+                            onClick={async () => {
+                              setShowShareModal(true);
+                              const dataUrl = await generateShareImage();
+                              if (!dataUrl) {
+                                alert("이미지 캡처에 실패했습니다. 잠시 후 다시 시도해주세요.");
+                              }
+                            }}
+                            className="w-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 hover:opacity-90 active:scale-[0.98] text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-purple-500/20 transition-all flex items-center justify-center gap-2.5 text-sm select-none"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            내 풍수 결과 공유하기 ✨
+                          </button>
+                        )}
                         <div className="flex gap-2.5">
                           <button
                             onClick={() => onClose(step === "result")}
                             className="flex-1 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white font-semibold py-3.5 px-4 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition-all flex items-center justify-center gap-1.5 text-xs"
                           >
+                            <MapPin className="w-4 h-4" />
                             지도로 돌아가기
                           </button>
                           <button
