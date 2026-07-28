@@ -19,7 +19,7 @@ export default function Home() {
       const url = new URL(window.location.href);
       if (url.searchParams.has("login")) {
         url.searchParams.delete("login");
-        window.history.replaceState({}, "", url.pathname + url.search);
+        window.history.replaceState({}, "", url.pathname + url.search + url.hash);
       }
     }
   }, []);
