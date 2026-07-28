@@ -353,7 +353,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 activeTab === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
               }`}
             >
-              {tab === "profile" ? "내 정보" : tab === "activity" ? (isEntrepreneurMode ? "관심공간" : "활동 내역") : tab === "reports" ? "제보 & 알림함" : "설정"}
+              {tab === "profile" ? "내 정보" : tab === "activity" ? (isEntrepreneurMode ? "관심공간" : "활동 내역") : tab === "reports" ? "제보 & 알림함" : tab === "store" ? "상상 스토어" : "설정"}
             </button>
           ))}
         </div>
