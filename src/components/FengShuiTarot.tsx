@@ -1701,7 +1701,7 @@ export default function FengShuiTarot({
               ) : null}
             </div>
 
-            {/* SNS 버튼 그리드 */}
+            {/* SNS 버튼 그룹 */}
             <div className="grid grid-cols-2 gap-3">
               {/* 이미지 다운로드 */}
               <button
@@ -1713,61 +1713,41 @@ export default function FengShuiTarot({
                   a.download = "우리집풍수결과.png";
                   a.click();
                 }}
-                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-br from-pink-600 to-rose-600 text-white font-bold text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95 transition-all shadow-lg"
+                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-800 border border-slate-700 text-white font-bold text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-700 active:scale-95 transition-all shadow-lg"
               >
                 <Download className="w-4 h-4" />
-                이미지 저장
+                이미지 저장하기
               </button>
 
-              {/* 링크 복사 */}
+              {/* 인스타그램 공유 (Web Share API) */}
               <button
+                disabled={!shareImageUrl}
                 onClick={async () => {
+                  if (!shareImageUrl) return;
                   try {
-                    await navigator.clipboard.writeText(window.location.href);
-                    setShareCopied(true);
-                    setTimeout(() => setShareCopied(false), 2000);
-                  } catch {}
-                }}
-                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-800 border border-slate-700 text-white font-bold text-xs hover:bg-slate-700 active:scale-95 transition-all"
-              >
-                {shareCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Link2 className="w-4 h-4" />}
-                {shareCopied ? "복사 완료!" : "링크 복사"}
-              </button>
-
-              {/* Twitter / X */}
-              <button
-                onClick={() => {
-                  const text = `우리 집 풍수 점수가 ${homeFsResult?.score}점이에요! 🏡✨ #명당찾기 #풍수타로 #우리집풍수`;
-                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, "_blank");
-                }}
-                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#1a1a2e] border border-slate-700 text-white font-bold text-xs hover:bg-slate-800 active:scale-95 transition-all"
-              >
-                <span className="font-black text-base leading-none">𝕏</span>
-                X (Twitter)
-              </button>
-
-              {/* 기기 기본 공유 (Web Share API) */}
-              <button
-                onClick={async () => {
-                  const text = `우리 집 풍수 점수 ${homeFsResult?.score}점! 🏡 개운 처방도 확인해 봐~ ✨`;
-                  if (navigator.share) {
-                    try {
+                    const blob = await (await fetch(shareImageUrl)).blob();
+                    const file = new File([blob], '우리집풍수결과.png', { type: blob.type });
+                    
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                       await navigator.share({
-                        title: '풍수타로 진단서',
-                        text: text,
-                        url: window.location.href,
+                        files: [file],
+                        title: '우리집 풍수타로 진단서',
                       });
-                    } catch (error) {
-                      console.log('공유 취소 또는 실패', error);
+                    } else {
+                      alert("기기에서 이미지 직접 공유를 지원하지 않습니다. 이미지를 저장한 후 인스타그램에 올려주세요!");
+                      const a = document.createElement("a");
+                      a.href = shareImageUrl;
+                      a.download = "우리집풍수결과.png";
+                      a.click();
                     }
-                  } else {
-                    alert('이 기기에서는 기본 공유 기능을 지원하지 않습니다. 링크 복사를 이용해 주세요.');
+                  } catch (e) {
+                    console.log('공유 실패 또는 취소', e);
                   }
                 }}
-                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#FEE500] text-[#3A1D1D] font-bold text-xs hover:opacity-90 active:scale-95 transition-all"
+                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] text-white font-bold text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95 transition-all shadow-lg"
               >
-                <span className="text-base leading-none">💬</span>
-                다른 앱으로 공유
+                <span className="font-black text-base leading-none">📸</span>
+                인스타에 공유하기
               </button>
             </div>
 
