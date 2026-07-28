@@ -273,6 +273,7 @@ export default function FengShuiTarot({
   // 타로 카드 선택 및 애니메이션 상태
   const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
   const [hoveredCardIdx, setHoveredCardIdx] = useState<number | null>(null);
+  const [cardModifiers, setCardModifiers] = useState<number[]>([15, 0, -15]);
   
   // 매칭 결과 상태
   const [matchedVacancy, setMatchedVacancy] = useState<Vacancy | null>(null);
@@ -474,6 +475,9 @@ export default function FengShuiTarot({
   }, [selectedPersonas, isOpen]);
 
   const handleStartTarot = () => {
+    // 3장의 카드에 각각 대길(+15), 평길(0), 소길(-15) 모디파이어를 무작위로 부여
+    const shuffledModifiers = [15, 0, -15].sort(() => 0.5 - Math.random());
+    setCardModifiers(shuffledModifiers);
     setStep("card");
   };
 
@@ -594,7 +598,8 @@ export default function FengShuiTarot({
         alignmentAnalysis = `현재 집의 방향(${selectedDir})이 산맥과 물길의 축에서 비껴나 비스듬히 흐르는 기류를 옆으로 마주하는 배치입니다. 외부 바람이 곧바로 부딪치지 않아 사계절 내내 집안 기운이 편온하고 평화롭게 유지되는 조화로운 구조입니다.`;
       }
 
-      const finalScore = Math.min(100, baseScore + alignmentBonus);
+      // 카드 모디파이어를 적용하여 점수가 명확하게(대길, 평길, 소길) 달라지도록 처리
+      const finalScore = Math.min(100, Math.max(40, baseScore + alignmentBonus + cardModifiers[cardIdx]));
 
       const homeGrades = [
         {
@@ -918,14 +923,20 @@ export default function FengShuiTarot({
                                  const matchedTheme = tarotMode === "neighborhood" 
                                    ? (scenariosPool.find(s => s.id === selectedScenarioId)?.fortuneType || desiredFortune) 
                                    : desiredFortune;
-                                 const mascot = getDynamicMascot(85, matchedTheme, userProfile?.nickname);
+                                 
+                                 // 선택한 카드의 모디파이어를 통해 점수 유추
+                                 const modifier = cardModifiers[idx];
+                                 const cardScore = 80 + modifier; // 95(대길), 80(평길), 65(소길)
+                                 const prefix = modifier > 0 ? "대길(大吉)" : modifier < 0 ? "소길(小吉)" : "무난(平)";
+                                 
+                                 const mascot = getDynamicMascot(cardScore, matchedTheme, userProfile?.nickname);
                                  const fortuneName = matchedTheme === "wealth" ? "재물운 💰" : matchedTheme === "stability" ? "안정운 🏥" : matchedTheme === "fame" ? "명예운 ⭐️" : "귀인운 🤝";
                                  return (
                                    <>
                                      <img src={mascot.src} alt="Tarot Result" className="w-20 h-20 object-contain drop-shadow-[0_5px_15px_rgba(245,158,11,0.5)]" />
                                      <div className="text-center mt-2">
                                        <span className="text-[10px] text-amber-500 font-bold block mb-0.5">선택한 기운 카드</span>
-                                       <span className="text-sm font-black text-white">{fortuneName}</span>
+                                       <span className="text-sm font-black text-white">{prefix} {fortuneName}</span>
                                      </div>
                                    </>
                                  );
