@@ -312,8 +312,10 @@ export default function FengShuiTarot({
       if (!el) return null;
 
       const dataUrl = await htmlToImage.toPng(el, {
-        pixelRatio: 1.5, // 1080x1920 is already large, 1.5 is enough (1620x2880)
+        pixelRatio: 1, // Use 1 to prevent memory issues and cropping on mobile Safari
         backgroundColor: "#0f172a",
+        width: 1080,
+        height: 1350,
         style: {
           transform: 'translate(0, 0)',
         }
