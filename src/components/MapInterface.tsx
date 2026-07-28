@@ -144,7 +144,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   const [isFamousLandmark, setIsFamousLandmark] = useState(false);
 
   const [isEntrepreneurMode, setIsEntrepreneurMode] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(true);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   // ─── 인증 위치 기반 공실 필터링 (반경 2.5km = 인증 동 + 인접 동) ───────────
   const filteredVacancies = useMemo(() => {
@@ -974,16 +974,33 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       </div>
 
       {!isPinpointing && !selectedVacancy && (
-        <div className="absolute bottom-4 md:bottom-8 left-0 right-0 px-6 z-10 pointer-events-none">
-          <motion.div initial={{ y: 300, opacity: 0 }} animate={{ y: showDashboard ? 0 : 350, opacity: showDashboard ? 1 : 0 }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="max-w-xl mx-auto bg-white p-5 md:p-6 rounded-[2.5rem] md:rounded-[3rem] shadow-xl border border-slate-100 pointer-events-auto overflow-hidden relative">
-             <button onClick={() => setShowDashboard(false)} className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
-             <div className="flex items-center justify-between mb-4 mt-2 relative z-10 gap-x-2">
+        <div className="absolute bottom-4 md:bottom-8 left-0 right-0 px-4 md:px-6 z-10 pointer-events-none">
+          <motion.div 
+            initial={false} 
+            animate={{ y: showDashboard ? 0 : "calc(100% - 85px)", opacity: 1 }} 
+            transition={{ type: "spring", damping: 25, stiffness: 200 }} 
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(e, { offset, velocity }) => {
+              if (offset.y < -20 || velocity.y < -200) setShowDashboard(true);
+              else if (offset.y > 20 || velocity.y > 200) setShowDashboard(false);
+            }}
+            onClick={() => { if(!showDashboard) setShowDashboard(true); }}
+            className="max-w-xl mx-auto bg-white p-5 md:p-6 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border border-slate-100 pointer-events-auto relative flex flex-col"
+          >
+             {/* Drag Handle */}
+             <div className="absolute top-0 left-0 w-full h-8 flex items-center justify-center cursor-grab active:cursor-grabbing" onClick={(e) => { e.stopPropagation(); setShowDashboard(!showDashboard); }}>
+               <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
+             </div>
+             
+             <div className="flex items-center justify-between mb-4 mt-3 relative z-10 gap-x-2">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-lg"><History className="w-4 h-4 md:w-5 md:h-5" /></div>
                   <h2 className="text-base md:text-lg font-black text-slate-950 tracking-tight whitespace-nowrap">나의 상상 조각들 <span className="text-amber-600 ml-1">{votedIds.length}</span></h2>
                 </div>
                 <button 
-                  onClick={() => setShowCurator(true)}
+                  onClick={(e) => { e.stopPropagation(); setShowCurator(true); }}
                   className="flex items-center gap-1.5 md:gap-2 px-3 py-2 bg-indigo-50 text-indigo-600 rounded-full text-[11px] md:text-[12px] font-black hover:bg-indigo-100 transition-all border border-indigo-100 whitespace-nowrap"
                 >
                   <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5" fill="currentColor" /> 상상 연습해보기

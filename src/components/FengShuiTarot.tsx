@@ -315,7 +315,7 @@ export default function FengShuiTarot({
         pixelRatio: 1, // Use 1 to prevent memory issues and cropping on mobile Safari
         backgroundColor: "#0f172a",
         width: 1080,
-        height: 1350,
+        height: 1920,
         style: {
           transform: 'translate(0, 0)',
         }
