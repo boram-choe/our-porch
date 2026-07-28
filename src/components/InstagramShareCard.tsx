@@ -66,8 +66,8 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
                 <Compass className="text-amber-400" size={32} />
                 <span className="text-[1.8rem] font-black text-slate-200 tracking-widest">여긴뭐가 풍수타로</span>
               </div>
-              <h1 className="text-[6.5rem] font-black text-white tracking-tight text-center leading-[1.2] drop-shadow-2xl">
-                우리 집 주거 <span className="text-amber-400">풍수 진단서</span>
+              <h1 className="text-[6.5rem] font-black text-white tracking-tight text-center leading-[1.2] drop-shadow-2xl break-keep">
+                우리 집 주거<br/><span className="text-amber-400">풍수 진단서</span>
               </h1>
             </div>
 
@@ -87,9 +87,9 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
             </div>
 
             {/* Character Section (Side-by-side) */}
-            <div className="w-full flex items-center justify-between gap-10 mt-6 mb-6 px-6">
-              <img src={mascot.src} alt={mascot.alt} className="w-[380px] h-[380px] object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] shrink-0" />
-              <div className="relative flex-1 bg-slate-800 text-[2.6rem] text-slate-100 p-10 rounded-[3.5rem] shadow-2xl text-left break-keep leading-[1.6] font-bold border border-slate-600">
+            <div className="w-full flex items-center justify-between gap-8 mt-6 mb-6 px-4">
+              <img src={mascot.src} alt={mascot.alt} className="w-[320px] h-[320px] object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] shrink-0" />
+              <div className="relative flex-1 bg-slate-800 text-[2.3rem] text-slate-100 p-8 rounded-[3.5rem] shadow-2xl text-left break-keep leading-[1.5] font-bold border border-slate-600">
                 <div className="absolute top-1/2 -translate-y-1/2 -left-5 w-10 h-10 bg-slate-800 border-b border-l border-slate-600 rotate-45" />
                 <span>{renderMessage(mascot.message)}</span>
               </div>
