@@ -1281,6 +1281,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               setIsFengShuiMinimized(false);
               if (showNudge) {
                 setShowRegisterNudgePopup(true);
+                setShowDashboard(false);
               }
             }}
             vacancies={vacancies}
@@ -1446,7 +1447,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                     우리 집 길운을 더 높이려면?
                   </h3>
                   <p className="text-[11px] font-bold text-slate-300 leading-relaxed mt-1.5 break-keep">
-                    오래 방치된 빈 공간은 주변의 좋은 기운을 흐리게 할 수 있어요. 장기 공실을 찾아 제보하고, 어떤 공간으로 다시 태어나면 좋을지 이웃들과 함께 상상해 보세요!
+                    오래 방치된 빈 공간은 주변의 좋은 기운을 흐리게 할 수 있어요. 빈 공간을 찾아 제보하고, 어떤 공간으로 다시 태어나면 좋을지 이웃들과 함께 상상해 보세요!
                   </p>
                 </div>
                 <button
@@ -1465,7 +1466,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                 className="w-full mt-4 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black rounded-xl shadow-lg shadow-amber-500/10 active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
               >
                 <Plus size={18} strokeWidth={3} />
-                내가 알고 있는 장기 공실 등록하기
+                내가 알고 있는 빈 공간 등록하고 500P 받기
               </button>
             </motion.div>
           </div>
