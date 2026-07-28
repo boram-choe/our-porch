@@ -84,7 +84,7 @@ function getDynamicMascot(
       return {
         src: "/images/characters/toad_2.png",
         alt: "윙크하는 복두꺼비",
-        message: `${nickname || ""}님, 재물 기운이 살랑살랑~ 😉\n부자 될 준비 되셨나요? 🪙`
+        message: `${nickname || ""}님,\n재물 기운이 살랑살랑~ 😉\n부자 될 준비 되셨나요? 🪙`
       };
     } else if (score >= 80) {
       return {
