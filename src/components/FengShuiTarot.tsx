@@ -507,7 +507,7 @@ export default function FengShuiTarot({
       if (available.length === 0) {
         setMatchedVacancy(null);
         setFsResult(null);
-        setTimeout(() => setStep("result"), 1200);
+        setTimeout(() => setStep("result"), 2500);
         return;
       }
 
@@ -641,7 +641,7 @@ export default function FengShuiTarot({
     // 신비로운 뒤집기 딜레이
     setTimeout(() => {
       setStep("result");
-    }, 1200);
+    }, 2500);
   };
 
   // SVG 레이더 차트 데이터 변환
@@ -909,11 +909,33 @@ export default function FengShuiTarot({
                           </div>
                         </div>
 
-                        {/* 카드 앞면 뒤집힘 로딩 */}
+                        {/* 카드 앞면 뒤집힘 로딩 및 결과 */}
                         <div className="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-4 [transform:rotateY(180deg)] [backface-visibility:hidden]">
                           <div className="absolute inset-2 border border-amber-400/30 rounded-xl" />
-                          <Compass className="w-10 h-10 text-amber-400 animate-spin" />
-                          <span className="text-[10px] font-black text-amber-400 mt-4 animate-pulse">명당 분석 중...</span>
+                          {isPicked ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center animate-fade-in gap-2">
+                               {(() => {
+                                 const matchedTheme = tarotMode === "neighborhood" 
+                                   ? (scenariosPool.find(s => s.id === selectedScenarioId)?.fortuneType || desiredFortune) 
+                                   : desiredFortune;
+                                 const mascot = getDynamicMascot(85, matchedTheme, userProfile?.nickname);
+                                 const fortuneName = matchedTheme === "wealth" ? "재물운 💰" : matchedTheme === "stability" ? "안정운 🏥" : matchedTheme === "fame" ? "명예운 ⭐️" : "귀인운 🤝";
+                                 return (
+                                   <>
+                                     <img src={mascot.src} alt="Tarot Result" className="w-20 h-20 object-contain drop-shadow-[0_5px_15px_rgba(245,158,11,0.5)]" />
+                                     <div className="text-center mt-2">
+                                       <span className="text-[10px] text-amber-500 font-bold block mb-0.5">선택한 기운 카드</span>
+                                       <span className="text-sm font-black text-white">{fortuneName}</span>
+                                     </div>
+                                   </>
+                                 );
+                               })()}
+                            </div>
+                          ) : (
+                            <>
+                              <Compass className="w-10 h-10 text-slate-700 animate-spin-slow" />
+                            </>
+                          )}
                         </div>
                       </motion.div>
                     );
