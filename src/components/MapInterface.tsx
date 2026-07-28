@@ -1305,18 +1305,9 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
               setMapCenter({ lat, lng });
               setHighlightFortuneArea({ lat, lng, areaName });
               setIsPulsing(true);
+              setShowDashboard(false);
               
-              let fortuneTitle = "명당 구역";
-              if (fortuneName) {
-                if (fortuneName.includes("재물")) fortuneTitle = "재물운이 좋은 곳";
-                else if (fortuneName.includes("성공")) fortuneTitle = "성공운이 좋은 곳";
-                else if (fortuneName.includes("연애")) fortuneTitle = "연애운이 좋은 곳";
-                else if (fortuneName.includes("안정")) fortuneTitle = "안정운이 좋은 곳";
-              }
-              
-              setShowSuccessToast(`🔮 ${fortuneTitle}이 지도에 표시되었습니다.`);
               setTimeout(() => {
-                setShowSuccessToast(null);
                 setIsPulsing(false);
               }, 8000);
             }}

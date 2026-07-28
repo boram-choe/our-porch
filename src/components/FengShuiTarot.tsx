@@ -77,25 +77,25 @@ function getDynamicMascot(
       return {
         src: "/images/characters/toad_4.png",
         alt: "돈 폭발 복두꺼비",
-        message: `와아~ 이 집 터 진짜 대박이에요! 💰 엽전 기운이 사방팔방 넘쳐흘러요! ✨`
+        message: `와아~ 이 집 터 진짜 대박이에요! 💰\n엽전 기운이 사방팔방 넘쳐흘러요! ✨`
       };
     } else if (score >= 83) {
       return {
         src: "/images/characters/toad_2.png",
         alt: "윙크하는 복두꺼비",
-        message: `${nickname || ""}님, 재물 기운이 살랑살랑~ 😉 부자 될 준비 되셨나요? 🪙`
+        message: `${nickname || ""}님, 재물 기운이 살랑살랑~ 😉\n부자 될 준비 되셨나요? 🪙`
       };
     } else if (score >= 80) {
       return {
         src: "/images/characters/toad_5.png",
         alt: "잠자는 복두꺼비",
-        message: `돈 더미 위에서 꿀잠 자는 지세예요~ 😴 가만있어도 재물이 차곡차곡 쌓여요! 💵`
+        message: `돈 더미 위에서 꿀잠 자는 지세예요~ 😴\n가만있어도 재물이 차곡차곡 쌓여요! 💵`
       };
     } else {
       return {
         src: "/images/characters/toad_3.png",
         alt: "공손한 복두꺼비",
-        message: `재물 기운이 살짝 주춤하고 있어요! 🙏 처방을 실천하면 금방 좋아질 거예요~`
+        message: `재물 기운이 살짝 주춤하고 있어요! 🙏\n처방을 실천하면 금방 좋아질 거예요~`
       };
     }
   } else if (isTigerDragon) {
@@ -103,25 +103,25 @@ function getDynamicMascot(
       return {
         src: "/images/characters/tiger_dragon_5.png",
         alt: "함께 웃는 백호 청룡",
-        message: `백호랑 청룡이 함께 깔깔 웃고 있어요! 🐉🐯 귀인과 행운이 줄줄이 찾아올 거예요~`
+        message: `백호랑 청룡이 함께 깔깔 웃고 있어요! 🐉🐯\n귀인과 행운이 줄줄이 찾아올 거예요~`
       };
     } else if (score >= 83) {
       return {
         src: "/images/characters/tiger_dragon_2.png",
         alt: "함께하는 백호 청룡",
-        message: `둘이 사이좋게 함께하는 기운이에요! 🤝 좋은 인연과 귀인이 자연스럽게 다가올 거예요!`
+        message: `둘이 사이좋게 함께하는 기운이에요! 🤝\n좋은 인연과 귀인이 자연스럽게 다가올 거예요!`
       };
     } else if (score >= 80) {
       return {
         src: "/images/characters/tiger_dragon_4.png",
         alt: "함께 자는 백호 청룡",
-        message: `백호와 청룡이 나란히 꿀잠 자는 평화로운 기운이에요~ 😴 집안이 조용하고 따뜻해질 거예요!`
+        message: `백호와 청룡이 나란히 꿀잠 자는 평화로운 기운이에요~ 😴\n집안이 조용하고 따뜻해질 거예요!`
       };
     } else {
       return {
         src: "/images/characters/tiger_dragon_3.png",
         alt: "물고기 먹는 백호 청룡",
-        message: `같이 물고기 먹으며 사이가 돈독해지는 기운이에요! 🐟 양보하고 나누면 더 좋아질 거예요~`
+        message: `같이 물고기 먹으며 사이가 돈독해지는 기운이에요! 🐟\n양보하고 나누면 더 좋아질 거예요~`
       };
     }
   } else {
@@ -129,25 +129,25 @@ function getDynamicMascot(
       return {
         src: "/images/characters/haetae_2.png",
         alt: "달려가는 아기 해치",
-        message: `집 기운이 너무 좋아서 저도 신나게 달려가고 싶어요! 🏃 나쁜 기운은 완전히 차단했어요~ 🏡✨`
+        message: `집 기운이 너무 좋아서 저도 신나게 달려가고 싶어요! 🏃\n나쁜 기운은 완전히 차단했어요~ 🏡✨`
       };
     } else if (score >= 83) {
       return {
         src: "/images/characters/haetae_1.png",
         alt: "앉아있는 아기 해치",
-        message: `저 해치가 든든하게 지켜드릴게요! 😊 나쁜 기운은 얼씬도 못 하게 할 거예요~ 🍀`
+        message: `저 해치가 든든하게 지켜드릴게요! 😊\n나쁜 기운은 얼씬도 못 하게 할 거예요~ 🍀`
       };
     } else if (score >= 80) {
       return {
         src: "/images/characters/haetae_4.png",
         alt: "메롱하는 아기 해치",
-        message: `메롱~! 😜 집안 분위기가 아주 활기차요! 피로할 틈이 없는 즐거운 공간이에요~`
+        message: `메롱~! 😜 집안 분위기가 아주 활기차요!\n피로할 틈이 없는 즐거운 공간이에요~`
       };
     } else {
       return {
         src: "/images/characters/haetae_3.png",
         alt: "고민하는 아기 해치",
-        message: `기운이 살짝 엇나가서 저도 같이 고민 중이에요~ 🤔 개운 처방이면 금방 해결돼요!`
+        message: `기운이 살짝 엇나가서 저도 같이 고민 중이에요~ 🤔\n개운 처방이면 금방 해결돼요!`
       };
     }
   }
@@ -166,19 +166,19 @@ function getDynamicRemedyMascot(
     return {
       src: "/images/characters/toad_3.png",
       alt: "처방 복두꺼비",
-      message: `이 황금 처방인 [${remedyTitle}]을(를) 꼭 실천해 보세요! 꽉 막혀있던 재물길이 활짝 열릴 거예요~ 🔮🪙`
+      message: `이 황금 처방인 [${remedyTitle}]을(를) 꼭 실천해 보세요!\n꽉 막혀있던 재물길이 활짝 열릴 거예요~ 🔮🪙`
     };
   } else if (isTigerDragon) {
     return {
       src: "/images/characters/tiger_dragon_3.png",
       alt: "처방 백호 청룡",
-      message: `서로 기운을 돋워주는 [${remedyTitle}] 처방이에요! 동반자와의 오해가 사르르 풀리고 귀인운이 차오를 거예요~ 🐉🐯`
+      message: `서로 기운을 돋워주는 [${remedyTitle}] 처방이에요!\n동반자와의 오해가 사르르 풀리고 귀인운이 차오를 거예요~ 🐉🐯`
     };
   } else {
     return {
       src: "/images/characters/haetae_3.png",
       alt: "처방 아기 해치",
-      message: `제가 드리는 정밀 처방전인 [${remedyTitle}]이에요! 집안의 나쁜 액운을 말끔히 씻어내서 아주 평안해질 거예요~ 🌿✨`
+      message: `제가 드리는 정밀 처방전인 [${remedyTitle}]이에요!\n집안의 나쁜 액운을 말끔히 씻어내서 아주 평안해질 거예요~ 🌿✨`
     };
   }
 }
@@ -1244,7 +1244,14 @@ export default function FengShuiTarot({
                                       </motion.div>
                                       <div className="relative w-full bg-slate-850 border border-slate-800 text-sm md:text-base text-slate-200 px-5 py-4 rounded-2xl shadow-xl text-center break-keep leading-relaxed font-medium mt-1">
                                         <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-850 border-t border-l border-slate-800 rotate-45" />
-                                        <span>{mascot.message}</span>
+                                        <span>
+                                          {mascot.message.split('\n').map((line, i, arr) => (
+                                            <span key={i}>
+                                              {line}
+                                              {i !== arr.length - 1 && <br />}
+                                            </span>
+                                          ))}
+                                        </span>
                                       </div>
                                     </div>
                                   );
@@ -1414,7 +1421,14 @@ export default function FengShuiTarot({
                                       </motion.div>
                                       <div className="relative w-full bg-slate-850 border border-slate-800 text-sm md:text-base text-slate-200 px-5 py-4 rounded-2xl shadow-xl text-center break-keep leading-relaxed font-medium mt-1">
                                         <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-850 border-t border-l border-slate-800 rotate-45" />
-                                        <span>{mascot.message}</span>
+                                        <span>
+                                          {mascot.message.split('\n').map((line, i, arr) => (
+                                            <span key={i}>
+                                              {line}
+                                              {i !== arr.length - 1 && <br />}
+                                            </span>
+                                          ))}
+                                        </span>
                                       </div>
                                     </div>
                                   );
