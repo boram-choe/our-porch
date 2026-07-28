@@ -1410,7 +1410,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">TIP 3 &middot; 풍수와 동네 기운 살리기</p>
-                      <p className="text-sm font-black text-slate-900 leading-snug">나쁜 음기를 뿜는 방치된 빈 상가를 찾아 제보하면 즉시 풍수 명당을 분석해 드려요.</p>
+                      <p className="text-sm font-black text-slate-900 leading-snug">나쁜 음기를 뿜는 빈 상가를 제보하고, 우리 집 풍수 운세와 동네 명당을 확인해 보세요!</p>
                       <p className="text-[11px] text-slate-500 font-bold mt-1">등록 시 기프티콘용 500P 지급 🎁</p>
                     </div>
                   </div>
