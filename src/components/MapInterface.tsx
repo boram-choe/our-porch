@@ -134,8 +134,9 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   const [newSpacePeriod, setNewSpacePeriod] = useState("방금 비었음");
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   
-  const [pinLocation, setPinLocation] = useState({ lat: 37.5665, lng: 126.9780 });
-  const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.9780 });
+  const defaultLocation = userProfile?.home ? { lat: userProfile.home.lat, lng: userProfile.home.lng } : { lat: 37.5665, lng: 126.9780 };
+  const [pinLocation, setPinLocation] = useState(defaultLocation);
+  const [mapCenter, setMapCenter] = useState(defaultLocation);
   
   const [detectedAddress, setDetectedAddress] = useState("");
   const [detectedLandmark, setDetectedLandmark] = useState("");
