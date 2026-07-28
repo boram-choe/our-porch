@@ -914,7 +914,7 @@ export default function FengShuiTarot({
                         <div className="absolute inset-0 p-4 flex flex-col items-center justify-between bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-900 rounded-2xl [backface-visibility:hidden]">
                           <div className="absolute inset-2 border border-amber-500/28 rounded-xl pointer-events-none" />
                           <div className="w-full h-full flex flex-col items-center justify-between relative z-10 py-4">
-                            <span className="text-[9px] font-black text-amber-500/65 uppercase tracking-widest">FENG SHUI TAROT</span>
+                            <span className="text-[9px] font-black text-amber-500/65 uppercase tracking-widest">FENG SHUI GUARDIAN</span>
                             
                             <div className="w-16 h-16 border-2 border-dashed border-amber-500/35 rounded-full flex items-center justify-center relative">
                               <div className="absolute inset-2 border border-amber-500/30 rounded-full animate-spin-slow" />
@@ -944,7 +944,7 @@ export default function FengShuiTarot({
                                  const fortuneName = matchedTheme === "wealth" ? "재물운 💰" : matchedTheme === "stability" ? "안정운 🏥" : matchedTheme === "fame" ? "명예운 ⭐️" : "귀인운 🤝";
                                  return (
                                    <>
-                                     <img src={mascot.src} alt="Tarot Result" className="w-20 h-20 object-contain drop-shadow-[0_5px_15px_rgba(245,158,11,0.5)]" />
+                                     <img src={mascot.src} alt="Guardian Spirit" className="w-20 h-20 object-contain drop-shadow-[0_5px_15px_rgba(245,158,11,0.5)]" />
                                      <div className="text-center mt-2">
                                        <span className="text-[10px] text-amber-500 font-bold block mb-0.5">선택한 기운 카드</span>
                                        <span className="text-sm font-black text-white">{prefix} {fortuneName}</span>
