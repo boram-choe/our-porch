@@ -64,7 +64,7 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
             <div className="flex flex-col items-center justify-center w-full mt-8 mb-6">
               <div className="flex items-center justify-center gap-3 mb-8 bg-slate-800/90 px-8 py-3 rounded-full border border-slate-600 shadow-xl">
                 <Compass className="text-amber-400" size={32} />
-                <span className="text-[1.8rem] font-black text-slate-200 tracking-widest">여긴뭐가 풍수타로</span>
+                <span className="text-[1.8rem] font-black text-slate-200 tracking-widest">여긴뭐가 풍수수호신</span>
               </div>
               <h1 className="text-[6.5rem] font-black text-white tracking-tight text-center leading-[1.2] drop-shadow-2xl break-keep">
                 우리 집 주거<br/><span className="text-amber-400">풍수 진단서</span>

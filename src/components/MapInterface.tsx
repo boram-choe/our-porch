@@ -933,7 +933,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         {isPinpointing && (<motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} onClick={() => setIsPinpointing(false)} className="w-16 h-16 bg-white rounded-3xl shadow-2xl flex items-center justify-center text-slate-400 hover:text-red-500 transition-all border-4 border-slate-50"><X size={32} /></motion.button>)}
         {!isPinpointing && !selectedVacancy && (
           <div className="relative group">
-            {/* 풍수타로 넛지 툴팁 */}
+            {/* 풍수수호신 넛지 툴팁 */}
             <AnimatePresence>
               {showFengShuiNudge && (
                 <motion.div 
@@ -961,7 +961,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
             >
               <span className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-amber-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <Compass size={20} className="text-amber-400 animate-spin-slow" />
-              <span className="text-[8px] font-black mt-0.5 text-amber-400">풍수타로</span>
+              <span className="text-[8px] font-black mt-0.5 text-amber-400">풍수수호신</span>
             </motion.button>
           </div>
         )}

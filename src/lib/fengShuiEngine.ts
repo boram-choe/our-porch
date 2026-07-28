@@ -1,4 +1,4 @@
-import { Vacancy } from "../data/dummyVacancies";
+﻿import { Vacancy } from "../data/dummyVacancies";
 
 export interface FengShuiResult {
   score: number;
@@ -376,7 +376,7 @@ export function getPersonaFengShuiTip(personaId: string): PersonaTip {
   return tips[personaId] || tips.default;
 }
 
-// 6. 타로용 페르소나별 3D 시나리오 정보
+// 6. 수호신용 페르소나별 3D 시나리오 정보
 export const PERSONA_SCENARIOS: PersonaScenario[] = [
   // 1) 주부 (homemaker)
   {
@@ -384,7 +384,7 @@ export const PERSONA_SCENARIOS: PersonaScenario[] = [
     personaId: "homemaker",
     personaName: "주부",
     fortuneType: "wealth",
-    question: "가계 경제에 활력을 줄 부가 수입이나 투자 이익을 모아다 줄 동네 재물 명당 상가는?",
+    question: "가계 경제에 활력을 줄 부가 수입이나 투자 이익을 모아다 줄 동네 최고의 명당 상가는?",
     spotType: "길목에서 금빛 물줄기처럼 재물이 돌며 휘감고 갇히는 금대수형 터",
     direction: "동남향 (재물운의 성장 방위)",
     food: "국화차",
