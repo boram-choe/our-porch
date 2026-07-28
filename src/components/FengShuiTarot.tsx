@@ -274,6 +274,7 @@ export default function FengShuiTarot({
   const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
   const [hoveredCardIdx, setHoveredCardIdx] = useState<number | null>(null);
   const [cardModifiers, setCardModifiers] = useState<number[]>([15, 0, -15]);
+  const [cardThemes, setCardThemes] = useState<string[]>(["wealth", "stability", "fame"]);
   
   // 매칭 결과 상태
   const [matchedVacancy, setMatchedVacancy] = useState<Vacancy | null>(null);
@@ -295,6 +296,7 @@ export default function FengShuiTarot({
       description: string;
       alignmentAnalysis: string;
     };
+    matchedTheme?: string;
   } | null>(null);
 
   const [activeFortuneTab, setActiveFortuneTab] = useState<string>("");
@@ -478,6 +480,11 @@ export default function FengShuiTarot({
     // 3장의 카드에 각각 대길(+15), 평길(0), 소길(-15) 모디파이어를 무작위로 부여
     const shuffledModifiers = [15, 0, -15].sort(() => 0.5 - Math.random());
     setCardModifiers(shuffledModifiers);
+    
+    // 3장의 카드에 각각 다른 기운(재물, 명예, 안정, 귀인 중 3개) 부여
+    const shuffledThemes = ["wealth", "fame", "stability", "mentors"].sort(() => 0.5 - Math.random()).slice(0, 3);
+    setCardThemes(shuffledThemes);
+    
     setStep("card");
   };
 
@@ -639,7 +646,8 @@ export default function FengShuiTarot({
           water: geo.water,
           description: geo.description,
           alignmentAnalysis
-        }
+        },
+        matchedTheme: cardThemes[cardIdx]
       });
     }
 
@@ -922,7 +930,7 @@ export default function FengShuiTarot({
                                {(() => {
                                  const matchedTheme = tarotMode === "neighborhood" 
                                    ? (scenariosPool.find(s => s.id === selectedScenarioId)?.fortuneType || desiredFortune) 
-                                   : desiredFortune;
+                                   : cardThemes[idx];
                                  
                                  // 선택한 카드의 모디파이어를 통해 점수 유추
                                  const modifier = cardModifiers[idx];
@@ -1254,7 +1262,8 @@ export default function FengShuiTarot({
 
                                 {/* 캐릭터 말풍선 피드백 */}
                                 {(() => {
-                                  const mascot = getDynamicMascot(homeFsResult.score, desiredFortune, userProfile?.nickname);
+                                  const finalTheme = homeFsResult.matchedTheme || desiredFortune;
+                                  const mascot = getDynamicMascot(homeFsResult.score, finalTheme, userProfile?.nickname);
                                   return (
                                     <div className="flex flex-col items-center justify-center gap-3 py-3 w-full">
                                       <motion.div
@@ -1683,8 +1692,9 @@ export default function FengShuiTarot({
 
     {/* ===== 히든 공유 카드 (인스타그램 카드뉴스용) ===== */}
     {homeFsResult && (() => {
-      const mascot = getDynamicMascot(homeFsResult.score, desiredFortune, userProfile?.nickname);
-      const remedyMascot = getDynamicRemedyMascot(homeFsResult.score, desiredFortune, homeFsResult.remedy.title);
+      const finalTheme = homeFsResult.matchedTheme || desiredFortune;
+      const mascot = getDynamicMascot(homeFsResult.score, finalTheme, userProfile?.nickname);
+      const remedyMascot = getDynamicRemedyMascot(homeFsResult.score, finalTheme, homeFsResult.remedy.title);
       
       return (
         <InstagramShareCard
