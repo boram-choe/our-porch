@@ -120,6 +120,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   const [showAddModal, setShowAddModal] = useState(false);
   const [showCurator, setShowCurator] = useState(false);
   const [showFengShui, setShowFengShui] = useState(false);
+  const [isFengShuiMinimized, setIsFengShuiMinimized] = useState(false);
   const [highlightFengShuiId, setHighlightFengShuiId] = useState<string | null>(null);
   const [highlightFortuneArea, setHighlightFortuneArea] = useState<{ lat: number, lng: number, areaName: string } | null>(null);
   const [isPulsing, setIsPulsing] = useState<boolean>(false);
@@ -156,16 +157,20 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       v.status !== 'hidden' && 
       v.status !== 'merged' && 
       v.status !== 'rejected' &&
-      haversineKm(activeLoc.lat, activeLoc.lng, v.lat, v.lng) <= FILTER_RADIUS_KM
+      (
+        votedIds.includes(v.id) ||
+        v.id === selectedVacancy?.id ||
+        haversineKm(activeLoc.lat, activeLoc.lng, v.lat, v.lng) <= FILTER_RADIUS_KM
+      )
     );
-  }, [vacancies, userProfile]);
+  }, [vacancies, userProfile, votedIds, selectedVacancy]);
 
   // ─── 반경 내 공실 기반 실시간 피드 생성 ──────────────────────────────────────
   useEffect(() => {
     const dong = userProfile
       ? (userProfile.activeLocationType === "work"
           ? userProfile.work?.neighborhood
-          : userProfile.home.neighborhood) || "우리동네"
+          : userProfile.home?.neighborhood) || "우리동네"
       : "우리동네";
 
     const colors = ["bg-amber-600", "bg-purple-500", "bg-emerald-500", "bg-indigo-500", "bg-rose-500", "bg-lime-500"];
@@ -539,6 +544,21 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   const confirmLocation = () => {
     const { lat, lng } = pinLocation;
+    
+    // 위치 반경 2.5km 체크
+    if (userProfile) {
+      const activeLoc = userProfile.activeLocationType === "work" 
+        ? userProfile.work || userProfile.home 
+        : userProfile.home;
+      if (activeLoc?.lat && activeLoc?.lng) {
+        if (haversineKm(activeLoc.lat, activeLoc.lng, lat, lng) > FILTER_RADIUS_KM) {
+          alert(`현재 설정된 위치 반경(${FILTER_RADIUS_KM}km) 이내에서만 공실을 등록할 수 있습니다.\n\n먼 곳의 공실은 눈으로 구경만 가능해요! 👀`);
+          setIsPinpointing(false);
+          return;
+        }
+      }
+    }
+
     const geocoder = new kakao.maps.services.Geocoder();
     const ps = new kakao.maps.services.Places();
 
@@ -609,6 +629,19 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
   const addNewSpace = async () => {
     if (!userProfile) return;
+
+    // 최종 저장 전 위치 반경 2.5km 이중 체크 (어뷰징/우회 방지)
+    const activeLoc = userProfile.activeLocationType === "work" 
+      ? userProfile.work || userProfile.home 
+      : userProfile.home;
+    if (activeLoc?.lat && activeLoc?.lng) {
+      if (haversineKm(activeLoc.lat, activeLoc.lng, pinLocation.lat, pinLocation.lng) > FILTER_RADIUS_KM) {
+        alert(`현재 설정된 위치 반경(${FILTER_RADIUS_KM}km) 이내에서만 공실을 등록할 수 있습니다.`);
+        setShowAddModal(false);
+        setIsPinpointing(false);
+        return;
+      }
+    }
 
     // 1. 중복 체크: 같은 위치(근접), 같은 층 확인
     const threshold = 0.0001; 
@@ -695,7 +728,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
     }
   };
 
-  const votedVacancies = filteredVacancies.filter(v => votedIds.includes(v.id));
+  const votedVacancies = vacancies.filter(v => votedIds.includes(v.id));
 
   const duplicateVacancy = showAddModal
     ? vacancies.find(v => {
@@ -1239,8 +1272,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         {showFengShui && (
           <FengShuiTarot
             isOpen={showFengShui}
+            isMinimized={isFengShuiMinimized}
+            onMinimize={() => setIsFengShuiMinimized(true)}
+            onRestore={() => setIsFengShuiMinimized(false)}
             onClose={(showNudge = false) => {
               setShowFengShui(false);
+              setIsFengShuiMinimized(false);
               if (showNudge) {
                 setShowRegisterNudgePopup(true);
               }

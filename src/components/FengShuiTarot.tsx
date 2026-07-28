@@ -25,6 +25,9 @@ interface FengShuiTarotProps {
   mapCenter: { lat: number; lng: number };
   userProfile: any; // UserProfile
   onStartDiscovery?: () => void;
+  isMinimized?: boolean;
+  onMinimize?: () => void;
+  onRestore?: () => void;
 }
 
 // 거리 계산 유틸리티 (미터 단위)
@@ -188,7 +191,10 @@ export default function FengShuiTarot({
   onSelectFortuneArea,
   mapCenter, 
   userProfile, 
-  onStartDiscovery 
+  onStartDiscovery,
+  isMinimized,
+  onMinimize,
+  onRestore
 }: FengShuiTarotProps) {
   const primaryPersonaId = userProfile?.personaIds?.[0] || "default";
   const personaTip = getPersonaFengShuiTip(primaryPersonaId);
@@ -480,6 +486,21 @@ export default function FengShuiTarot({
 
   if (!isOpen) return null;
 
+  if (isMinimized) {
+    return (
+      <motion.button
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        onClick={onRestore}
+        className="fixed bottom-28 md:bottom-32 left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-amber-400 font-black px-6 py-3 rounded-full border border-amber-500/50 shadow-[0_10px_30px_rgba(245,158,11,0.2)] flex items-center gap-2 hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all"
+      >
+        <Compass className="w-5 h-5 animate-spin-slow" />
+        풍수 결과 다시보기
+      </motion.button>
+    );
+  }
+
+
   // 카드 선택 완료 시 결과 분석 처리
   const handlePickCard = (cardIdx: number) => {
     setSelectedCardIdx(cardIdx);
@@ -687,16 +708,7 @@ export default function FengShuiTarot({
               </div>
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={async () => {
-                  setShowShareModal(true);
-                  await generateShareImage();
-                }}
-                className="w-10 h-10 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 flex items-center justify-center transition-all border border-amber-500/20"
-                title="현재 화면 캡처 및 공유"
-              >
-                <Camera className="w-4 h-4" />
-              </button>
+
               <button
                 onClick={() => onClose(step === "result")}
                 className="w-10 h-10 rounded-2xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-all"
@@ -1116,7 +1128,8 @@ export default function FengShuiTarot({
                           <button
                             onClick={() => {
                               onSelectVacancy(matchedVacancy);
-                              onClose();
+                              if (onMinimize) onMinimize();
+                              else onClose();
                             }}
                             className="flex-1 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black py-4 px-6 rounded-2xl shadow-xl shadow-amber-500/15 hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-2 text-sm"
                           >
@@ -1544,7 +1557,8 @@ export default function FengShuiTarot({
                                           if (onSelectFortuneArea) {
                                             onSelectFortuneArea(match.lat, match.lng, match.areaName, activeItem.name);
                                           }
-                                          onClose(true);
+                                          if (onMinimize) onMinimize();
+                                          else onClose(true);
                                         }}
                                         className="shrink-0 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl shadow-amber-500/10 active:scale-95 transition-all text-xs flex items-center justify-center gap-1.5"
                                       >
@@ -1810,16 +1824,28 @@ export default function FengShuiTarot({
                 X (Twitter)
               </button>
 
-              {/* 카카오 */}
+              {/* 기기 기본 공유 (Web Share API) */}
               <button
-                onClick={() => {
+                onClick={async () => {
                   const text = `우리 집 풍수 점수 ${homeFsResult?.score}점! 🏡 개운 처방도 확인해 봐~ ✨`;
-                  window.open(`https://sharer.kakao.com/talk/friends/picker/link?app_key=DEMO&text=${encodeURIComponent(text)}&link=${encodeURIComponent(window.location.href)}`, "_blank");
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({
+                        title: '풍수타로 진단서',
+                        text: text,
+                        url: window.location.href,
+                      });
+                    } catch (error) {
+                      console.log('공유 취소 또는 실패', error);
+                    }
+                  } else {
+                    alert('이 기기에서는 기본 공유 기능을 지원하지 않습니다. 링크 복사를 이용해 주세요.');
+                  }
                 }}
                 className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#FEE500] text-[#3A1D1D] font-bold text-xs hover:opacity-90 active:scale-95 transition-all"
               >
                 <span className="text-base leading-none">💬</span>
-                카카오톡
+                다른 앱으로 공유
               </button>
             </div>
 

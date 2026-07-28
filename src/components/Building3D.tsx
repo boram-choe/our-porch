@@ -17,10 +17,10 @@ const CATEGORIES = [
   { id: 'hair', label: '미용/뷰티', icon: <Scissors size={24} />, subs: ['헤어살롱', '남성전용/바버샵', '네일/에스테틱'], brands: ['준오헤어', '박승철헤어', '리안헤어', '올리브영'] },
   { id: 'doctor', label: '병원/약국', icon: <Stethoscope size={24} />, subs: ['소아과', '치과', '내과/가정의학', '약국'], brands: [] },
   { id: 'gym', label: '운동/헬스', icon: <Dumbbell size={24} />, subs: ['헬스장', '필라테스/요가', '태권도/주짓수'], brands: [] },
-  { id: 'store', label: '상점/생활', icon: <ShoppingBag size={24} />, subs: ['편의점', '소품샵', '무인점포', '반찬가게'], brands: ['GS25', 'CU', '세븐일레븐', '다이소'] },
+  { id: 'store', label: '상점/생활', icon: <ShoppingBag size={24} />, subs: ['편의점', '서점/문구', '세탁소', '무인점포'], brands: ['GS25', 'CU', '세븐일레븐', '다이소'] },
   { id: 'edu', label: '교육/학원', icon: <GraduationCap size={24} />, subs: ['영어/수학', '음악/미술', '스터디카페'], brands: [] },
   { id: 'studio', label: '스튜디오', icon: <CameraIcon size={24} />, subs: ['사진관', '공방/클래스', '꽃집'], brands: [] },
-  { id: 'etc', label: '기타', icon: <Gift size={24} />, subs: [], brands: [] },
+  { id: 'etc', label: '기타', icon: <Gift size={24} />, subs: ['코인노래방', 'PC방'], brands: [] },
 ];
 
 const BRAND_DOMAIN_MAP: Record<string, string> = {
@@ -57,6 +57,19 @@ function getKoreanSubjectMarker(word: string): string {
     return hasBatchim ? "이" : "가";
   }
   return "이";
+}
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
 import { UserProfile } from "./AuthOnboarding";
@@ -213,18 +226,65 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   }, [vacancy.currentVotes]);
 
   const getCategoryIdFromRecommendation = (rec: string) => {
-    if (rec.includes("카페")) return "cafe";
-    if (rec.includes("식당") || rec.includes("맛집")) return "food";
-    if (rec.includes("미용실")) return "hair";
-    if (rec.includes("의원") || rec.includes("약국") || rec.includes("소아과") || rec.includes("내과")) return "doctor";
-    if (rec.includes("헬스") || rec.includes("탁구장") || rec.includes("체육관") || rec.includes("키즈 카페")) return "gym";
-    if (rec.includes("소품샵") || rec.includes("마켓") || rec.includes("식자재 마트") || rec.includes("슈퍼마켓")) return "store";
-    if (rec.includes("학원")) return "edu";
-    if (rec.includes("공방") || rec.includes("사진관")) return "studio";
+    // 서울시 상권분석 업종 데이터 기반 정교화
+    if (rec.includes("커피") || rec.includes("제과") || rec.includes("카페") || rec.includes("베이커리")) return "cafe";
+    if (rec.includes("음식") || rec.includes("치킨") || rec.includes("분식") || rec.includes("패스트푸드") || rec.includes("샐러드")) return "food";
+    if (rec.includes("미용") || rec.includes("피부") || rec.includes("네일") || rec.includes("에스테틱")) return "hair";
+    if (rec.includes("의원") || rec.includes("병원") || rec.includes("약국") || rec.includes("치과") || rec.includes("한의원") || rec.includes("소아과")) return "doctor";
+    if (rec.includes("헬스") || rec.includes("스포츠") || rec.includes("체육") || rec.includes("필라테스") || rec.includes("요가")) return "gym";
+    if (rec.includes("편의점") || rec.includes("슈퍼마켓") || rec.includes("세탁소") || rec.includes("반찬") || rec.includes("판매") || rec.includes("과일") || rec.includes("의류") || rec.includes("신발") || rec.includes("가방") || rec.includes("안경") || rec.includes("화장품") || rec.includes("문구") || rec.includes("서적") || rec.includes("서점") || rec.includes("애완동물")) return "store";
+    if (rec.includes("학원") || rec.includes("독서실") || rec.includes("스터디")) return "edu";
+    if (rec.includes("사진") || rec.includes("화초") || rec.includes("꽃집") || rec.includes("공방") || rec.includes("인테리어")) return "studio";
     return "etc";
   };
 
-  // 삭제됨: getCleanName (사용자가 입력한 원본 텍스트 유지를 위해)
+  const [aiRecommended, setAiRecommended] = useState<string[]>([]);
+  const [trdarName, setTrdarName] = useState<string>("이 공실 주변");
+  const [isAiLoading, setIsAiLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function fetchSeoulRecommendations() {
+      setIsAiLoading(true);
+      try {
+        const address = vacancy.address || "";
+        const addrParts = address.split(' ');
+        const dong = addrParts.find(p => p.endsWith('동') || p.endsWith('가') || p.endsWith('로')) || "";
+        
+        const res = await fetch(`/api/seoul-store?lat=${vacancy.lat || 0}&lng=${vacancy.lng || 0}&neighborhood=${encodeURIComponent(dong)}`);
+        if (!res.ok) throw new Error("API Fetch failed");
+        const data = await res.json();
+        
+        if (data.success && data.recommendations && data.recommendations.length >= 2) {
+          setAiRecommended(data.recommendations);
+          setTrdarName(`[${data.trdarName}] 상권`);
+        } else {
+          // Fallback if API returns no data
+          const fallbackCandidates = [
+            ['독립 서점', '샐러드 전문점', '약국'],
+            ['편의점', '세탁소', '스터디카페'],
+            ['무인 아이스크림', '필라테스', '소아과'],
+            ['베이커리', '코인노래방', '사진관']
+          ];
+          const seed = Math.floor((vacancy.lat || 0) * 100000) + Math.floor((vacancy.lng || 0) * 100000);
+          setAiRecommended(fallbackCandidates[seed % fallbackCandidates.length]);
+          setTrdarName("이 공실 주변");
+        }
+      } catch (err) {
+        console.error("Failed to load Seoul API data:", err);
+        const fallbackCandidates = [
+          ['독립 서점', '샐러드 전문점', '세탁소'],
+          ['약국', '스터디카페', '무인 아이스크림']
+        ];
+        const seed = Math.floor((vacancy.lat || 0) * 100000) + Math.floor((vacancy.lng || 0) * 100000);
+        setAiRecommended(fallbackCandidates[seed % fallbackCandidates.length]);
+        setTrdarName("이 공실 주변");
+      } finally {
+        setIsAiLoading(false);
+      }
+    }
+    
+    fetchSeoulRecommendations();
+  }, [vacancy.lat, vacancy.lng]);
 
   const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
     if (userProfile?.isGuest) {
@@ -588,58 +648,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                     ) : null;
                   })()}
 
-                  {/* 🔮 풍수 명당 정보 (지나가는 사용자 대상 흥미 유도) */}
-                  {(() => {
-                    const fs = getGeneralBuildingFengShui(vacancy);
-                    const primaryPersonaId = userProfile?.personaIds?.find(id => 
-                      ["homemaker", "worker", "parenting", "student", "solo", "pet", "senior"].includes(id)
-                    ) || "default";
-                    const personaTip = getPersonaFengShuiTip(primaryPersonaId);
-                    
-                    return (
-                      <div className="w-full bg-gradient-to-br from-amber-500/10 to-yellow-500/5 border border-amber-500/20 rounded-[2rem] p-6 mb-5 shadow-lg">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <Compass size={16} className="text-amber-400 animate-spin-slow" />
-                            <span className="text-xs font-black text-amber-400 uppercase tracking-widest leading-none">이 터의 풍수지리 명당 진단</span>
-                          </div>
-                          <div className="text-[10px] font-black bg-amber-500/25 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-                            {fs.fortuneTypeKr} &middot; {fs.score}점
-                          </div>
-                        </div>
-                        <h5 className="text-sm font-black text-white mb-2">{fs.grade} ({fs.entranceDirection})</h5>
-                        <p className="text-[11px] font-bold text-slate-350 leading-relaxed mb-4">
-                          {fs.summary}
-                        </p>
-                        
-                        {/* 페르소나 맞춤형 개운 솔루션 */}
-                        <div className="mb-4 p-4 bg-slate-950/60 border border-amber-500/15 rounded-2xl text-left">
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <Compass size={12} className="text-amber-500" />
-                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">
-                              {primaryPersonaId === "default" ? "이웃" : personaTip.personaName} 맞춤형 오늘의 개운(開運) 비법
-                            </span>
-                          </div>
-                          <p className="text-[11px] font-black text-slate-350 leading-relaxed mb-2.5">
-                            Q. &ldquo;{personaTip.question}&rdquo;
-                          </p>
-                          <div className="text-[11.5px] font-bold text-slate-200 leading-normal space-y-1">
-                            <p>📍 <strong>행운의 터</strong>: {personaTip.spotType} ({personaTip.direction})</p>
-                            <p>🥤 <strong>행운의 음료/음식</strong>: {personaTip.food}</p>
-                            <p>🏃 <strong>행운의 행동</strong>: {personaTip.action}</p>
-                          </div>
-                        </div>
-
-                        <div className="text-[10px] font-bold text-slate-400 border-t border-white/5 pt-3.5 flex items-start gap-1.5 leading-relaxed">
-                          <span className="text-amber-400 text-xs mt-0.5">💡</span>
-                          <span>
-                            이 좋은 명당 기운이 현재 <strong>{vacancy.vacancyPeriod || "장기 공실"}</strong> 상태로 비어 있습니다. 
-                            이 터에 어떤 상상(가게)이 들어오면 이 에너지를 가장 잘 살릴 수 있을까요? 아래에서 원하시는 업종을 선택하여 투표해 주세요!
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })()}
 
                   {/* 이웃들의 상상 TOP 3 (대분류 기준 집계) */}
                   {groupedVotes.length > 0 && (
@@ -729,10 +737,55 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
                     ) : votingStep === "category" ? (
                       <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
                         
+                        {/* 서울시 상권 분석 추천 배너 추가 */}
+                        <div className="bg-slate-950/80 border border-blue-500/30 rounded-2xl p-4 md:p-5 shadow-lg backdrop-blur-md mb-1 relative overflow-hidden">
+                          <div className="absolute -top-6 -right-6 opacity-10 rotate-12 pointer-events-none">
+                            <Sparkles size={100} className="text-blue-500" />
+                          </div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-blue-400 text-lg leading-none">📊</span>
+                            <span className="text-[10px] md:text-[11px] font-black text-blue-400 uppercase tracking-widest leading-none">서울시 상권분석 데이터 추천</span>
+                          </div>
+                          {isAiLoading ? (
+                            <div className="flex flex-col items-center justify-center py-5">
+                              <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-3"></div>
+                              <p className="text-[11px] text-blue-400 font-bold animate-pulse">실시간 상권 데이터를 분석 중입니다...</p>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-[11px] md:text-xs font-bold text-slate-300 leading-relaxed break-keep">
+                                현재 <span className="text-blue-300 font-black">[{trdarName}]</span> 상권을 분석한 결과, 
+                                {aiRecommended.map((r, i) => (
+                                  <span key={i}>
+                                    <strong className="text-white mx-1 text-[12px] md:text-[13px] bg-blue-500/20 px-1.5 py-0.5 rounded">[{r}]</strong>
+                                    {i < aiRecommended.length - 2 ? ", " : i === aiRecommended.length - 2 ? "와 " : ""}
+                                  </span>
+                                ))} 
+                                업종이 현저히 부족합니다. <br className="hidden md:block"/>이웃과 함께 이 공간을 추천해 보시는 건 어떨까요?
+                              </p>
+                              <div className="flex flex-wrap gap-2 mt-4">
+                                {aiRecommended.map(rec => (
+                                  <button 
+                                    key={rec}
+                                    onClick={() => {
+                                      setSelectedCategory(getCategoryIdFromRecommendation(rec));
+                                      handleVoteSubmit(undefined, rec, getCategoryIdFromRecommendation(rec));
+                                    }}
+                                    className="flex-1 min-w-[30%] py-2 md:py-2.5 bg-blue-500 hover:bg-blue-400 active:scale-95 text-slate-950 text-[10px] md:text-[11px] font-black rounded-xl transition-all flex flex-col items-center justify-center gap-1 shadow-md shadow-blue-500/20"
+                                  >
+                                    <span className="truncate w-full text-center px-1">{rec}</span>
+                                    <div className="flex items-center gap-1 opacity-80 text-[9px]">추천하기 <CheckCircle2 size={10} strokeWidth={3} /></div>
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
+                        </div>
+
                         {/* 질문 헤더 수정 */}
                         <div className="text-center my-2">
                           <h4 className="text-base font-black text-amber-400 tracking-tight leading-none mb-1">
-                            어떤 공간이 생기면 좋을까요?
+                            직접 상상해볼까요?
                           </h4>
                           <p className="text-[10px] font-bold text-slate-400">동네에 필요한 공간을 하나 꾹 눌러주세요</p>
                         </div>
