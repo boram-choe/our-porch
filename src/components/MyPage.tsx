@@ -578,7 +578,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-amber-500/10">
                         <Star size={20} className="text-amber-600" />
                       </div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">상상 지수</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">상상 포인트</p>
                       <div className="flex items-end gap-1.5">
                         <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
                         <span className="text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md mb-1 pb-0">5,000P부터 사용 가능</span>
@@ -613,7 +613,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         <h4 className="text-[11px] font-black text-amber-500 uppercase tracking-widest leading-none">상상 포인트 혜택 안내</h4>
                       </div>
                       <p className="text-xs font-bold text-slate-200 leading-relaxed break-keep">
-                        이웃님이 모으신 상상 포인트는 향후 '여긴뭐가'를 통해 실제 오프라인 골목에 오픈하는 매장의 <span className="text-amber-400 font-black">할인 쿠폰</span>으로 교환해 이용하실 수 있습니다! 🎁
+                        이웃님이 모으신 상상 포인트는 <span className="text-amber-400 font-black">기프티콘</span>으로 교환해 드릴 예정이며, 향후 '여긴뭐가'를 통해 실제 오프라인 골목에 오픈하는 매장의 <span className="text-amber-400 font-black">할인 쿠폰</span>으로도 교환될 수 있게 준비 중입니다! 🎁
                       </p>
                       <div className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-[10px] text-slate-500 font-black tracking-tighter">
                         <span>🗳️ 투표참여 50P</span>
