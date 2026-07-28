@@ -154,6 +154,16 @@ function getDynamicMascot(
   }
 }
 
+// 조사(을/를, 이에요/예요 등) 자동 변환 함수
+function getJosa(word: string, josa1: string, josa2: string) {
+  if (!word) return josa1;
+  const lastChar = word.charCodeAt(word.length - 1);
+  // 한글이 아닌 경우 기본값 (josa1) 반환
+  if (lastChar < 0xac00 || lastChar > 0xd7a3) return josa1; 
+  const hasJongseong = (lastChar - 0xac00) % 28 > 0;
+  return hasJongseong ? josa1 : josa2;
+}
+
 // 15종 개운 솔루션 방 전용 동적 멘트 매핑 함수
 function getDynamicRemedyMascot(
   score: number,
@@ -167,7 +177,7 @@ function getDynamicRemedyMascot(
     return {
       src: "/images/characters/toad_3.png",
       alt: "처방 복두꺼비",
-      message: `이 황금 처방인 [${remedyTitle}]을(를) 꼭 실천해 보세요!\n꽉 막혀있던 재물길이 활짝 열릴 거예요~ 🔮🪙`
+      message: `이 황금 처방인 [${remedyTitle}]${getJosa(remedyTitle, "을", "를")} 꼭 실천해 보세요!\n꽉 막혀있던 재물길이 활짝 열릴 거예요~ 🔮🪙`
     };
   } else if (isTigerDragon) {
     return {
@@ -179,7 +189,7 @@ function getDynamicRemedyMascot(
     return {
       src: "/images/characters/haetae_3.png",
       alt: "처방 아기 해치",
-      message: `제가 드리는 정밀 처방전인 [${remedyTitle}]이에요!\n집안의 나쁜 액운을 말끔히 씻어내서 아주 평안해질 거예요~ 🌿✨`
+      message: `제가 드리는 정밀 처방전인 [${remedyTitle}]${getJosa(remedyTitle, "이에요", "예요")}!\n집안의 나쁜 액운을 말끔히 씻어내서 아주 평안해질 거예요~ 🌿✨`
     };
   }
 }
