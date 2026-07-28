@@ -922,11 +922,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       </div>
 
       <div 
-        className={`absolute right-4 md:right-6 flex flex-col gap-3 md:gap-4 z-[100] transition-all duration-500 ease-out ${
-          showDashboard && !isPinpointing && !selectedVacancy
-            ? "bottom-[16.5rem] md:bottom-72" 
-            : "bottom-6 md:bottom-10"
-        }`}
+        className="absolute right-4 md:right-6 flex flex-col gap-3 md:gap-4 z-[100] transition-all duration-500 ease-out top-1/2 -translate-y-1/2"
       >
         {!isPinpointing && (
           <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} onClick={startDiscovery} className="w-16 h-16 bg-slate-950 text-amber-500 rounded-3xl shadow-2xl flex items-center justify-center border-[5px] border-amber-500 relative group overflow-hidden">
