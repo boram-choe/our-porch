@@ -56,6 +56,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [editNickname, setEditNickname] = useState("");
   const [dbVotes, setDbVotes] = useState<any[]>([]);
   const [dbComments, setDbComments] = useState<any[]>([]);
+  const [dbReports, setDbReports] = useState<DbReport[]>([]);
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
   const [gifticonRequests, setGifticonRequests] = useState<GifticonRequest[]>([]);
   const [reportedVacancies, setReportedVacancies] = useState<any[]>([]);
@@ -80,7 +81,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [tempWorkLocation, setTempWorkLocation] = useState<{ neighborhood: string; lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [tempWorkActivityTimes, setTempWorkActivityTimes] = useState<string[]>([]);
-  const [activityFilter, setActivityFilter] = useState<"all" | "vote" | "comment">("all");
+  const [activityFilter, setActivityFilter] = useState<"all" | "vote" | "comment" | "report" | "vacancy">("all");
 
   // 1. Load saved profile on mount
   useEffect(() => {
@@ -103,12 +104,14 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       }
       setIsLoadingActivity(true);
       try {
-        const [votesRes, commentsRes] = await Promise.all([
+        const [votesRes, commentsRes, reportsRes] = await Promise.all([
           supabase.from("votes").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-          supabase.from("comments").select("*").eq("user_id", userId).order("created_at", { ascending: false })
+          supabase.from("comments").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+            supabase.from("reports").select("*").eq("user_id", userId).order("created_at", { ascending: false })
         ]);
         if (votesRes.data) setDbVotes(votesRes.data);
         if (commentsRes.data) setDbComments(commentsRes.data);
+          if (reportsRes.data) setDbReports(reportsRes.data as DbReport[]);
       } catch (e) {
         console.warn("Supabase 활동 내역 조회 실패:", e);
       } finally {
@@ -157,7 +160,8 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   const approvedReports = reportedVacancies.filter(v => v.status === "available" || v.status === "completed");
-  const totalEarnedPoints = (dbVotes.length * 50) + (dbComments.length * 50) + (approvedReports.length * 500);
+  const approvedReportsCount = dbReports.filter(r => r.status === "resolved").length;
+  const totalEarnedPoints = (dbVotes.length * 50) + (dbComments.length * 50) + (approvedReports.length * 500) + (approvedReportsCount * 500);
   const totalSpentPoints = gifticonRequests.reduce((sum, req) => sum + req.price, 0);
   const totalPoints = totalEarnedPoints - totalSpentPoints;
 
@@ -663,7 +667,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
 
             {!isEntrepreneurMode && (
               <div className="flex gap-2 p-1 bg-slate-200/40 rounded-xl w-fit">
-                {(["all", "vote", "comment"] as const).map((filter) => (
+                {(["all", "vote", "comment", "vacancy", "report"] as const).map((filter) => (
                   <button
                     key={filter}
                     onClick={() => setActivityFilter(filter)}
