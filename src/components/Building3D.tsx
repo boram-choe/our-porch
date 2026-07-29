@@ -99,6 +99,19 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const [showGallery, setShowGallery] = useState(false);
  const [galleryIndex, setGalleryIndex] = useState(0);
+  const mainScrollRef = useRef<HTMLDivElement>(null);
+    
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (mainScrollRef.current) {
+        mainScrollRef.current.scrollTo({
+          top: window.innerHeight * 0.35,
+          behavior: 'smooth'
+        });
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
  const [showPointsToast, setShowPointsToast] = useState(false);
   const [hasPendingMovein, setHasPendingMovein] = useState(false);
 
@@ -537,7 +550,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  };
 
  return (
- <div className="relative w-full h-full overflow-y-auto no-scrollbar bg-slate-950 flex flex-col">
+ <div ref={mainScrollRef} className="relative w-full h-full overflow-y-auto no-scrollbar bg-slate-950 flex flex-col scroll-smooth">
  {/* 대표사진이 등록되었거나 혹은 마지막 투표 결과(결과창에선 건물 애니메이션을 위해 50vh 유지)일 경우에만 상단 50% 공간 노출 */}
  {showTopVisual ? (
  <div className="relative w-full h-[50vh] flex-shrink-0 overflow-hidden flex items-center justify-center">
@@ -668,30 +681,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  ) : null;
  })()}
 
-
- {/* 이웃들의 상상 TOP 3 (대분류 기준 집계) */}
- {groupedVotes.length > 0 && (
- <div className="w-full space-y-2">
- <div className="flex items-center gap-2 ml-1">
- <Star size={14} className="text-amber-500" />
- <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">현재 이웃들의 상상 TOP 3</p>
- </div>
- <div className="flex flex-col gap-1.5">
- {groupedVotes.slice(0, 3).map((group, i) => (
- <div key={group.id} className="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/5 hover:bg-white/30 transition-all">
- <div className="flex items-center gap-3">
- <div className="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-[11px] font-black text-slate-950 shadow-lg shadow-amber-500/20">{i + 1}</div>
- <div className="flex items-center gap-2 text-sm font-bold text-white">
- <span className="scale-75 opacity-70 flex items-center justify-center">{group.icon}</span>
- <span>{group.label}</span>
- </div>
- </div>
- <span className="text-[11px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg">{group.total}표</span>
- </div>
- ))}
- </div>
- </div>
- )}
 
  {/* 중개사 정보 */}
  {vacancy.realtorName && (
