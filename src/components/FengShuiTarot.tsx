@@ -523,8 +523,8 @@ export default function FengShuiTarot({
       }
 
       // 선택된 시나리오나 기본 정보 기반으로 최고 점수 공실 매칭
-      const targetScenario = scenariosPool.find(s => s.id === selectedScenarioId);
-      const matchedTheme = targetScenario ? targetScenario.fortuneType : desiredFortune;
+      // 선택한 카드의 기운(테마)을 기반으로 분석
+      const matchedTheme = cardThemes[cardIdx];
 
       let bestVacancy = available[0];
       let bestResult = analyzeFengShui(bestVacancy, zodiacYear, spaceTheme, matchedTheme);
@@ -931,9 +931,7 @@ export default function FengShuiTarot({
                           {isPicked ? (
                             <div className="w-full h-full flex flex-col items-center justify-center animate-fade-in gap-2">
                                {(() => {
-                                 const matchedTheme = tarotMode === "neighborhood" 
-                                   ? (scenariosPool.find(s => s.id === selectedScenarioId)?.fortuneType || desiredFortune) 
-                                   : cardThemes[idx];
+                                 const matchedTheme = cardThemes[idx];
                                  
                                  // 선택한 카드의 모디파이어를 통해 점수 유추
                                  const modifier = cardModifiers[idx];
