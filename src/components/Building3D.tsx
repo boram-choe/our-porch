@@ -751,51 +751,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  ) : votingStep === "category" ? (
  <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
  
- {/* 서울시 상권 분석 추천 배너 추가 */}
- <div className="bg-slate-950/95 border border-blue-500/30 rounded-2xl p-4 md:p-5 shadow-lg mb-1 relative overflow-hidden">
- <div className="absolute -top-6 -right-6 opacity-10 rotate-12 pointer-events-none">
- <Sparkles size={100} className="text-blue-500" />
- </div>
- <div className="flex items-center gap-2 mb-3">
- <span className="text-blue-400 text-lg leading-none">📊</span>
- <span className="text-[10px] md:text-[11px] font-black text-blue-400 uppercase tracking-widest leading-none">서울시 상권분석 데이터 추천</span>
- </div>
- {isAiLoading ? (
- <div className="flex flex-col items-center justify-center py-5">
- <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-3"></div>
- <p className="text-[11px] text-blue-400 font-bold animate-pulse">실시간 상권 데이터를 분석 중입니다...</p>
- </div>
- ) : (
- <>
- <p className="text-[11px] md:text-xs font-bold text-slate-300 leading-relaxed break-keep">
- 현재 <span className="text-blue-300 font-black">[{trdarName}]</span> 상권을 분석한 결과, 
- {aiRecommended.map((r, i) => (
- <span key={i}>
- <strong className="text-white mx-1 text-[12px] md:text-[13px] bg-blue-500/20 px-1.5 py-0.5 rounded">[{r}]</strong>
- {i < aiRecommended.length - 2 ? ", " : i === aiRecommended.length - 2 ? "와 " : ""}
- </span>
- ))} 
- 업종이 현저히 부족합니다. <br className="hidden md:block"/>이웃과 함께 이 공간을 추천해 보시는 건 어떨까요?
- </p>
- <div className="flex flex-wrap gap-2 mt-4">
- {aiRecommended.map(rec => (
- <button 
- key={rec}
- onClick={() => {
- setSelectedCategory(getCategoryIdFromRecommendation(rec));
- handleVoteSubmit(undefined, rec, getCategoryIdFromRecommendation(rec));
- }}
- className="flex-1 min-w-[30%] py-2 md:py-2.5 bg-blue-500 hover:bg-blue-400 active:scale-95 text-slate-950 text-[10px] md:text-[11px] font-black rounded-xl transition-all flex flex-col items-center justify-center gap-1 shadow-md shadow-blue-500/20"
- >
- <span className="truncate w-full text-center px-1">{rec}</span>
- <div className="flex items-center gap-1 opacity-80 text-[9px]">추천하기 <CheckCircle2 size={10} strokeWidth={3} /></div>
- </button>
- ))}
- </div>
- </>
- )}
- </div>
-
  {/* 질문 헤더 수정 */}
  <div id="vote-section" className="bg-slate-900/50 p-6 rounded-[2.5rem] border border-amber-400/40 shadow-[0_0_40px_rgba(245,158,11,0.25)] relative overflow-hidden mb-2 mt-6">
     <div className="absolute inset-0 border-[3px] border-amber-400 rounded-[2.5rem] animate-pulse pointer-events-none opacity-80" />
@@ -847,6 +802,51 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  ))}
  </div>
 </div>
+
+ {/* 서울시 상권 분석 추천 배너 추가 */}
+ <div className="bg-slate-950/95 border border-blue-500/30 rounded-2xl p-4 md:p-5 shadow-lg mb-1 relative overflow-hidden">
+ <div className="absolute -top-6 -right-6 opacity-10 rotate-12 pointer-events-none">
+ <Sparkles size={100} className="text-blue-500" />
+ </div>
+ <div className="flex items-center gap-2 mb-3">
+ <span className="text-blue-400 text-lg leading-none">📊</span>
+ <span className="text-[10px] md:text-[11px] font-black text-blue-400 uppercase tracking-widest leading-none">서울시 상권분석 데이터 추천</span>
+ </div>
+ {isAiLoading ? (
+ <div className="flex flex-col items-center justify-center py-5">
+ <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-3"></div>
+ <p className="text-[11px] text-blue-400 font-bold animate-pulse">실시간 상권 데이터를 분석 중입니다...</p>
+ </div>
+ ) : (
+ <>
+ <p className="text-[11px] md:text-xs font-bold text-slate-300 leading-relaxed break-keep">
+ 현재 <span className="text-blue-300 font-black">[{trdarName}]</span> 상권을 분석한 결과, 
+ {aiRecommended.map((r, i) => (
+ <span key={i}>
+ <strong className="text-white mx-1 text-[12px] md:text-[13px] bg-blue-500/20 px-1.5 py-0.5 rounded">[{r}]</strong>
+ {i < aiRecommended.length - 2 ? ", " : i === aiRecommended.length - 2 ? "와 " : ""}
+ </span>
+ ))} 
+ 업종이 현저히 부족합니다. <br className="hidden md:block"/>이웃과 함께 이 공간을 추천해 보시는 건 어떨까요?
+ </p>
+ <div className="flex flex-wrap gap-2 mt-4">
+ {aiRecommended.map(rec => (
+ <button 
+ key={rec}
+ onClick={() => {
+ setSelectedCategory(getCategoryIdFromRecommendation(rec));
+ handleVoteSubmit(undefined, rec, getCategoryIdFromRecommendation(rec));
+ }}
+ className="flex-1 min-w-[30%] py-2 md:py-2.5 bg-blue-500 hover:bg-blue-400 active:scale-95 text-slate-950 text-[10px] md:text-[11px] font-black rounded-xl transition-all flex flex-col items-center justify-center gap-1 shadow-md shadow-blue-500/20"
+ >
+ <span className="truncate w-full text-center px-1">{rec}</span>
+ <div className="flex items-center gap-1 opacity-80 text-[9px]">추천하기 <CheckCircle2 size={10} strokeWidth={3} /></div>
+ </button>
+ ))}
+ </div>
+ </>
+ )}
+ </div>
  </motion.div>
  ) : votingStep === "detail" ? (
  <motion.div key="details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
