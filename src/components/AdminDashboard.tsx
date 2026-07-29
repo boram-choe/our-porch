@@ -14,6 +14,7 @@ import {
 import { getNeighborhoodReport, DemographicSummary } from "@/lib/db";
 
 import { saveVacancy } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 export default function AdminDashboard({ 
   onBack, 
   vacancies = [],
@@ -25,6 +26,8 @@ export default function AdminDashboard({
 }) {
   const [report, setReport] = useState<DemographicSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingReports, setPendingReports] = useState<any[]>([]);
+  const [moveinInputs, setMoveinInputs] = useState<Record<string, string>>({});
   const [neighborhood, setNeighborhood] = useState("");
 
   useEffect(() => {
@@ -33,7 +36,10 @@ export default function AdminDashboard({
     const dong = profile?.home?.neighborhood || profile?.neighborhood || "우리동네";
     setNeighborhood(dong);
 
-    getNeighborhoodReport(dong)
+    supabase.from('reports').select('*').eq('status', 'pending').eq('report_type', 'movein')
+        .then(({ data }) => setPendingReports(data || []));
+
+      getNeighborhoodReport(dong)
       .then(data => {
         setReport(data);
         setLoading(false);
@@ -93,6 +99,73 @@ export default function AdminDashboard({
 
       <div className="px-6 -translate-y-6 space-y-6 pb-24">
         
+        
+        {/* Pending Move-in Reports Section */}
+        {pendingReports.length > 0 && (
+          <div className="bg-purple-50 p-8 rounded-[3rem] shadow-sm border border-purple-200 mb-8">
+            <div className="flex items-center justify-between mb-6">
+               <h3 className="font-black text-slate-900 flex items-center gap-2">
+                 <Sparkles size={18} className="text-purple-500" />
+                 입점 제보 확인 대기 ({pendingReports.length}건)
+               </h3>
+            </div>
+            <div className="space-y-4">
+              {pendingReports.map(report => {
+                const matchedVacancy = vacancies.find(v => v.id === report.vacancy_id);
+                return (
+                  <div key={report.id} className="bg-white p-5 rounded-3xl border border-purple-100 flex flex-col gap-3 shadow-sm">
+                    <div>
+                      <p className="font-black text-slate-900">{matchedVacancy?.landmark || '알 수 없는 공간'} 입점 제보</p>
+                      <p className="text-xs text-slate-500 mt-1">제보내용: {report.content}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="입점 확정할 매장명/업종 입력" 
+                        className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-purple-400"
+                        value={moveinInputs[report.id] || ''}
+                        onChange={(e) => setMoveinInputs({...moveinInputs, [report.id]: e.target.value})}
+                      />
+                      <button
+                        onClick={async () => {
+                          if (!moveinInputs[report.id]) {
+                            alert("입점 매장명/업종을 입력해주세요.");
+                            return;
+                          }
+                          // 1. Update report status
+                          await supabase.from('reports').update({ status: 'resolved' }).eq('id', report.id);
+                          // 2. Update vacancy status to completed and append move-in info
+                          if (matchedVacancy && onUpdateVacancy) {
+                            const res = await saveVacancy({
+                              ...matchedVacancy,
+                              userId: matchedVacancy.registered_by,
+                              status: 'completed',
+                              surveyRemarks: `[입점 확정] ${moveinInputs[report.id]}`
+                            });
+                            if (!res.error) {
+                              onUpdateVacancy({ 
+                                ...matchedVacancy,
+                                status: 'completed', 
+                                surveyRemarks: `[입점 확정] ${moveinInputs[report.id]}` 
+                              });
+                            } else {
+                              alert('오류가 발생했습니다: ' + res.error);
+                            }
+                          }
+                          setPendingReports(prev => prev.filter(r => r.id !== report.id));
+                        }}
+                        className="px-4 py-2 bg-purple-600 text-white font-black text-[10px] rounded-xl hover:bg-purple-700 transition-colors"
+                      >
+                        입점 확정
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Pending Vacancies Section */}
         {vacancies.filter(v => v.status === 'pending').length > 0 && (
           <div className="bg-amber-50 p-8 rounded-[3rem] shadow-sm border border-amber-200">

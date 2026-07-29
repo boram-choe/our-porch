@@ -767,6 +767,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  const hasVoted = group.some(v => votedIds.includes(v.id));
  const multiFloor = group.length > 1;
  const isHighlightedFs = highlightFengShuiId && group.some(v => v.id === highlightFengShuiId);
+ const isRecentlyCompleted = rep.status === 'completed' && (rep as any).updated_at && (new Date().getTime() - new Date((rep as any).updated_at).getTime() < 14 * 24 * 60 * 60 * 1000);
  return (
  <CustomOverlayMap key={`${rep.id}-${hasVoted}-${isHighlightedFs}`} position={{ lat: rep.lat, lng: rep.lng }}>
  <button onClick={() => handlePinClick(rep)} className="relative group">
@@ -778,12 +779,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  )}
  <div className={`relative w-12 h-12 rounded-[1.5rem] flex items-center justify-center border-2 shadow-md transition-all duration-300 ${
  isHighlightedFs ? "bg-amber-500 text-slate-950 border-amber-400 scale-120 ring-4 ring-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.6)]" :
- rep.status === 'completed' ? "bg-emerald-500 text-white border-white scale-105" :
+ rep.status === 'completed' ? (isRecentlyCompleted ? "bg-emerald-500 text-white border-white scale-110 shadow-[0_0_20px_rgba(16,185,129,0.5)] animate-pulse" : "bg-slate-700 text-slate-300 border-slate-600") :
  hasVoted ? "bg-amber-500 text-slate-950 border-white scale-110" : 
  "bg-slate-950 text-white border-white/20 hover:border-white/50"
  }`}>
  {isHighlightedFs ? <Compass size={24} className="text-slate-950 animate-spin-slow" /> : 
- rep.status === 'completed' ? <Sparkles size={24} /> : 
+ rep.status === 'completed' ? <Check size={24} /> : 
  <Lightbulb size={24} fill="currentColor" />}
  </div>
  {multiFloor && (
