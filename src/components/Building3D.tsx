@@ -6,6 +6,7 @@ import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, Sh
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "./MyPage";
 import { saveVote, saveVacancy, submitDisputeReport } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "../lib/comments";
 import { getGeneralBuildingFengShui, getPersonaFengShuiTip } from "@/lib/fengShuiEngine";
 
@@ -99,6 +100,25 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  const [showGallery, setShowGallery] = useState(false);
  const [galleryIndex, setGalleryIndex] = useState(0);
  const [showPointsToast, setShowPointsToast] = useState(false);
+  const [hasPendingMovein, setHasPendingMovein] = useState(false);
+
+  useEffect(() => {
+    async function checkPendingMovein() {
+      const { data } = await supabase
+        .from('reports')
+        .select('id')
+        .eq('vacancy_id', vacancy.id)
+        .eq('report_type', 'movein')
+        .eq('status', 'pending')
+        .limit(1);
+      
+      if (data && data.length > 0) {
+        setHasPendingMovein(true);
+        setVotingStep("results");
+      }
+    }
+    checkPendingMovein();
+  }, [vacancy.id]);
 
  const allImages = useMemo(() => {
  const list: string[] = [];
