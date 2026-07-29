@@ -102,6 +102,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   const mainScrollRef = useRef<HTMLDivElement>(null);
     
   useEffect(() => {
+    const hasPhoto = !!(vacancy.imageUrl || (vacancy.images && vacancy.images.length > 0));
+    if (!hasPhoto && votingStep !== 'results') return; // 사진이 없으면 자동 스크롤 생략하여 상단 겹침 방지
+    
     const timer = setTimeout(() => {
       if (mainScrollRef.current) {
         const el = document.getElementById('vote-section');
@@ -836,7 +839,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  {i < aiRecommended.length - 2 ? ", " : i === aiRecommended.length - 2 ? "와 " : ""}
  </span>
  ))} 
- 업종이 현저히 부족합니다. <br className="hidden md:block"/>이웃과 함께 이 공간을 추천해 보시는 건 어떨까요?
+ 업종이 현저히 부족합니다. <br className="hidden md:block"/>이웃과 함께 이 공간을 상상해보시는건 어떨까요?
  </p>
  <div className="flex flex-wrap gap-2 mt-4">
  {aiRecommended.map(rec => (
@@ -849,7 +852,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  className="flex-1 min-w-[30%] py-2 md:py-2.5 bg-blue-500 hover:bg-blue-400 active:scale-95 text-slate-950 text-[10px] md:text-[11px] font-black rounded-xl transition-all flex flex-col items-center justify-center gap-1 shadow-md shadow-blue-500/20"
  >
  <span className="truncate w-full text-center px-1">{rec}</span>
- <div className="flex items-center gap-1 opacity-80 text-[9px]">추천하기 <CheckCircle2 size={10} strokeWidth={3} /></div>
+ <div className="flex items-center gap-1 opacity-80 text-[9px]">투표하기 <CheckCircle2 size={10} strokeWidth={3} /></div>
  </button>
  ))}
  </div>
