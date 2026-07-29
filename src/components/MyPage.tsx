@@ -59,6 +59,12 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
   const [gifticonRequests, setGifticonRequests] = useState<GifticonRequest[]>([]);
   const [reportedVacancies, setReportedVacancies] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (userProfile && vacancies) {
+      setReportedVacancies(vacancies.filter(v => v.registered_by === localStorage.getItem("gongsil_user_id")));
+    }
+  }, [userProfile, vacancies]);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [selectedGifticon, setSelectedGifticon] = useState<any>(null);

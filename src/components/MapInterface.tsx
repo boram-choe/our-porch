@@ -112,6 +112,14 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  
  const mapRef = useRef<kakao.maps.Map>(null);
 
+  useEffect(() => {
+    (window as any).showAdminDashboard = () => setShowAdmin(true);
+    return () => {
+      delete (window as any).showAdminDashboard;
+    };
+  }, []);
+
+
  const [feedIndex, setFeedIndex] = useState(0);
  const [localFeeds, setLocalFeeds] = useState<{user: string, text: string, color: string}[]>([]);
  const [showFeed, setShowFeed] = useState(true);
@@ -1492,7 +1500,29 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  )}
  </AnimatePresence>
 
- <div className="hidden md:flex absolute bottom-2 left-4 z-[300] bg-slate-950/90 px-3.5 py-2 rounded-xl border border-white/10 text-[9px] md:text-[10px] text-slate-400 font-bold flex items-center gap-3 shadow-lg pointer-events-auto">
+ 
+        {/* Admin Dashboard */}
+        <AnimatePresence>
+          {showAdmin && (
+            <motion.div 
+              initial={{ opacity: 0, y: "100%" }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute inset-0 z-[200] bg-slate-50 overflow-y-auto"
+            >
+              <AdminDashboard 
+                onBack={() => setShowAdmin(false)} 
+                vacancies={vacancies}
+                onUpdateVacancy={(updatedV) => {
+                  setVacancies(prev => prev.map(v => v.id === updatedV.id ? updatedV : v));
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="hidden md:flex absolute bottom-2 left-4 z-[300] bg-slate-950/90 px-3.5 py-2 rounded-xl border border-white/10 text-[9px] md:text-[10px] text-slate-400 font-bold flex items-center gap-3 shadow-lg pointer-events-auto">
  <span className="text-white font-black">사업자 정보</span>
  <span className="text-white/20">|</span>
  <span>상호명: 채담</span>
