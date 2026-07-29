@@ -803,6 +803,15 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </div>
 </div>
 
+ <div className="flex flex-col items-center justify-center my-6 relative w-full">
+    <div className="absolute top-1/2 left-0 w-[15%] md:w-[25%] h-px bg-gradient-to-r from-transparent to-blue-500/20" />
+    <div className="absolute top-1/2 right-0 w-[15%] md:w-[25%] h-px bg-gradient-to-l from-transparent to-blue-500/20" />
+    <p className="text-[12px] md:text-sm font-bold text-slate-400 leading-relaxed text-center relative z-10 px-4">
+      지금 딱 떠오르는 아이디어가 없다면?<br/>
+      <span className="text-blue-400 font-black">서울시 상권분석 데이터가 추천하는 공간</span>은 어떠세요?
+    </p>
+ </div>
+
  {/* 서울시 상권 분석 추천 배너 추가 */}
  <div className="bg-slate-950/95 border border-blue-500/30 rounded-2xl p-4 md:p-5 shadow-lg mb-1 relative overflow-hidden">
  <div className="absolute -top-6 -right-6 opacity-10 rotate-12 pointer-events-none">
