@@ -677,7 +677,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
-                    {filter === "all" ? "전체" : filter === "vote" ? "🗳️ 투표" : "💬 의견"}
+                    {filter === "all" ? "전체" : filter === "vote" ? "🗳️ 투표" : filter === "comment" ? "💬 의견" : filter === "vacancy" ? "✨ 공실등록" : "💡 정보제보"}
                   </button>
                 ))}
               </div>
