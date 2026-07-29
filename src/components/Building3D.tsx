@@ -104,10 +104,15 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
   useEffect(() => {
     const timer = setTimeout(() => {
       if (mainScrollRef.current) {
-        mainScrollRef.current.scrollTo({
-          top: window.innerHeight * 0.35,
-          behavior: 'smooth'
-        });
+        const el = document.getElementById('vote-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          mainScrollRef.current.scrollTo({
+            top: window.innerHeight * 0.5,
+            behavior: 'smooth'
+          });
+        }
       }
     }, 1200);
     return () => clearTimeout(timer);
@@ -792,11 +797,13 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </div>
 
  {/* 질문 헤더 수정 */}
- <div className="text-center my-2">
- <h4 className="text-base font-black text-amber-400 tracking-tight leading-none mb-1">
+ <div id="vote-section" className="bg-slate-900/50 p-6 rounded-[2.5rem] border border-amber-400/40 shadow-[0_0_40px_rgba(245,158,11,0.25)] relative overflow-hidden mb-2 mt-6">
+    <div className="absolute inset-0 border-[3px] border-amber-400 rounded-[2.5rem] animate-pulse pointer-events-none opacity-80" />
+ <div className="text-center mb-6 relative z-10">
+ <h4 className="text-xl font-black text-amber-400 tracking-tight leading-none mb-2 drop-shadow-md">
  직접 상상해볼까요?
  </h4>
- <p className="text-[10px] font-bold text-slate-400">동네에 필요한 공간을 하나 꾹 눌러주세요</p>
+ <p className="text-xs font-bold text-slate-300">동네에 필요한 공간을 하나 꾹 눌러주세요</p>
  </div>
 
  {recommendedCategory && !hasVoted && (
@@ -839,6 +846,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </button>
  ))}
  </div>
+</div>
  </motion.div>
  ) : votingStep === "detail" ? (
  <motion.div key="details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">

@@ -357,12 +357,13 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
               <div className="h-6 w-1.5 md:h-10 md:w-2 bg-rose-500 rounded-full" />
               <h3 className="text-lg md:text-2xl font-black text-slate-950 tracking-tight">공간 상태 관리</h3>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3">
               {[
-                { id: 'available', label: '공실 가능', icon: '✅' },
-                { id: 'completed', label: '입점 완료', icon: '✨' },
-                { id: 'merged', label: '통합 처리', icon: '🔗' },
-                { id: 'rejected', label: '비공개/반려', icon: '🔒' }
+                { id: 'pending', label: '확인필요공실', icon: '⏳' },
+                { id: 'available', label: '확인완료공실', icon: '✅' },
+                { id: 'completed', label: '입점완료공실', icon: '✨' },
+                { id: 'merged', label: '통합된공실', icon: '🔗' },
+                { id: 'rejected', label: '비공개공실', icon: '🔒' }
               ].map(s => (
                 <button 
                   key={s.id} 
