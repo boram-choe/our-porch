@@ -430,42 +430,28 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
                     <div className="space-y-2 md:space-y-4">
                       <label className="text-[11px] font-black text-rose-400 uppercase tracking-widest px-1">비공개/반려 사유 선택</label>
                       <div className="flex flex-wrap gap-2">
-                        {["공실아님", "임대인요청", "정보부족", "기타"].map(r => (
-                          <button 
-                            key={r} 
-                            onClick={() => setFormData({...formData, rejectionReason: r})}
-                            className={`px-4 py-2 md:px-6 md:py-3 rounded-full text-[11px] md:text-[12px] font-black border-2 transition-all ${formData.rejectionReason === r ? 'bg-rose-100 border-rose-200 text-rose-600' : 'bg-white border-white text-slate-400 hover:border-slate-200'}`}
-                          >
-                            {r}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="space-y-2 md:space-y-4">
-                      <label className="text-[11px] font-black text-rose-400 uppercase tracking-widest px-1">상세 사유 입력 (제보자에게 안내됨)</label>
-                      <textarea
-                        value={formData.hiddenComment || ""}
-                        onChange={(e) => setFormData({...formData, hiddenComment: e.target.value})}
-                        placeholder="등록한 사람에게 전달될 상세 사유를 입력해주세요."
-                        className="w-full bg-white border-2 border-rose-100 rounded-xl md:rounded-2xl py-3 px-4 md:py-4 md:px-6 font-bold text-slate-950 focus:outline-none focus:border-rose-500 transition-all text-xs md:text-sm min-h-[80px] md:min-h-[100px]"
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
             </AnimatePresence>
 
             {formData.status === 'completed' && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }} 
                 animate={{ opacity: 1, y: 0 }}
-                className="p-6 bg-emerald-50 rounded-2xl border-2 border-emerald-100 flex items-center gap-4"
+                className="p-6 bg-emerald-50 rounded-2xl border-2 border-emerald-100 flex flex-col gap-4"
               >
-                <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">✨</div>
-                <p className="text-sm font-bold text-emerald-700 leading-relaxed">
-                  임대차계약이 완료된 공간입니다. <br/>
-                  저장 시 사용자에게 <span className="font-black text-emerald-900">'어떤 공간이 입점될 예정입니다. 많이 기대해주세요'</span> 메시지가 표시됩니다.
-                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">✨</div>
+                  <p className="text-sm font-bold text-emerald-700 leading-relaxed">
+                    임대차계약이 완료된 공간입니다. <br/>
+                    아래에 입점 매장명을 입력하면 사용자에게 해당 정보가 표시됩니다.
+                  </p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="입점 예정 매장명 (예: 메가커피)"
+                  className="w-full bg-white border-2 border-emerald-200 rounded-xl py-3 px-4 font-bold text-emerald-900 focus:outline-none focus:border-emerald-500 transition-all text-sm"
+                  value={formData.surveyRemarks?.startsWith('[입점 확정] ') ? formData.surveyRemarks.replace('[입점 확정] ', '') : ''}
+                  onChange={(e) => setFormData({...formData, surveyRemarks: e.target.value ? '[입점 확정] ' + e.target.value : ''})}
+                />
               </motion.div>
             )}
           </div>
