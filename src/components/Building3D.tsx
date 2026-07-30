@@ -1018,6 +1018,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </div>
  </div>
  
+ {(vacancy.realtorName || vacancy.realtorPhone) && (
  <div className="w-full">
  <button 
  onClick={() => setShowRealtor(!showRealtor)}
@@ -1038,17 +1039,19 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <div className="mt-2 bg-slate-950 p-4 rounded-xl border border-white/5 flex items-center justify-between">
  <div>
  <p className="text-[10px] font-black text-amber-500 mb-1">전속 중개 파트너</p>
- <p className="text-sm font-black text-white">행복 공인중개사무소</p>
- <p className="text-[11px] font-bold text-slate-400 mt-0.5">김성공 소장</p>
+ <p className="text-sm font-black text-white">{vacancy.realtorName || '담당 공인중개사'}</p>
  </div>
- <a href="tel:010-1234-5678" className="bg-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
+ {vacancy.realtorPhone && (
+ <a href={`tel:${vacancy.realtorPhone}`} className="bg-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 flex-shrink-0 ml-4">
  전화연결
  </a>
+ )}
  </div>
  </motion.div>
  )}
  </AnimatePresence>
  </div>
+ )}
  </div>
  </div>
  </motion.div>
