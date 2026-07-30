@@ -1018,7 +1018,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </div>
  </div>
  
- {(vacancy.realtorName || vacancy.realtorPhone) && (
  <div className="w-full">
  <button 
  onClick={() => setShowRealtor(!showRealtor)}
@@ -1037,6 +1036,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  className="overflow-hidden"
  >
  <div className="mt-2 bg-slate-950 p-4 rounded-xl border border-white/5 flex items-center justify-between">
+ {(vacancy.realtorName || vacancy.realtorPhone) ? (
+ <>
  <div>
  <p className="text-[10px] font-black text-amber-500 mb-1">전속 중개 파트너</p>
  <p className="text-sm font-black text-white">{vacancy.realtorName || '담당 공인중개사'}</p>
@@ -1046,12 +1047,17 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  전화연결
  </a>
  )}
+ </>
+ ) : (
+ <div className="w-full text-center py-2">
+ <p className="text-[11px] font-bold text-slate-400">툇마루단이 담당 중개소를 꼼꼼히 확인 중입니다. 🕵️‍♂️</p>
+ </div>
+ )}
  </div>
  </motion.div>
  )}
  </AnimatePresence>
  </div>
- )}
  </div>
  </div>
  </motion.div>
