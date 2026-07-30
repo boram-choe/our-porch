@@ -430,6 +430,29 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
                     <div className="space-y-2 md:space-y-4">
                       <label className="text-[11px] font-black text-rose-400 uppercase tracking-widest px-1">비공개/반려 사유 선택</label>
                       <div className="flex flex-wrap gap-2">
+                        {["공실아님", "임대인요청", "정보부족", "기타"].map(r => (
+                          <button 
+                            key={r} 
+                            onClick={() => setFormData({...formData, rejectionReason: r})}
+                            className={`px-4 py-2 md:px-6 md:py-3 rounded-full text-[11px] md:text-[12px] font-black border-2 transition-all ${formData.rejectionReason === r ? 'bg-rose-100 border-rose-200 text-rose-600' : 'bg-white border-white text-slate-400 hover:border-slate-200'}`}
+                          >
+                            {r}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2 md:space-y-4">
+                      <label className="text-[11px] font-black text-rose-400 uppercase tracking-widest px-1">상세 사유 입력 (제보자에게 안내됨)</label>
+                      <textarea
+                        value={formData.hiddenComment || ""}
+                        onChange={(e) => setFormData({...formData, hiddenComment: e.target.value})}
+                        placeholder="등록한 사람에게 전달될 상세 사유를 입력해주세요."
+                        className="w-full bg-white border-2 border-rose-100 rounded-xl md:rounded-2xl py-3 px-4 md:py-4 md:px-6 font-bold text-slate-950 focus:outline-none focus:border-rose-500 transition-all text-xs md:text-sm min-h-[80px] md:min-h-[100px]"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
 
             {formData.status === 'completed' && (
