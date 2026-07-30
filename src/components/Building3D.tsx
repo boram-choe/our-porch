@@ -90,6 +90,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  const [reportText, setReportText] = useState("");
  const [reportSubmitted, setReportSubmitted] = useState(false);
  const [inputValue, setInputValue] = useState("");
+ const [showRealtor, setShowRealtor] = useState(false);
  
  const [votingStep, setVotingStep] = useState<"category" | "detail" | "results">(
  (hasVoted || userProfile?.isGuest) ? "results" : "category"
@@ -1006,13 +1007,47 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </AnimatePresence>
  </div>
 
- <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+ <div className="mt-8 pt-6 border-t border-white/5 flex flex-col gap-4">
+ <div className="flex items-center justify-between">
  <button onClick={() => setReportMode("choice")} className="flex items-center gap-2 text-slate-500 hover:text-amber-400 transition-colors text-[10px] font-black uppercase tracking-widest"><AlertTriangle size={12} /> 정보 정정하기</button>
  <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
  <div className="flex -space-x-2">
  {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[8px] text-white font-black">{i}</div>)}
  </div>
  <span className="text-[11px] font-black text-amber-400">{sortedVotes.reduce((acc,curr) => acc+curr.count, 0)}명의 상상 결합 중</span>
+ </div>
+ </div>
+ 
+ <div className="w-full">
+ <button 
+ onClick={() => setShowRealtor(!showRealtor)}
+ className="w-full flex items-center justify-between bg-slate-800/50 hover:bg-slate-800 px-4 py-3 rounded-xl border border-white/5 transition-all text-xs font-bold text-slate-300"
+ >
+ <span className="flex items-center gap-2"><Briefcase size={14} className="text-amber-500" /> 담당 공인중개사무소 정보 보기</span>
+ <ChevronDown size={14} className={`transition-transform ${showRealtor ? 'rotate-180' : ''}`} />
+ </button>
+ 
+ <AnimatePresence>
+ {showRealtor && (
+ <motion.div
+ initial={{ height: 0, opacity: 0 }}
+ animate={{ height: "auto", opacity: 1 }}
+ exit={{ height: 0, opacity: 0 }}
+ className="overflow-hidden"
+ >
+ <div className="mt-2 bg-slate-950 p-4 rounded-xl border border-white/5 flex items-center justify-between">
+ <div>
+ <p className="text-[10px] font-black text-amber-500 mb-1">전속 중개 파트너</p>
+ <p className="text-sm font-black text-white">행복 공인중개사무소</p>
+ <p className="text-[11px] font-bold text-slate-400 mt-0.5">김성공 소장</p>
+ </div>
+ <a href="tel:010-1234-5678" className="bg-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
+ 전화연결
+ </a>
+ </div>
+ </motion.div>
+ )}
+ </AnimatePresence>
  </div>
  </div>
  </div>
