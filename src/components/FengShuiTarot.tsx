@@ -740,7 +740,7 @@ export default function FengShuiTarot({
                       <div>
                         <h4 className="text-sm font-black text-amber-400">이웃들의 상상과 풍수의 만남</h4>
                         <p className="text-xs text-slate-400 leading-relaxed mt-1 font-medium">
-                          귀하의 탄생 생년(오행)과 희망하는 창업/공간 테마를 분석하여, 동네 마커 중 풍수학적으로 부와 안정을 가져다줄 <strong>장기 공실</strong> 명당을 수호신점 형태로 찾아드립니다.
+                          귀하의 거주지와 생년월일(사주)을 분석하여 개인의 기운(재물운, 연애운 등)을 극대화할 <strong>'우리 동네 명당'</strong>을 찾아드립니다.
                         </p>
                       </div>
                     </div>

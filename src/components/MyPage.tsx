@@ -642,9 +642,9 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         이웃님이 모으신 상상 포인트는 <span className="text-amber-400 font-black">기프티콘</span>으로 교환해 드릴 예정이며, 향후 '여긴뭐가'를 통해 실제 오프라인 골목에 오픈하는 매장의 <span className="text-amber-400 font-black">할인 쿠폰</span>으로도 교환될 수 있게 준비 중입니다! 🎁
                       </p>
                       <div className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-[10px] text-slate-500 font-black tracking-tighter">
-                        <span>🗳️ 투표참여 50P</span>
+                        <span>🗳️ 투표참여 10P</span>
                         <span>•</span>
-                        <span>💬 의견작성 50P</span>
+                        <span>💬 의견작성 10P</span>
                       </div>
                     </div>
                   </div>
@@ -808,7 +808,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                              {new Date(item.timestamp).toLocaleDateString()}
                            </p>
                            <div className="flex items-center gap-1 justify-end">
-                             <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">+50P</span>
+                             <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">+10P</span>
                              {matchedVacancy && onVacancySelect && <ChevronRight size={14} className="text-slate-300 ml-1 shrink-0" />}
                            </div>
                         </div>

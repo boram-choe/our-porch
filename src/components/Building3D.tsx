@@ -183,7 +183,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const handleAddComment = async () => {
  if (userProfile?.isGuest) {
- alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 50p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
+ alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 10p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
  return;
  }
  if (!newComment.trim() || typeof window === "undefined") return;
@@ -206,7 +206,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const handleLike = async (commentId: string, isLiked: boolean) => {
  if (userProfile?.isGuest) {
- alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 50p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
+ alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 10p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
  return;
  }
  if (typeof window === "undefined") return;
@@ -221,7 +221,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const handleReport = async (commentId: string) => {
  if (userProfile?.isGuest) {
- alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 50p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
+ alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 10p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
  return;
  }
  if (typeof window === "undefined") return;
@@ -329,7 +329,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
  if (userProfile?.isGuest) {
- alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 50p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
+ alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 10p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
  return;
  }
  if (e) e.preventDefault();
@@ -744,9 +744,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <div className="w-20 h-20 bg-white/30 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/30">
  <CheckCircle2 size={40} className="text-white" strokeWidth={3} />
  </div>
- <h4 className="text-2xl font-black text-white tracking-tighter leading-tight mb-2">계약이 완료되었습니다! 🎊</h4>
+ <h4 className="text-2xl font-black text-white tracking-tighter leading-tight mb-2">
+  {(() => {
+    const match = vacancy.surveyRemarks?.match(/\[입점 확정\]\s*(.+)/);
+    return match ? `${match[1]} 입점 확정! 🎊` : "계약이 완료되었습니다! 🎊";
+  })()}
+ </h4>
  <p className="text-base font-bold text-emerald-50 leading-relaxed">
- 어떤 공간이 입점될 예정입니다.<br/>
+ 이웃들의 상상대로 새로운 공간이 생깁니다.<br/>
  많이 기대해주세요! ✨
  </p>
  </div>
@@ -958,7 +963,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <ShieldCheck size={14} /> 상상 참여 권장
  </p>
  <p className="text-[11px] font-bold text-slate-300 leading-relaxed break-keep">
- 지금 <span className="text-amber-400 font-black">카카오 계정으로 로그인</span>하시면 동네 빈 공간 투표와 의견 작성에 참여하고, 오프라인 오픈 매장에서 사용 가능한 <span className="text-amber-400 font-black">상상 할인 포인트(건당 50P)</span>를 바로 모으실 수 있어요! 🔐
+ 지금 <span className="text-amber-400 font-black">카카오 계정으로 로그인</span>하시면 동네 빈 공간 투표와 의견 작성에 참여하고, 오프라인 오픈 매장에서 사용 가능한 <span className="text-amber-400 font-black">상상 할인 포인트(건당 10P)</span>를 바로 모으실 수 있어요! 🔐
  </p>
  </div>
  )}
@@ -1390,7 +1395,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </div>
  <div>
  <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-0.5">상상 포인트 적립!</p>
- <p className="text-sm font-black text-white">+50P 상상 포인트가 적립되었습니다! 🎁</p>
+ <p className="text-sm font-black text-white">+10P 상상 포인트가 적립되었습니다! 🎁</p>
  </div>
  </motion.div>
  )}

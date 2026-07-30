@@ -1,6 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
+
+export const viewport: Viewport = {
+  themeColor: "#020617",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "여긴뭐가 | 우리 동네를 채우는 가장 즐거운 상상",
@@ -38,6 +46,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning className="h-full overflow-hidden antialiased">
       <head>
+        <link rel="manifest" href="/manifest.json" />
         <link rel="stylesheet" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" crossOrigin="anonymous" />
       </head>
       <body className="min-h-full flex flex-col m-0 p-0 overflow-hidden bg-slate-950 text-white font-sans">

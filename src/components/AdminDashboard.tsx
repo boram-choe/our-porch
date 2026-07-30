@@ -28,6 +28,7 @@ export default function AdminDashboard({
   const [loading, setLoading] = useState(true);
   const [pendingReports, setPendingReports] = useState<any[]>([]);
   const [moveinInputs, setMoveinInputs] = useState<Record<string, string>>({});
+  const [editingStoreName, setEditingStoreName] = useState<Record<string, string>>({});
   const [neighborhood, setNeighborhood] = useState("");
 
   useEffect(() => {
@@ -201,34 +202,111 @@ export default function AdminDashboard({
                 </div>
                 <div className="space-y-4">
                   {groupVacancies.map(v => (
-                    <div key={v.id} className="bg-white p-5 rounded-3xl border border-slate-100 flex items-center justify-between shadow-sm">
-                      <div>
-                        <h4 className="font-black text-slate-900">{v.landmark} <span className="text-xs text-slate-400">({v.floor})</span></h4>
-                        <p className="text-xs font-bold text-slate-500">{v.address}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">제보자 ID: {v.registered_by?.substring(0, 8)}...</p>
+                    <div key={v.id} className="bg-white p-5 rounded-3xl border border-slate-100 flex shadow-sm">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-black text-slate-900">{v.landmark} <span className="text-xs text-slate-400">({v.floor})</span></h4>
+                            <p className="text-xs font-bold text-slate-500">{v.address}</p>
+                            <p className="text-[10px] text-slate-400 mt-1">제보자 ID: {v.registered_by?.substring(0, 8)}...</p>
+                          </div>
+                          {statusGroup.id === 'pending' && (
+                            <button
+                              onClick={async () => {
+                                if (confirm('이 공실을 정상 공실로 확정하시겠습니까?\\n확정 시 제보자에게 500P가 지급됩니다.')) {
+                                  const res = await saveVacancy({
+                                    ...v,
+                                    userId: v.registered_by,
+                                    status: 'available'
+                                  });
+                                  if (!res.error && onUpdateVacancy) {
+                                    onUpdateVacancy({ ...v, status: 'available' });
+                                    alert('정상 공실로 확정되었습니다. 제보자에게 500P가 지급됩니다.');
+                                  } else {
+                                    alert('확정 처리 중 오류가 발생했습니다: ' + res.error);
+                                  }
+                                }
+                              }}
+                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 transition-all active:scale-95 whitespace-nowrap"
+                            >
+                              정상 공실 확정
+                            </button>
+                          )}
+                        </div>
+
+                        {statusGroup.id === 'available' && (
+                          <div className="mt-4 flex gap-2">
+                            <input 
+                              type="text" 
+                              placeholder="입점 매장명 (예: 메가커피)"
+                              className="flex-1 text-xs border border-blue-200 rounded-xl px-3 py-2 outline-none focus:border-blue-400"
+                              value={editingStoreName[v.id] || ''}
+                              onChange={(e) => setEditingStoreName({...editingStoreName, [v.id]: e.target.value})}
+                            />
+                            <button
+                              onClick={async () => {
+                                const newName = editingStoreName[v.id];
+                                if (!newName) {
+                                  alert("입점 매장명/업종을 입력해주세요.");
+                                  return;
+                                }
+                                if (confirm(`'${newName}'(으)로 입점 확정 처리하시겠습니까?`)) {
+                                  const res = await saveVacancy({
+                                    ...v,
+                                    userId: v.registered_by,
+                                    status: 'completed',
+                                    surveyRemarks: `[입점 확정] ${newName}`
+                                  });
+                                  if (!res.error && onUpdateVacancy) {
+                                    onUpdateVacancy({ ...v, status: 'completed', surveyRemarks: `[입점 확정] ${newName}` });
+                                    alert('입점 완료 처리되었습니다.');
+                                  } else {
+                                    alert('오류가 발생했습니다: ' + res.error);
+                                  }
+                                }
+                              }}
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black transition-all whitespace-nowrap"
+                            >
+                              입점 확정
+                            </button>
+                          </div>
+                        )}
+
+                        {statusGroup.id === 'completed' && (
+                          <div className="mt-4 flex gap-2">
+                            <input 
+                              type="text" 
+                              placeholder="노출될 매장명 (예: 메가커피)"
+                              className="flex-1 text-xs border border-emerald-200 rounded-xl px-3 py-2 outline-none focus:border-emerald-400"
+                              value={editingStoreName[v.id] !== undefined ? editingStoreName[v.id] : (v.surveyRemarks?.match(/\[입점 확정\]\s*(.+)/)?.[1] || '')}
+                              onChange={(e) => setEditingStoreName({...editingStoreName, [v.id]: e.target.value})}
+                            />
+                            <button
+                              onClick={async () => {
+                                const newName = editingStoreName[v.id];
+                                if (!newName) {
+                                  alert("매장명을 입력해주세요.");
+                                  return;
+                                }
+                                const res = await saveVacancy({
+                                  ...v,
+                                  userId: v.registered_by,
+                                  surveyRemarks: `[입점 확정] ${newName}`
+                                });
+                                if (!res.error && onUpdateVacancy) {
+                                  onUpdateVacancy({ ...v, surveyRemarks: `[입점 확정] ${newName}` });
+                                  alert('매장명이 업데이트되었습니다.');
+                                } else {
+                                  alert('저장 중 오류가 발생했습니다: ' + res.error);
+                                }
+                              }}
+                              className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap"
+                            >
+                              저장
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      {statusGroup.id === 'pending' && (
-                        <button
-                          onClick={async () => {
-                            if (confirm('이 공실을 정상 공실로 확정하시겠습니까?\n확정 시 제보자에게 500P가 지급됩니다.')) {
-                              const res = await saveVacancy({
-                                ...v,
-                                userId: v.registered_by,
-                                status: 'available'
-                              });
-                              if (!res.error && onUpdateVacancy) {
-                                onUpdateVacancy({ ...v, status: 'available' });
-                                alert('정상 공실로 확정되었습니다. 제보자에게 500P가 지급됩니다.');
-                              } else {
-                                alert('확정 처리 중 오류가 발생했습니다: ' + res.error);
-                              }
-                            }
-                          }}
-                          className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 transition-all active:scale-95 whitespace-nowrap"
-                        >
-                          정상 공실 확정
-                        </button>
-                      )}
                     </div>
                   ))}
                 </div>
