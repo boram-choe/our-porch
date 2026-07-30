@@ -800,7 +800,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  const hasVoted = group.some(v => votedIds.includes(v.id));
  const multiFloor = group.length > 1;
  const isHighlightedFs = highlightFengShuiId && group.some(v => v.id === highlightFengShuiId);
- const isRecentlyCompleted = rep.status === 'completed' && (rep as any).updated_at && (new Date().getTime() - new Date((rep as any).updated_at).getTime() < 14 * 24 * 60 * 60 * 1000);
+ const isRecentlyCompleted = rep.status === 'completed' && rep.updatedAt && (new Date().getTime() - new Date(rep.updatedAt).getTime() < 30 * 24 * 60 * 60 * 1000);
  return (
  <CustomOverlayMap key={`${rep.id}-${hasVoted}-${isHighlightedFs}`} position={{ lat: rep.lat, lng: rep.lng }}>
  <button onClick={() => handlePinClick(rep)} className="relative group">
