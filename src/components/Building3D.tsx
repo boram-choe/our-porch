@@ -100,6 +100,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const [showGallery, setShowGallery] = useState(false);
  const [galleryIndex, setGalleryIndex] = useState(0);
+ const [showShareSheet, setShowShareSheet] = useState(false);
+ const [linkCopied, setLinkCopied] = useState(false);
   const mainScrollRef = useRef<HTMLDivElement>(null);
     
   useEffect(() => {
@@ -184,7 +186,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const handleAddComment = async () => {
  if (userProfile?.isGuest) {
- alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 10p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
+ // 게스트 모드: 조용히 무시 (토스트는 MapInterface 레벨에서 처리)
  return;
  }
  if (!newComment.trim() || typeof window === "undefined") return;
@@ -206,10 +208,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  };
 
  const handleLike = async (commentId: string, isLiked: boolean) => {
- if (userProfile?.isGuest) {
- alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 10p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
- return;
- }
+ if (userProfile?.isGuest) return;
  if (typeof window === "undefined") return;
  const userId = localStorage.getItem("gongsil_user_id");
  if (!userId) return;
@@ -221,18 +220,13 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  };
 
  const handleReport = async (commentId: string) => {
- if (userProfile?.isGuest) {
- alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 10p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
- return;
- }
+ if (userProfile?.isGuest) return;
  if (typeof window === "undefined") return;
- if (!confirm("이 댓글을 신고하시겠습니까?")) return;
  const userId = localStorage.getItem("gongsil_user_id");
  if (!userId) return;
 
  const success = await reportComment(commentId, userId);
  if (success) {
- alert("신고가 접수되었습니다.");
  await loadComments();
  }
  };
@@ -329,10 +323,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  }, [vacancy.lat, vacancy.lng]);
 
  const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
- if (userProfile?.isGuest) {
- alert("카카오로 로그인하시면 동네 빈 공간을 상상하고 10p 단위의 매장 할인 포인트를 모으실 수 있어요! 🔐");
- return;
- }
+ if (userProfile?.isGuest) return; // 게스트: 조용히 차단
  if (e) e.preventDefault();
  let brand = (customBrand || inputValue).trim();
  if (!brand) return;
@@ -471,19 +462,39 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  }
  };
 
- const handleShare = async () => {
- const text = `우리 동네 '${vacancy.landmark || vacancy.address}' 공간에 이런 게 생기면 어떨까요? 함께 상상해봐요! ✨`;
- // 각 공실의 고유 ID를 쿼리 파라미터로 결합하여 북마크/공유 시 해당 공실이 즉시 열리도록 딥링크 구축
- const url = `https://여긴뭐가.kr/?vacancyId=${vacancy.id}`;
- if (navigator.share) {
- try {
- await navigator.share({ title: '여긴뭐가 | 우리 동네 상상 시뮬레이터', text, url });
- } catch (err) { console.log('Share failed', err); }
- } else {
- navigator.clipboard.writeText(`${text}\n${url}`);
- alert("공유 링크가 클립보드에 복사되었습니다! 🔗");
- }
+ const vacancyUrl = typeof window !== 'undefined'
+  ? `${window.location.origin}/?vacancyId=${vacancy.id}`
+  : `https://여긴뭐가.kr/?vacancyId=${vacancy.id}`;
+ const shareText = `우리 동네 '${vacancy.landmark || vacancy.address}' 공간에 이런 게 생기면 어떨까요? 함께 상상해봐요! ✨`;
+
+ const handleKakaoShare = () => {
+  const kakao = (window as any).Kakao;
+  if (kakao && kakao.isInitialized()) {
+   kakao.Share.sendDefault({
+    objectType: 'feed',
+    content: {
+     title: `여긴뭐가 | ${vacancy.landmark || vacancy.address}`,
+     description: shareText,
+     imageUrl: (vacancy.images?.[0] || vacancy.imageUrl) ?? 'https://여긴뭐가.kr/og-image.png',
+     link: { mobileWebUrl: vacancyUrl, webUrl: vacancyUrl },
+    },
+    buttons: [{ title: '상상 투표하기', link: { mobileWebUrl: vacancyUrl, webUrl: vacancyUrl } }],
+   });
+  } else if (navigator.share) {
+   navigator.share({ title: `여긴뭐가 | ${vacancy.landmark || vacancy.address}`, text: shareText, url: vacancyUrl }).catch(() => {});
+  } else {
+   handleCopyLink();
+  }
+  setShowShareSheet(false);
  };
+
+ const handleCopyLink = async () => {
+  try { await navigator.clipboard.writeText(vacancyUrl); } catch (e) { /* ignore */ }
+  setLinkCopied(true);
+  setTimeout(() => { setLinkCopied(false); setShowShareSheet(false); }, 2000);
+ };
+
+ const handleShare = () => setShowShareSheet(true);
 
  const BuildingVisual = () => {
  const isCompact = votingStep !== "results";
@@ -1445,6 +1456,76 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  )}
  </AnimatePresence>
  <style dangerouslySetInnerHTML={{__html: `.hide-scrollbar::-webkit-scrollbar{display:none}.hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}} />
+
+ {/* ===== 공유 Bottom Sheet ===== */}
+ <AnimatePresence>
+  {showShareSheet && (
+   <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 z-[600] bg-black/60 backdrop-blur-sm flex items-end justify-center"
+    onClick={() => setShowShareSheet(false)}
+   >
+    <motion.div
+     initial={{ y: 120, opacity: 0 }}
+     animate={{ y: 0, opacity: 1 }}
+     exit={{ y: 120, opacity: 0 }}
+     transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+     onClick={e => e.stopPropagation()}
+     className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-t-[2.5rem] p-6 pb-10 space-y-4 shadow-2xl"
+    >
+     {/* 핸들 */}
+     <div className="w-10 h-1 bg-slate-700 rounded-full mx-auto mb-2" />
+
+     {/* 헤더 */}
+     <div className="text-center mb-2">
+      <h3 className="text-white font-black text-base tracking-tight">이웃에게 공유하기 🔗</h3>
+      <p className="text-xs text-slate-400 mt-1 break-keep">
+       <span className="font-black text-amber-400">{vacancy.landmark || vacancy.address}</span>에 뭐가 생기면 좋을지, 친구에게 물어봐요!
+      </p>
+     </div>
+
+     {/* 공유 버튼들 */}
+     <div className="grid grid-cols-2 gap-3">
+      {/* 카카오톡 */}
+      <button
+       onClick={handleKakaoShare}
+       className="flex flex-col items-center justify-center gap-2 py-5 bg-[#FEE500] hover:bg-[#FDD800] active:scale-95 rounded-2xl transition-all shadow-lg shadow-yellow-500/20"
+      >
+       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <path d="M14 3C8.477 3 4 6.71 4 11.3c0 2.91 1.94 5.47 4.87 6.93l-1.24 4.58a.3.3 0 00.45.33l5.37-3.56c.51.05 1.02.08 1.55.08 5.523 0 10-3.71 10-8.3C24 6.71 19.523 3 14 3z" fill="#3A1D1D"/>
+       </svg>
+       <span className="text-[11px] font-black text-slate-900">카카오톡 공유</span>
+      </button>
+
+      {/* 링크 복사 */}
+      <button
+       onClick={handleCopyLink}
+       className={`flex flex-col items-center justify-center gap-2 py-5 rounded-2xl transition-all active:scale-95 ${linkCopied ? 'bg-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-slate-800 hover:bg-slate-700 border border-slate-700'}`}
+      >
+       {linkCopied ? (
+        <CheckCircle2 size={28} className="text-white" />
+       ) : (
+        <Share2 size={28} className="text-slate-300" />
+       )}
+       <span className={`text-[11px] font-black ${linkCopied ? 'text-white' : 'text-slate-300'}`}>
+        {linkCopied ? '링크 복사됨 ✓' : '링크 복사'}
+       </span>
+      </button>
+     </div>
+
+     {/* 취소 */}
+     <button
+      onClick={() => setShowShareSheet(false)}
+      className="w-full py-3.5 text-slate-500 text-xs font-black hover:text-slate-300 transition-colors"
+     >
+      취소
+     </button>
+    </motion.div>
+   </motion.div>
+  )}
+ </AnimatePresence>
  </div>
  );
 }

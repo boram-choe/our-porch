@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   User as UserIcon, MapPin, Settings, Heart, MessageSquare, ChevronRight, LogOut, 
   Camera, Star, Award, Briefcase, Baby, Dog, Zap, HelpCircle, Edit3, Check, 
-  Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon, X, ArrowLeft, Gift
+  Clock, Lightbulb, Sparkles, LayoutDashboard, ShieldCheck, Key, Home, Plus, Navigation as NavigationIcon, X, ArrowLeft, Gift, Bell
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
-import { fetchUserReports, DbReport } from "@/lib/db";
+import { fetchUserReports, DbReport, fetchUserNotifications, markNotificationsRead, DbNotification } from "@/lib/db";
 import { fetchGifticonRequests, purchaseGifticon, STORE_ITEMS, GifticonRequest } from "@/lib/gifticon";
 import { supabase } from "@/lib/supabase";
 
@@ -51,7 +51,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [selectedLocation, setSelectedLocation] = useState("");
   const [showEntrepreneurModal, setShowEntrepreneurModal] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<"profile" | "activity" | "reports" | "store" | "settings">(isEntrepreneurMode ? "activity" : "profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "activity" | "reports" | "store" | "notifications" | "settings">(isEntrepreneurMode ? "activity" : "profile");
   const [isEditing, setIsEditing] = useState(false);
   const [editNickname, setEditNickname] = useState("");
   const [dbVotes, setDbVotes] = useState<any[]>([]);
@@ -60,6 +60,8 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
   const [gifticonRequests, setGifticonRequests] = useState<GifticonRequest[]>([]);
   const [reportedVacancies, setReportedVacancies] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<DbNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (userProfile && vacancies) {
@@ -92,6 +94,25 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       setEditPersonaIds(profile.personaIds || []);
     }
   }, []);
+
+  // 1-b. Load notifications
+  useEffect(() => {
+    const userId = localStorage.getItem("gongsil_user_id");
+    if (!userId) return;
+    fetchUserNotifications(userId).then(data => {
+      setNotifications(data);
+      setUnreadCount(data.filter(n => !n.is_read).length);
+    });
+  }, []);
+
+  // 읽음 처리: 알림 탭 진입 시
+  useEffect(() => {
+    if (activeTab !== 'notifications') return;
+    const userId = localStorage.getItem("gongsil_user_id");
+    if (!userId) return;
+    markNotificationsRead(userId).then(() => setUnreadCount(0));
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+  }, [activeTab]);
 
   // 2. Load Supabase activity once on mount
   useEffect(() => {
@@ -171,10 +192,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     if (editPersonaIds.includes(id)) {
       setEditPersonaIds(editPersonaIds.filter(i => i !== id));
     } else {
-      if (editPersonaIds.length >= 3) {
-        alert("나의 조각은 최대 3개까지 선택할 수 있습니다.");
-        return;
-      }
+      if (editPersonaIds.length >= 3) return;
       setEditPersonaIds([...editPersonaIds, id]);
     }
   };
@@ -233,12 +251,10 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       const updatedProfile = { ...userProfile, isAdmin: true };
       setUserProfile(updatedProfile);
       localStorage.setItem("gongsil_user_profile", JSON.stringify(updatedProfile));
-      alert("관리자 권한이 승인되었습니다! 🔐");
       setAdminCode("");
       setShowAdminAuth(false);
-    } else {
-      alert("코드가 일치하지 않습니다.");
     }
+    // 코드 불일치 시: 조용히 무시 (UI에서 실패 피드백 필요시 인라인 상태로 추가 가능)
   };
 
   const addWorkLocation = () => {
@@ -287,22 +303,19 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     setUserProfile(updatedProfile);
     localStorage.setItem("gongsil_user_profile", JSON.stringify(updatedProfile));
     
-    alert(`'${tempWorkLocation.neighborhood}'이 나의 일터로 등록되었습니다! 🏢`);
     setTempWorkLocation(null);
     setTempWorkActivityTimes([]);
     setIsRegisteringWork(false);
   };
 
   const removeWorkLocation = () => {
-    if (confirm("등록된 직장 정보를 삭제하시겠어요?")) {
-      const updatedProfile: UserProfile = {
-        ...userProfile,
-        work: undefined,
-        activeLocationType: 'home'
-      };
-      setUserProfile(updatedProfile);
-      localStorage.setItem("gongsil_user_profile", JSON.stringify(updatedProfile));
-    }
+    const updatedProfile: UserProfile = {
+      ...userProfile,
+      work: undefined,
+      activeLocationType: 'home'
+    };
+    setUserProfile(updatedProfile);
+    localStorage.setItem("gongsil_user_profile", JSON.stringify(updatedProfile));
   };
 
   return (
@@ -321,9 +334,23 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               {userProfile.isAdmin && <ShieldCheck className="text-amber-500" size={20} />}
             </h1>
           </div>
-          <button onClick={() => setActiveTab("settings")} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
-            <Settings size={22} className="text-slate-400" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* 알림 벨 */}
+            <button
+              onClick={() => setActiveTab("notifications")}
+              className="relative p-2 hover:bg-slate-100 rounded-xl transition-all"
+            >
+              <Bell size={22} className={unreadCount > 0 ? "text-amber-500" : "text-slate-400"} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] font-black text-white flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+            <button onClick={() => setActiveTab("settings")} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
+              <Settings size={22} className="text-slate-400" />
+            </button>
+          </div>
         </div>
 
         {/* Mode Switch Premium Toggle */}
@@ -358,15 +385,21 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
       <div className="px-6 space-y-6">
         {/* Tabs */}
         <div className="flex p-1 bg-slate-200/50 rounded-2xl">
-          {(!isEntrepreneurMode ? ["profile", "activity", "reports", "store", "settings"] : ["activity", "reports", "store", "settings"]).map((tab) => (
+          {(!isEntrepreneurMode ? ["profile", "activity", "reports", "store", "notifications", "settings"] : ["activity", "reports", "store", "notifications", "settings"]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
+              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all relative ${
                 activeTab === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
               }`}
             >
-              {tab === "profile" ? "내 정보" : tab === "activity" ? (isEntrepreneurMode ? "관심공간" : "활동 내역") : tab === "reports" ? "제보 & 알림함" : tab === "store" ? "상상 스토어" : "설정"}
+              {tab === "profile" ? "내 정보" : tab === "activity" ? (isEntrepreneurMode ? "관심공간" : "활동 내역") : tab === "reports" ? "제보 & 알림함" : tab === "store" ? "상상 스토어" : tab === "notifications" ? (
+                <span className="flex items-center justify-center gap-1">
+                  <Bell size={14} />
+                  알림
+                  {unreadCount > 0 && <span className="w-4 h-4 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                </span>
+              ) : "설정"}
             </button>
           ))}
         </div>
@@ -847,10 +880,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                    </div>
                    <button 
                      onClick={() => {
-                       if (totalPoints < item.price) {
-                         alert("포인트가 부족합니다!");
-                         return;
-                       }
+                       if (totalPoints < item.price) return;
                        setSelectedGifticon(item);
                        setPhoneNumber("");
                        setShowPhoneModal(true);
@@ -884,6 +914,73 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                  </div>
                </div>
              )}
+          </motion.div>
+        )}
+
+        {/* ===== 알림함 탭 ===== */}
+        {activeTab === "notifications" && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">알림함</h3>
+              {notifications.length > 0 && (
+                <button
+                  onClick={() => {
+                    const userId = localStorage.getItem("gongsil_user_id");
+                    if (userId) markNotificationsRead(userId);
+                    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+                    setUnreadCount(0);
+                  }}
+                  className="text-[10px] font-black text-slate-400 hover:text-slate-600"
+                >
+                  전체 읽음 처리
+                </button>
+              )}
+            </div>
+
+            {notifications.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <Bell size={40} className="text-slate-200" />
+                <p className="text-sm font-bold text-slate-400">아직 알림이 없어요</p>
+                <p className="text-xs text-slate-300 text-center break-keep">
+                  투표한 공실에 입점이 확정되면<br />여기서 알려드릴게요! 🏠
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {notifications.map(notif => (
+                  <motion.div
+                    key={notif.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={`p-4 rounded-2xl border transition-all ${
+                      notif.is_read
+                        ? 'bg-white border-slate-100'
+                        : 'bg-amber-50 border-amber-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0 ${
+                        notif.type === 'movein' ? 'bg-emerald-100' : 'bg-blue-100'
+                      }`}>
+                        {notif.type === 'movein' ? '✨' : '💬'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <p className="text-sm font-black text-slate-900 leading-tight break-keep">{notif.title}</p>
+                          {!notif.is_read && (
+                            <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium leading-relaxed break-keep">{notif.body}</p>
+                        <p className="text-[10px] text-slate-300 font-bold mt-1.5">
+                          {new Date(notif.created_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
 

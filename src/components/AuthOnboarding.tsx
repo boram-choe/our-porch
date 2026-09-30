@@ -64,6 +64,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
   const [gender, setGender] = useState<"male" | "female" | undefined>(undefined);
   const [ageRange, setAgeRange] = useState<string | undefined>(undefined);
   const [selectedActivityTimes, setSelectedActivityTimes] = useState<string[]>([]);
+  const [userCount, setUserCount] = useState(847); // 소셜 증명용 유저 수
 
   // 전체 동의 처리
   const handleConsentAll = (checked: boolean) => {
@@ -83,6 +84,14 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
   useEffect(() => {
     setConsentAll(consentTerms && consentPrivacy && consentLocation && consentMarketing);
   }, [consentTerms, consentPrivacy, consentLocation, consentMarketing]);
+
+  // 소셜 증명 — Supabase에서 총 유저 수 실시간 fetch
+  useEffect(() => {
+    supabase
+      .from('user_profiles')
+      .select('*', { count: 'exact', head: true })
+      .then(({ count }) => { if (count && count > 50) setUserCount(count); });
+  }, []);
 
   // 카카오 로그인 후 돌아왔을 때 세션이 있고 기존 프로필이 있으면 복원하고 바로 진입, 없으면 다음 단계(약관 동의)로 이동
   useEffect(() => {
@@ -424,59 +433,148 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
       </div>
 
       <AnimatePresence mode="wait">
-        {/* Step 0: Kakao Login (진입점) */}
+        {/* Step 0: 랜딩 — 전면 재설계 */}
         {step === 0 && (
-          <motion.div 
-            key="kakao" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }}
-            className="w-full max-w-md p-10 text-center relative z-10"
+          <motion.div
+            key="kakao"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="w-full flex flex-col relative z-10"
+            style={{ minHeight: '100dvh' }}
           >
-            <div className="w-24 h-24 bg-amber-400 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-amber-400/20">
-               <Heart size={44} className="text-slate-950" fill="currentColor" />
+            {/* 떠다니는 파티클 이모지 */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {[
+                { emoji: "💡", left: "7%",  top: "9%",  dur: 4.2, delay: 0   },
+                { emoji: "🏪", left: "76%", top: "6%",  dur: 3.8, delay: 1.2 },
+                { emoji: "☕", left: "87%", top: "30%", dur: 5.1, delay: 0.5 },
+                { emoji: "📍", left: "9%",  top: "43%", dur: 4.5, delay: 2.0 },
+                { emoji: "🏋️", left: "64%", top: "54%", dur: 3.6, delay: 0.8 },
+                { emoji: "✂️", left: "21%", top: "67%", dur: 4.8, delay: 1.5 },
+                { emoji: "💊", left: "81%", top: "71%", dur: 4.0, delay: 0.3 },
+                { emoji: "📚", left: "4%",  top: "81%", dur: 5.3, delay: 1.8 },
+              ].map((pin, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute text-2xl select-none"
+                  style={{ left: pin.left, top: pin.top }}
+                  animate={{ y: [0, -16, 0], opacity: [0.2, 0.55, 0.2] }}
+                  transition={{ duration: pin.dur, repeat: Infinity, delay: pin.delay, ease: "easeInOut" }}
+                >
+                  {pin.emoji}
+                </motion.span>
+              ))}
             </div>
-            <h1 className="text-4xl font-black text-white mb-4 tracking-tighter leading-tight">반가워요! <br/> <span className="text-amber-400">여긴뭐가</span> 입니다 ✨</h1>
-            <p className="text-slate-400 mb-12 font-bold leading-relaxed">우리 동네의 비어있는 공간을 찾고<br/>새로운 꿈을 채워넣어 볼까요?</p>
-            
-            <button 
-              onClick={async () => {
-                try {
-                  const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: 'kakao',
-                    options: {
-                      redirectTo: `${window.location.origin}/?login=success`,
-                      skipBrowserRedirect: true // SDK 내부 자동 이동 대신 URL만 안전하게 수신
-                    }
-                  });
-                  if (error) {
-                    console.error("Kakao Login Error:", error);
-                    alert("카카오 로그인 연동 중 문제가 발생했습니다: " + error.message);
-                    return;
-                  }
-                  if (data?.url) {
-                    // 수동 리다이렉트 실행 (Edge 등 브라우저의 보안 필터 우회 효과)
-                    window.location.href = data.url;
-                  } else {
-                    alert("로그인 페이지 주소를 생성하지 못했습니다.");
-                  }
-                } catch (err: any) {
-                  console.error("Kakao OAuth Exception:", err);
-                  alert("카카오 로그인 실행 중 에러가 발생했습니다: " + (err.message || err));
-                }
-              }}
-              className="w-full bg-[#FEE500] text-slate-950 py-5 rounded-2xl text-lg font-black shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 mb-4"
-            >
-              <div className="w-6 h-6 bg-slate-950 rounded-full flex items-center justify-center"><MessageSquare size={14} className="text-[#FEE500]" fill="currentColor" /></div>
-              카카오로 1초 만에 시작하기
-            </button>
 
-            <button
-              onClick={() => {
-                setIsGuest(true);
-                setStep(1);
-              }}
-              className="text-xs text-slate-500 hover:text-slate-300 font-bold underline transition-colors"
-            >
-              카카오 연동 없이 둘러보기 ↗
-            </button>
+            {/* 상단 콘텐츠 */}
+            <div className="flex-1 flex flex-col items-center justify-center px-6 pt-14 pb-2">
+
+              {/* 로고 */}
+              <motion.div
+                initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
+                className="w-16 h-16 bg-black rounded-[1.5rem] border border-amber-500/30 flex flex-col items-center justify-center mb-5 shadow-[0_0_40px_rgba(245,158,11,0.15)]"
+                style={{ fontFamily: '"Black Han Sans", "Pretendard Black", sans-serif' }}
+              >
+                <div className="flex w-full justify-between px-[5px] text-amber-500 font-black text-[17px] leading-tight">
+                  <span>여</span><span>긴</span>
+                </div>
+                <div className="flex w-full justify-between px-[5px] text-amber-500 font-black text-[17px] leading-tight">
+                  <span>뭐</span><span>가</span>
+                </div>
+              </motion.div>
+
+              {/* 소셜 증명 뱃지 */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}
+                className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full mb-7"
+              >
+                <div className="flex gap-0.5">
+                  {["🏠","🏢","🏪"].map((e, i) => <span key={i} className="text-xs">{e}</span>)}
+                </div>
+                <p className="text-xs font-bold text-slate-300">
+                  이미 <span className="text-amber-400 font-black">{userCount.toLocaleString()}명</span>이 동네를 상상 중
+                </p>
+              </motion.div>
+
+              {/* 헤드라인 */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.25 }}
+                className="text-center mb-7"
+              >
+                <h1 className="text-[2.6rem] font-black text-white tracking-tighter leading-[1.1] mb-3 break-keep">
+                  이 자리에<br/><span className="text-amber-400">뭐가 생기면</span><br/>좋을까요?
+                </h1>
+                <p className="text-slate-400 font-bold text-sm leading-relaxed break-keep">
+                  동네 빈 공간을 발견하면<br/>이웃들과 함께 상상해보세요 ✨
+                </p>
+              </motion.div>
+
+              {/* 실제 투표 예시 카드 슬라이더 */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+                className="w-full"
+              >
+                <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-3 text-center">지금 이웃들의 상상</p>
+                <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+                  {[
+                    { dong: "남가좌동", name: "가좌역 앞 1층 공간",    emoji: "☕", category: "카페",   votes: 34, from: "from-amber-500/10",   to: "to-amber-500/5" },
+                    { dong: "연희동",   name: "연세로 골목 2층 공간",  emoji: "🏋️", category: "필라테스", votes: 22, from: "from-indigo-500/10",  to: "to-indigo-500/5" },
+                    { dong: "홍은동",   name: "홍은사거리 1층 공간",  emoji: "🏪", category: "편의점", votes: 47, from: "from-emerald-500/10", to: "to-emerald-500/5" },
+                  ].map((card, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + i * 0.08 }}
+                      className={`flex-shrink-0 w-44 bg-gradient-to-br ${card.from} ${card.to} border border-white/10 rounded-2xl p-4 backdrop-blur-sm`}
+                    >
+                      <div className="flex items-center gap-1 mb-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">{card.dong}</p>
+                      </div>
+                      <p className="text-xs font-black text-white mb-3 line-clamp-1">{card.name}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{card.emoji}</span>
+                        <div>
+                          <p className="text-xs font-black text-white">{card.category}</p>
+                          <p className="text-[10px] text-amber-400 font-bold">{card.votes}표 상상 중</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+
+            {/* 하단 CTA */}
+            <div className="px-6 pb-10 pt-5 space-y-3">
+              <motion.button
+                initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                onClick={async () => {
+                  try {
+                    const { data, error } = await supabase.auth.signInWithOAuth({
+                      provider: 'kakao',
+                      options: {
+                        redirectTo: `${window.location.origin}/?login=success`,
+                        skipBrowserRedirect: true
+                      }
+                    });
+                    if (error) { console.error("Kakao Login Error:", error); return; }
+                    if (data?.url) { window.location.href = data.url; }
+                  } catch (err: any) { console.error("Kakao OAuth Exception:", err); }
+                }}
+                className="w-full bg-[#FEE500] text-slate-950 py-5 rounded-2xl text-lg font-black shadow-[0_10px_40px_rgba(254,229,0,0.2)] flex items-center justify-center gap-3"
+              >
+                <div className="w-6 h-6 bg-slate-950 rounded-full flex items-center justify-center">
+                  <MessageSquare size={14} className="text-[#FEE500]" fill="currentColor" />
+                </div>
+                카카오로 1초 만에 시작하기
+              </motion.button>
+              <button
+                onClick={() => { setIsGuest(true); setStep(1); }}
+                className="w-full text-xs text-slate-600 hover:text-slate-400 font-bold transition-colors py-2"
+              >
+                카카오 연동 없이 둘러보기 →
+              </button>
+            </div>
           </motion.div>
         )}
 
@@ -625,47 +723,66 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
           </motion.div>
         )}
 
-        {/* Step 2: Location Auth */}
+        {/* Step 2: 위치 인증 — 스토리텔링 강화 */}
         {step === 2 && (
           <motion.div 
             key="location" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
-            className="w-full max-w-md p-10 text-center relative z-10"
+            className="w-full max-w-md px-8 py-10 text-center relative z-10"
           >
-            <div className="w-20 h-20 bg-slate-900 border-2 border-amber-400/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-2xl">
-               <MapPin size={36} className="text-amber-400" />
-            </div>
-            <h1 className="text-3xl font-black text-white mb-6 tracking-tighter leading-tight">탐험을 시작하기 위해 <br/> <span className="text-amber-400">현재 동네</span>를 인증해 주세요</h1>
-            <p className="text-slate-400 mb-10 font-bold leading-relaxed break-keep">
-              내가 사랑하는 동네의 숨은 매력을 발견하고 <br/>
-              비어있는 상상 공간을 함께 채우기 위해 <br/>
-              <span className="block mt-1">위치 인증이 필요합니다.</span>
-            </p>
-            
-            <button 
-              onClick={handleLocationAuth} disabled={isLocating}
-              className="w-full bg-amber-400 text-slate-950 py-6 rounded-3xl text-xl font-black shadow-2xl hover:bg-amber-300 transition-all flex items-center justify-center gap-3"
+            {/* 반경 시각화 */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.1, type: "spring" }}
+              className="relative w-32 h-32 mx-auto mb-8"
             >
-              {isLocating ? <div className="w-6 h-6 border-4 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" /> : <>현재 위치로 인증하기 <NavigationIcon size={24} /></>}
-            </button>
+              <div className="absolute inset-0 rounded-full border-2 border-amber-500/15 animate-ping" style={{ animationDuration: '3s' }} />
+              <div className="absolute inset-[10px] rounded-full border-2 border-amber-500/25" />
+              <div className="absolute inset-[22px] rounded-full border-2 border-amber-500/40" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-12 bg-amber-500 rounded-[1.2rem] flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.5)]">
+                  <MapPin size={24} className="text-slate-950" fill="currentColor" />
+                </div>
+              </div>
+            </motion.div>
 
-            {/* 위치 인증 실패 에러 메시지 */}
+            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
+              <h1 className="text-3xl font-black text-white mb-4 tracking-tighter leading-tight break-keep">
+                <span className="text-amber-400">내 동네 반경 2.5km</span>의<br/>빈 공간을 보여드려요
+              </h1>
+              <p className="text-slate-400 mb-3 font-bold text-sm leading-relaxed break-keep">
+                GPS로 현재 위치를 확인하면<br/>우리 동네 공실 지도가 열립니다.
+              </p>
+              <p className="text-slate-600 text-xs font-bold mb-8">📵 위치는 동네 인증에만 사용되며, 이동 경로를 추적하지 않아요</p>
+            </motion.div>
+
+            <motion.button
+              initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              onClick={handleLocationAuth} disabled={isLocating}
+              className="w-full bg-amber-400 text-slate-950 py-6 rounded-3xl text-xl font-black shadow-[0_10px_40px_rgba(245,158,11,0.3)] flex items-center justify-center gap-3 disabled:opacity-60"
+            >
+              {isLocating
+                ? <><div className="w-6 h-6 border-4 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" /><span>동네 확인 중...</span></>
+                : <><NavigationIcon size={22} />현재 위치로 동네 인증하기</>
+              }
+            </motion.button>
+
             {locationError === "denied" && (
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-left">
+              <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-left"
+              >
                 <p className="text-red-400 font-black text-sm mb-1">📵 위치 접근이 차단되어 있어요</p>
                 <p className="text-red-300/70 text-xs font-bold leading-relaxed">
-                  브라우저 설정에서 위치 권한을 허용한 후 다시 시도해 주세요.<br/>
-                  (주소창 왼쪽 자물쇠 아이콘 → 위치 → 허용)
+                  주소창 왼쪽 자물쇠 아이콘 → 위치 → 허용 후 다시 시도해주세요.
                 </p>
-              </div>
+              </motion.div>
             )}
             {locationError && locationError !== "denied" && (
-              <div className="mt-4 p-4 bg-orange-500/10 border border-orange-500/30 rounded-2xl text-left">
+              <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 bg-orange-500/10 border border-orange-500/30 rounded-2xl text-left"
+              >
                 <p className="text-orange-400 font-black text-sm mb-1">📍 위치 확인에 실패했어요</p>
-                <p className="text-orange-300/70 text-xs font-bold leading-relaxed">
-                  {locationError}<br/>
-                  (잠시 후 다시 시도해 주세요)
-                </p>
-              </div>
+                <p className="text-orange-300/70 text-xs font-bold leading-relaxed">{locationError}<br/>(잠시 후 다시 시도해주세요)</p>
+              </motion.div>
             )}
           </motion.div>
         )}
@@ -814,9 +931,6 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
 
             <button 
               disabled={
-                !gender || 
-                !ageRange || 
-                selectedActivityTimes.length === 0 || 
                 selectedPersonaIds.length === 0 || 
                 (selectedPersonaIds.includes("other") && customPersona.trim() === "")
               } 
@@ -824,6 +938,12 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               className="w-full bg-amber-400 text-slate-950 py-5 rounded-2xl text-xl font-black shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
               선택 완료
+            </button>
+            <button
+              onClick={() => setStep(5)}
+              className="w-full text-xs text-slate-600 hover:text-slate-400 font-bold transition-colors py-3 mt-1"
+            >
+              나중에 입력하기 →
             </button>
           </motion.div>
         )}

@@ -138,15 +138,11 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
 
   const handleResolveReport = async (reportId: string) => {
     const replyText = replyTexts[reportId]?.trim();
-    if (!replyText) {
-      alert("주민분께 전할 회신 메시지를 입력해주세요.");
-      return;
-    }
+    if (!replyText) return; // 추후 버튼 disabled 조건으로 보호
 
     try {
       await updateReportReply(reportId, replyText);
-      alert("제보하신 주민분께 감사 메시지가 성공적으로 전송되었습니다! ✨");
-
+      // 성공 시 해당 제보 제거
       setPendingReports(prev => prev.filter(r => r.id !== reportId));
 
       if (formData.surveyRemarks) {
@@ -159,7 +155,6 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
       }
     } catch (err) {
       console.error("제보 답변 작성 실패:", err);
-      alert("제보 해결 처리 중 오류가 발생했습니다.");
     }
   };
 
@@ -209,15 +204,9 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
     // 통합 처리 시 유효성 검사
     if (formData.status === 'merged') {
       const targetId = formData.mergedIntoId?.trim();
-      if (!targetId || targetId.length !== 10 || isNaN(Number(targetId))) {
-        alert("올바른 10자리 공실 ID를 입력해주세요.");
-        return;
-      }
+      if (!targetId || targetId.length !== 10 || isNaN(Number(targetId))) return;
       const targetExists = allVacancies.find(v => v.display_id === targetId);
-      if (!targetExists) {
-        alert("존재하지 않는 공실 ID입니다. 다시 확인해주세요.");
-        return;
-      }
+      if (!targetExists) return;
     }
 
     onSave(formData);
@@ -593,7 +582,7 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
                               type="button"
                               onClick={async () => {
                                 const reply = inlineReportReplies[i]?.trim();
-                                if (!reply) { alert("답변 메시지를 입력해주세요."); return; }
+                                if (!reply) return; // 빈 값 시 조용히 무시
                                 // pendingReports에서 내용 일치하는 항목 찾아 DB에 즉시 저장
                                 const matchingReport = pendingReports.find(r =>
                                   r.content && content && (

@@ -324,16 +324,28 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  // Supabase에서 공실 불러오기 (동네 필터링)
  fetchVacancies().then(async (dbVacancies) => {
  if (dbVacancies.length > 0) {
- // 각 공실별로 실시간 투표 데이터를 가져와서 집계합니다.
- const vacanciesWithVotes = await Promise.all(dbVacancies.map(async (v) => {
- const { data: votes } = await supabase
- .from("votes")
- .select("category, category_icon, comment")
- .eq("vacancy_id", v.id);
+ // ─── N+1 쿼리 개선: 모든 투표를 단 1번에 가져온 뒤 클라이언트에서 그룹핑 ───
+ const vacancyIds = dbVacancies.map(v => v.id);
+ const { data: allVotes } = await supabase
+  .from("votes")
+  .select("vacancy_id, category, category_icon, comment")
+  .in("vacancy_id", vacancyIds);
+
+ // vacancyId 기준으로 투표 데이터를 미리 그룹핑
+ const votesByVacancyId: Record<string, typeof allVotes> = {};
+ (allVotes || []).forEach(vote => {
+  if (!votesByVacancyId[vote.vacancy_id]) {
+  votesByVacancyId[vote.vacancy_id] = [];
+  }
+  votesByVacancyId[vote.vacancy_id]!.push(vote);
+ });
+
+ const vacanciesWithVotes = dbVacancies.map((v) => {
+ const votes = votesByVacancyId[v.id] || [];
 
  // 업종별로 투표 수 집계
  const voteCounts: Record<string, { brand: string, count: number, categoryId: string }> = {};
- (votes || []).forEach(vote => {
+ votes.forEach(vote => {
  const brand = vote.comment || vote.category; // 사용자가 선택한 세부 카테고리/브랜드명 우선 채택
  const bigCategoryName = vote.category; // 대분류 카테고리명 ("상점/생활", "음식점" 등)
  if (!voteCounts[brand]) {
@@ -368,7 +380,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  displayId: v.display_id,
  currentVotes: Object.values(voteCounts),
  };
- }));
+ });
 
  setVacancies(vacanciesWithVotes);
 
@@ -398,7 +410,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  }, 500);
  } else {
  // 2.5km 범위 밖이거나 동네를 벗어난 곳의 딥링크 공유 접근 차단 안내 및 주소 정리
- alert("공유받은 상상 조각이 회원님의 인증 동네(반경 2.5km)를 벗어난 곳에 위치하여 열어볼 수 없습니다. 📍");
+ setShowSuccessToast("📍 공유받은 상상 조각이 회원님의 인증 동네(반경 2.5km)를 벗어나 있어 열어볼 수 없습니다.");
  searchParams.delete("vacancyId");
  const query = searchParams.toString();
  window.history.pushState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
@@ -594,7 +606,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  : userProfile.home;
  if (activeLoc?.lat && activeLoc?.lng) {
  if (haversineKm(activeLoc.lat, activeLoc.lng, lat, lng) > FILTER_RADIUS_KM) {
- alert(`현재 설정된 위치 반경(${FILTER_RADIUS_KM}km) 이내에서만 공실을 등록할 수 있습니다.\n\n먼 곳의 공실은 눈으로 구경만 가능해요! 👀`);
+ setShowSuccessToast(`📍 현재 동네 반경 ${FILTER_RADIUS_KM}km 이내에서만 공실을 등록할 수 있습니다. 먼 곳의 공실은 눈으로 구경만 가능해요! 👀`);
  setIsPinpointing(false);
  return;
  }
@@ -678,7 +690,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  : userProfile.home;
  if (activeLoc?.lat && activeLoc?.lng) {
  if (haversineKm(activeLoc.lat, activeLoc.lng, pinLocation.lat, pinLocation.lng) > FILTER_RADIUS_KM) {
- alert(`현재 설정된 위치 반경(${FILTER_RADIUS_KM}km) 이내에서만 공실을 등록할 수 있습니다.`);
+ setShowSuccessToast(`📍 현재 동네 반경 ${FILTER_RADIUS_KM}km 이내에서만 공실을 등록할 수 있습니다.`);
  setShowAddModal(false);
  setIsPinpointing(false);
  return;
@@ -764,7 +776,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  }
  } catch (e) {
  console.warn("공실 저장 실패:", e);
- alert("공실 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
+ setShowSuccessToast("⚠️ 공실 등록 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
  } finally {
  setIsPinpointing(false);
  }
@@ -884,27 +896,36 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
  <div className="absolute inset-0 z-0">
  <Map 
- center={mapCenter} 
- style={{ width: "100%", height: "100%" }} 
- level={3} 
- ref={mapRef} 
- onDragStart={() => setShowDashboard(false)}
- onCenterChanged={(map) => {
- if (isPinpointing) {
- const center = map.getCenter();
- setPinLocation({ lat: center.getLat(), lng: center.getLng() });
- }
- }}
- onClick={(_, mouseEvent) => {
- if (isPinpointing) {
- const latLng = mouseEvent.latLng;
- setPinLocation({ lat: latLng.getLat(), lng: latLng.getLng() });
- }
- }}
- >
- {mapMarkers}
- {highlightFortuneArea && (
- <CustomOverlayMap position={{ lat: highlightFortuneArea.lat, lng: highlightFortuneArea.lng }}>
+        center={mapCenter} 
+        style={{ width: "100%", height: "100%" }} 
+        level={3} 
+        ref={mapRef} 
+        draggable={true}
+        zoomable={true}
+        onDragStart={() => setShowDashboard(false)}
+        onDragEnd={(map) => {
+          const center = map.getCenter();
+          setMapCenter({ lat: center.getLat(), lng: center.getLng() });
+        }}
+        onCenterChanged={(map) => {
+          const center = map.getCenter();
+          const lat = center.getLat();
+          const lng = center.getLng();
+          setMapCenter({ lat, lng });
+          if (isPinpointing) {
+            setPinLocation({ lat, lng });
+          }
+        }}
+        onClick={(_, mouseEvent) => {
+          if (isPinpointing) {
+            const latLng = mouseEvent.latLng;
+            setPinLocation({ lat: latLng.getLat(), lng: latLng.getLng() });
+          }
+        }}
+      >
+        {mapMarkers}
+        {highlightFortuneArea && (
+          <CustomOverlayMap position={{ lat: highlightFortuneArea.lat, lng: highlightFortuneArea.lng }}>
  <div className="relative flex items-center justify-center pointer-events-none">
  {/* Glowing ripple effects */}
  {isPulsing && (

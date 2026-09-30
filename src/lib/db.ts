@@ -374,7 +374,19 @@ export async function saveVacancy(v: {
       return { id: null, error: "데이터를 찾을 수 없거나 수정 권한이 없습니다. (DB 정책 확인 필요)" };
     }
     
-    return { id: data[0].id, error: null };
+    const savedId = data[0].id;
+
+    // [입점 확정] status=completed 전환 시 → 투표자 전원 알림 발송
+    if (v.status === 'completed' && v.id) {
+      try {
+        const storeName = v.surveyRemarks?.replace('[입점 확정] ', '') || '';
+        await notifyVotersOnMovein(v.id, v.landmark || v.address || '이 공간', storeName);
+      } catch (notifErr) {
+        console.warn('입점 알림 발송 중 오류 (무시):', notifErr);
+      }
+    }
+
+    return { id: savedId, error: null };
   } else {
     // 신규 공실 등록
     console.log("신규 공실 등록 시도:", commonPayload);
@@ -698,3 +710,91 @@ export async function updateReportReply(reportId: string, replyContent: string):
 }
 
 
+// ─── 알림(Notifications) ──────────────────────────────────────────────────
+
+export interface DbNotification {
+  id: string;
+  user_id: string;
+  type: 'movein' | 'reply' | 'system';
+  title: string;
+  body: string;
+  vacancy_id: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+/** 특정 유저의 알림 목록 조회 */
+export async function fetchUserNotifications(userId: string): Promise<DbNotification[]> {
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.warn('알림 조회 오류:', error.message);
+    return [];
+  }
+  return (data ?? []) as DbNotification[];
+}
+
+/** 읽지 않은 알림 개수 */
+export async function fetchUnreadNotificationCount(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('is_read', false);
+
+  if (error) return 0;
+  return count ?? 0;
+}
+
+/** 알림 읽음 처리 (단건 또는 전체) */
+export async function markNotificationsRead(userId: string, notificationId?: string): Promise<void> {
+  let query = supabase.from('notifications').update({ is_read: true }).eq('user_id', userId);
+  if (notificationId) query = (query as any).eq('id', notificationId);
+  await query;
+}
+
+/** 입점 확정 시 해당 공실 투표자 전원에게 알림 생성 */
+export async function notifyVotersOnMovein(
+  vacancyId: string,
+  vacancyName: string,
+  storeName: string
+): Promise<void> {
+  // 1. 해당 공실에 투표한 유저 ID 목록 수집 (중복 제거)
+  const { data: votes, error: voteErr } = await supabase
+    .from('votes')
+    .select('user_id')
+    .eq('vacancy_id', vacancyId);
+
+  if (voteErr || !votes || votes.length === 0) return;
+
+  const uniqueUserIds = [...new Set(votes.map((v: any) => v.user_id as string))];
+
+  // 2. 알림 내용 구성
+  const title = storeName
+    ? `✨ ${vacancyName}에 '${storeName}'이(가) 입점했어요!`
+    : `✨ ${vacancyName}에 새 가게가 입점했어요!`;
+
+  const body = storeName
+    ? `당신이 상상했던 공간에 실제로 가게가 생겼어요. 동네에 새 명소를 함께 응원해봐요! 🎉`
+    : `당신이 투표했던 공실에 드디어 입점이 확정되었습니다. 동네 변화를 지켜봐요! 🏠`;
+
+  // 3. 투표자 전원 알림 배치 INSERT
+  const notifications = uniqueUserIds.map(userId => ({
+    user_id: userId,
+    type: 'movein' as const,
+    title,
+    body,
+    vacancy_id: vacancyId,
+    is_read: false,
+    created_at: new Date().toISOString(),
+  }));
+
+  const { error: insertErr } = await supabase.from('notifications').insert(notifications);
+  if (insertErr) console.error('알림 일괄 생성 오류:', insertErr.message);
+  else console.log(`입점 알림 ${notifications.length}명에게 발송 완료`);
+}

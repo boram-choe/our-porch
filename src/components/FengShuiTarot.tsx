@@ -327,7 +327,6 @@ export default function FengShuiTarot({
       setShareImageUrl(dataUrl);
       return dataUrl;
     } catch (e: any) {
-      alert(`캡처 중 상세 오류:\n${e.name || ''} : ${e.message || e.toString()}`);
       console.error("이미지 생성 오류", e);
       return null;
     } finally {
@@ -1650,7 +1649,7 @@ export default function FengShuiTarot({
                               setShowShareModal(true);
                               const dataUrl = await generateShareImage();
                               if (!dataUrl) {
-                                alert("이미지 캡처에 실패했습니다. 잠시 후 다시 시도해주세요.");
+                                console.warn('이미지 생성 실패');
                               }
                             }}
                             className="w-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 hover:opacity-90 active:scale-[0.98] text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-purple-500/20 transition-all flex items-center justify-center gap-2.5 text-sm select-none"
@@ -1789,7 +1788,7 @@ export default function FengShuiTarot({
                         title: '우리집 풍수수호신 진단서',
                       });
                     } else {
-                      alert("기기에서 이미지 직접 공유를 지원하지 않습니다. 이미지를 저장한 후 인스타그램에 올려주세요!");
+                      // 직접 공유 미지원 시 자동 다운로드
                       const a = document.createElement("a");
                       a.href = shareImageUrl;
                       a.download = "우리집풍수결과.png";
