@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
-import { fetchUserReports, DbReport, fetchUserNotifications, markNotificationsRead, DbNotification } from "@/lib/db";
+import { fetchUserReports, DbReport, fetchUserNotifications, markNotificationsRead, DbNotification, restoreTeamSession } from "@/lib/db";
 import { fetchGifticonRequests, purchaseGifticon, STORE_ITEMS, GifticonRequest } from "@/lib/gifticon";
 import { supabase } from "@/lib/supabase";
 
@@ -76,7 +76,6 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [editPersonaIds, setEditPersonaIds] = useState<string[]>([]);
   const [editCustomPersona, setEditCustomPersona] = useState("");
   
-  const [adminCode, setAdminCode] = useState("");
   const [showAdminAuth, setShowAdminAuth] = useState(false);
 
   const [isRegisteringWork, setIsRegisteringWork] = useState(false);
@@ -246,15 +245,20 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     setIsEditing(false);
   };
 
-  const handleAdminAuth = () => {
-    if (adminCode === "0000") {
+  const [adminAuthMessage, setAdminAuthMessage] = useState<string | null>(null);
+
+  // 관리자 인증: 조사원 페이지(/surveyor)에서 CEO/OPS 계정으로 로그인한 세션이 서버에서 확인될 때만 허용
+  const handleAdminAuth = async () => {
+    const staff = await restoreTeamSession();
+    if (staff && (staff.role === "CEO" || staff.role === "OPS")) {
       const updatedProfile = { ...userProfile, isAdmin: true };
       setUserProfile(updatedProfile);
       localStorage.setItem("gongsil_user_profile", JSON.stringify(updatedProfile));
-      setAdminCode("");
+      setAdminAuthMessage(null);
       setShowAdminAuth(false);
+    } else {
+      setAdminAuthMessage("대표/운영 계정으로 조사원 페이지(/surveyor)에 먼저 로그인한 뒤 다시 시도해주세요.");
     }
-    // 코드 불일치 시: 조용히 무시 (UI에서 실패 피드백 필요시 인라인 상태로 추가 가능)
   };
 
   const addWorkLocation = () => {
@@ -1026,13 +1030,10 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 
                 {showAdminAuth ? (
                   <div className="space-y-4">
-                    <input 
-                      type="password"
-                      value={adminCode}
-                      onChange={(e) => setAdminCode(e.target.value)}
-                      placeholder="관리자 코드를 입력하세요"
-                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold focus:border-amber-500 transition-all outline-none text-sm"
-                    />
+                    <p className="text-xs font-bold text-slate-500 leading-relaxed">
+                      조사원 페이지에서 대표/운영 계정으로 로그인한 상태여야 합니다.
+                    </p>
+                    {adminAuthMessage && <p className="text-xs font-bold text-rose-500">{adminAuthMessage}</p>}
                     <div className="flex gap-2">
                        <button onClick={() => setShowAdminAuth(false)} className="flex-1 py-3 bg-slate-50 text-slate-400 font-bold rounded-xl text-sm">취소</button>
                        <button onClick={handleAdminAuth} className="flex-1 py-3 bg-slate-900 text-white font-bold rounded-xl text-sm">인증하기</button>

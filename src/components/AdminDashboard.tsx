@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 import { getNeighborhoodReport, DemographicSummary } from "@/lib/db";
 
-import { saveVacancy } from "@/lib/db";
-import { supabase } from "@/lib/supabase";
+import { saveVacancy, fetchPendingMoveinReports, markReportResolved } from "@/lib/db";
 export default function AdminDashboard({ 
   onBack, 
   vacancies = [],
@@ -38,8 +37,7 @@ export default function AdminDashboard({
     const dong = profile?.home?.neighborhood || profile?.neighborhood || "우리동네";
     setNeighborhood(dong);
 
-    supabase.from('reports').select('*').eq('status', 'pending').eq('report_type', 'movein')
-        .then(({ data }) => setPendingReports(data || []));
+    fetchPendingMoveinReports().then((data) => setPendingReports(data));
 
       getNeighborhoodReport(dong)
       .then(data => {
@@ -141,7 +139,7 @@ export default function AdminDashboard({
                             return;
                           }
                           // 1. Update report status
-                          await supabase.from('reports').update({ status: 'resolved' }).eq('id', report.id);
+                          await markReportResolved(report.id);
                           // 2. Update vacancy status to completed and append move-in info
                           if (matchedVacancy && onUpdateVacancy) {
                             const res = await saveVacancy({

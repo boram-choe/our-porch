@@ -687,7 +687,9 @@ export async function submitDisputeReport(report: {
   reportType: 'dispute' | 'movein';
   content: string;
 }): Promise<{ id: string | null; error: string | null }> {
+  const id = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : undefined;
   const payload = {
+    ...(id ? { id } : {}),
     vacancy_id: report.vacancyId,
     user_id: report.userId,
     report_type: report.reportType,
@@ -698,17 +700,13 @@ export async function submitDisputeReport(report: {
     updated_at: new Date().toISOString()
   };
 
-  const { data, error } = await supabase
-    .from('reports')
-    .insert(payload)
-    .select('id')
-    .single();
+  const { error } = await supabase.from('reports').insert(payload);
 
   if (error) {
     console.error("제보 저장 오류:", error.message);
     return { id: null, error: error.message };
   }
-  return { id: data ? data.id : null, error: null };
+  return { id: id ?? null, error: null };
 }
 
 export async function fetchUserReports(userId: string): Promise<DbReport[]> {
@@ -860,4 +858,25 @@ export async function updateVacancyRemarks(vacancyId: string, surveyRemarks: str
     .update({ survey_remarks: surveyRemarks, updated_at: new Date().toISOString() })
     .eq("id", vacancyId);
   return { error: error ? error.message : null };
+}
+
+/** 처리 대기 중인 입점 제보 목록 (조사원 로그인 시 서버 RPC, 그 외에는 관리자 계정 정책) */
+export async function fetchPendingMoveinReports(): Promise<DbReport[]> {
+  const token = getTeamToken();
+  if (token) {
+    const { data } = await supabase.rpc('staff_list_reports', { p_token: token, p_status: 'pending' });
+    return ((data ?? []) as DbReport[]).filter(r => r.report_type === 'movein');
+  }
+  const { data } = await supabase.from('reports').select('*').eq('status', 'pending').eq('report_type', 'movein');
+  return (data ?? []) as DbReport[];
+}
+
+/** 제보를 회신 없이 처리 완료로 표시 (입점 확정 등) */
+export async function markReportResolved(reportId: string): Promise<void> {
+  const token = getTeamToken();
+  if (token) {
+    await supabase.rpc('staff_reply_report', { p_token: token, p_report_id: reportId, p_reply: null });
+    return;
+  }
+  await supabase.from('reports').update({ status: 'resolved' }).eq('id', reportId);
 }
