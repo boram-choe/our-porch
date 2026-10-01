@@ -2,6 +2,19 @@
 // Supabase CRUD 헬퍼 함수 모음
 import { supabase } from "./supabase";
 
+// ─── 조사원(팀원) 세션 토큰 ─────────────────────────────────────────────────
+const TEAM_TOKEN_KEY = "gongsil_team_token";
+export function getTeamToken(): string | null {
+  try { return typeof window !== "undefined" ? localStorage.getItem(TEAM_TOKEN_KEY) : null; } catch { return null; }
+}
+export function setTeamToken(token: string | null) {
+  try {
+    if (typeof window === "undefined") return;
+    if (token) localStorage.setItem(TEAM_TOKEN_KEY, token);
+    else localStorage.removeItem(TEAM_TOKEN_KEY);
+  } catch { /* 저장소 접근 불가 시 무시 */ }
+}
+
 // ─── 타입 ────────────────────────────────────────────────────────────────────
 
 // 사진 업로드 함수
@@ -70,15 +83,14 @@ export interface DbVote {
 
 export interface TeamMember {
   id: string;
-  password: string;
   real_name: string;
   role: "CEO" | "OPS" | "SURVEYOR";
   city: string;
   gu: string;
   dong: string;
-  phone: string;
+  phone: string | null;
   hire_date: string;
-  base_salary: number;
+  base_salary: number | null;
 }
 
 
@@ -321,6 +333,23 @@ export async function saveVacancy(v: {
     commonPayload.display_id = v.displayId;
   }
 
+  // 조사원(팀원) 로그인 상태면 서버 RPC로 저장 (직접 테이블 쓰기 권한 없음)
+  const teamToken = getTeamToken();
+  if (teamToken) {
+    const { data, error } = await supabase.rpc("staff_save_vacancy", {
+      p_token: teamToken,
+      p_id: v.id || null,
+      p: commonPayload,
+    });
+    if (error) {
+      console.error("공실 저장 오류:", error);
+      return { id: null, error: error.message };
+    }
+    if (data?.error === "unauthorized") return { id: null, error: "로그인이 만료되었습니다. 다시 로그인해주세요." };
+    if (data?.error) return { id: null, error: data.error === "not_found" ? "데이터를 찾을 수 없습니다." : data.error };
+    return { id: data?.id ?? null, error: null };
+  }
+
   if (v.id) {
     // 기존 공실 업데이트
     console.log("공실 업데이트 시도 ID:", v.id, "데이터:", commonPayload);
@@ -376,7 +405,7 @@ export async function saveVacancy(v: {
     
     const savedId = data[0].id;
 
-    // [입점 확정] status=completed 전환 시 → 투표자 전원 알림 발송
+    // [입점 확정] status=completed 전환 시 → 투표자 전원 알림 발송 (관리자 경로. 조사원 경로는 서버에서 처리)
     if (v.status === 'completed' && v.id) {
       try {
         const storeName = v.surveyRemarks?.replace('[입점 확정] ', '') || '';
@@ -544,77 +573,95 @@ export async function getNeighborhoodReport(neighborhood: string): Promise<Demog
 // ─── 팀원 관리 (Team Members) ──────────────────────────────────────────────
 
 export async function fetchTeamMembers(): Promise<TeamMember[]> {
-  const { data, error } = await supabase
-    .from("team_members")
-    .select("*")
-    .order("created_at", { ascending: true });
-
+  const token = getTeamToken();
+  if (!token) return [];
+  const { data, error } = await supabase.rpc("team_list", { p_token: token });
   if (error) {
     console.error("팀원 조회 오류:", error.message);
     return [];
   }
-  return data ?? [];
+  return (data ?? []) as TeamMember[];
 }
 
-export async function saveTeamMember(m: Partial<TeamMember>): Promise<{ id: string | null; error: string | null }> {
-  // ID 자동 생성 로직 (해당 동네의 기존 인원수 기반)
-  let generatedId = m.id;
-  if (!generatedId) {
-    const { count } = await supabase
-      .from('team_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('city', m.city)
-      .eq('gu', m.gu)
-      .eq('dong', m.dong);
-    
-    generatedId = generateMemberId(m.city || "", m.gu || "", m.dong || "", (count || 0) + 1);
+export async function saveTeamMember(m: Partial<TeamMember> & { password?: string }): Promise<{ id: string | null; error: string | null }> {
+  const token = getTeamToken();
+  if (!token) return { id: null, error: "로그인이 필요합니다." };
+
+  // ID는 동네 기존 인원수 기반으로 생성하고, 중복이면 다음 번호로 재시도 (기존 팀원을 덮어쓰지 않음)
+  const existing = m.id ? [] : await fetchTeamMembers();
+  const base = existing.filter(t => t.city === m.city && t.gu === m.gu && t.dong === m.dong).length;
+
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const id = m.id || generateMemberId(m.city || "", m.gu || "", m.dong || "", base + 1 + attempt);
+    const { data, error } = await supabase.rpc("team_create_member", {
+      p_token: token,
+      p: {
+        id,
+        password: m.password || id, // 비밀번호가 없으면 ID와 동일하게 부여
+        real_name: m.real_name,
+        role: m.role || "SURVEYOR",
+        city: m.city,
+        gu: m.gu,
+        dong: m.dong,
+        phone: m.phone,
+        hire_date: m.hire_date,
+        base_salary: m.base_salary || 0,
+      },
+    });
+    if (error) {
+      console.error("팀원 저장 오류:", error.message);
+      return { id: null, error: error.message };
+    }
+    if (data?.error === "duplicate_id" && !m.id) continue;
+    if (data?.error) return { id: null, error: data.error === "forbidden" ? "권한이 없습니다." : data.error };
+    return { id: data?.id ?? id, error: null };
   }
-
-  const payload = {
-    id: generatedId,
-    password: m.password || generatedId, // 비밀번호가 없으면 ID와 동일하게 부여
-    real_name: m.real_name,
-    role: m.role || 'SURVEYOR',
-    city: m.city,
-    gu: m.gu,
-    dong: m.dong,
-    phone: m.phone,
-    hire_date: m.hire_date || new Date().toISOString().split('T')[0],
-    base_salary: m.base_salary || 0,
-  };
-
-
-  const { data, error } = await supabase
-    .from("team_members")
-    .upsert(payload)
-    .select("id");
-
-  if (error) {
-    console.error("팀원 저장 오류:", error.message);
-    return { id: null, error: error.message };
-  }
-
-  return { id: (data && data.length > 0) ? data[0].id : null, error: null };
+  return { id: null, error: "사용 가능한 ID를 만들지 못했습니다." };
 }
 
-export async function updateTeamMemberPassword(id: string, newPassword: string): Promise<{ error: string | null }> {
-  const { error } = await supabase
-    .from('team_members')
-    .update({ password: newPassword })
-    .eq('id', id);
-  return { error: error ? error.message : null };
+export async function updateTeamMemberPassword(newPassword: string): Promise<{ error: string | null }> {
+  const { data, error } = await supabase.rpc("team_change_password", { p_token: getTeamToken(), p_new: newPassword });
+  if (error) return { error: error.message };
+  if (data?.error === "too_short") return { error: "비밀번호는 6자 이상이어야 합니다." };
+  if (data?.error) return { error: "권한이 없습니다. 다시 로그인해주세요." };
+  setTeamToken(null);
+  return { error: null };
 }
 
-export async function loginTeamMember(id: string, password: string): Promise<TeamMember | null> {
-  const { data, error } = await supabase
-    .from('team_members')
-    .select('*')
-    .eq('id', id.trim())
-    .eq('password', password.trim())
-    .single();
-  
-  if (error || !data) return null;
-  return data;
+export async function resetTeamMemberPassword(memberId: string, newPassword: string): Promise<{ error: string | null }> {
+  const { data, error } = await supabase.rpc("team_reset_password", { p_token: getTeamToken(), p_member_id: memberId, p_new: newPassword });
+  if (error) return { error: error.message };
+  if (data?.error === "too_short") return { error: "비밀번호는 6자 이상이어야 합니다." };
+  if (data?.error) return { error: "권한이 없습니다." };
+  return { error: null };
+}
+
+export type TeamLoginResult =
+  | { member: TeamMember; error: null }
+  | { member: null; error: "invalid" | "locked" | "network" };
+
+export async function loginTeamMember(id: string, password: string): Promise<TeamLoginResult> {
+  const { data, error } = await supabase.rpc("team_login", { p_id: id, p_password: password });
+  if (error || !data) return { member: null, error: "network" };
+  if (data.error) return { member: null, error: data.error === "locked" ? "locked" : "invalid" };
+  setTeamToken(data.token);
+  return { member: data.member as TeamMember, error: null };
+}
+
+/** 저장된 토큰이 아직 유효하면 팀원 정보를 돌려준다 (페이지 진입 시 세션 복원용) */
+export async function restoreTeamSession(): Promise<TeamMember | null> {
+  const token = getTeamToken();
+  if (!token) return null;
+  const { data, error } = await supabase.rpc("team_me", { p_token: token });
+  if (error) return null; // 네트워크 오류: 토큰은 유지
+  if (!data) { setTeamToken(null); return null; }
+  return data as TeamMember;
+}
+
+export async function logoutTeamMember(): Promise<void> {
+  const token = getTeamToken();
+  setTeamToken(null);
+  if (token) await supabase.rpc("team_logout", { p_token: token });
 }
 
 // ─── 공실 정보 정정 제보 및 회신(메시지함) ─────────────────────────────────────────
@@ -679,11 +726,10 @@ export async function fetchUserReports(userId: string): Promise<DbReport[]> {
 }
 
 export async function fetchVacancyReports(vacancyId: string): Promise<DbReport[]> {
-  const { data, error } = await supabase
-    .from('reports')
-    .select('*')
-    .eq('vacancy_id', vacancyId)
-    .order('created_at', { ascending: false });
+  const token = getTeamToken();
+  const { data, error } = token
+    ? await supabase.rpc('staff_vacancy_reports', { p_token: token, p_vacancy_id: vacancyId })
+    : await supabase.from('reports').select('*').eq('vacancy_id', vacancyId).order('created_at', { ascending: false });
 
   if (error || !data) {
     console.error("공실 제보 조회 오류:", error?.message);
@@ -693,6 +739,13 @@ export async function fetchVacancyReports(vacancyId: string): Promise<DbReport[]
 }
 
 export async function updateReportReply(reportId: string, replyContent: string): Promise<{ error: string | null }> {
+  const token = getTeamToken();
+  if (token) {
+    const { data, error } = await supabase.rpc('staff_reply_report', { p_token: token, p_report_id: reportId, p_reply: replyContent });
+    if (error) return { error: error.message };
+    if (data?.error) return { error: "권한이 없거나 로그인이 만료되었습니다." };
+    return { error: null };
+  }
   const { error } = await supabase
     .from('reports')
     .update({
@@ -797,4 +850,14 @@ export async function notifyVotersOnMovein(
   const { error: insertErr } = await supabase.from('notifications').insert(notifications);
   if (insertErr) console.error('알림 일괄 생성 오류:', insertErr.message);
   else console.log(`입점 알림 ${notifications.length}명에게 발송 완료`);
+}
+
+
+/** 일반 사용자의 제보로 공실 비고(survey_remarks)만 갱신 (다른 컬럼은 건드리지 않음) */
+export async function updateVacancyRemarks(vacancyId: string, surveyRemarks: string): Promise<{ error: string | null }> {
+  const { error } = await supabase
+    .from("vacancies")
+    .update({ survey_remarks: surveyRemarks, updated_at: new Date().toISOString() })
+    .eq("id", vacancyId);
+  return { error: error ? error.message : null };
 }

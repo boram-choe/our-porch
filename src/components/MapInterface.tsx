@@ -621,7 +621,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  const addrData = result[0];
  setDetectedAddress(addrData.address.address_name);
  
- let buildingName = addrData.road_address?.building_name || "";
+ const buildingName = addrData.road_address?.building_name || "";
  
  ps.keywordSearch("우체국 은행 지하철역 정류장 도서관 공원 병원 학교 마트 시청 경찰서 아파트 단지", (famousData: any, famousStatus: any) => {
  ps.keywordSearch("빌딩 빌라 오피스텔", (buildingData: any, buildingStatus: any) => {

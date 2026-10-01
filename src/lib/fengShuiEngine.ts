@@ -252,7 +252,7 @@ export function analyzeFengShui(
 
   // 특별 15% 확률로 사거리 '로충살'이 포함된 경우
   let remedyData = { ...gradeData.remedy };
-  let currentCons = [...gradeData.cons];
+  const currentCons = [...gradeData.cons];
   
   if (seed % 7 === 0) {
     currentCons.push("매장 전면에 직통하는 도로의 강하고 날카로운 살기(로충살)가 밀려듭니다.");

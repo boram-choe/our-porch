@@ -6,7 +6,7 @@ import { ShieldCheck, MapPin, Search, Check, Building2, LogOut, Lock, ArrowRight
 import { Map, MapMarker } from "react-kakao-maps-sdk";
 import { useKakaoLoader } from "react-kakao-maps-sdk";
 import SurveyInput from "../../components/SurveyInput";
-import { saveVacancy, fetchVacancies, DbVacancy, generateSpaceId, fetchTeamMembers, saveTeamMember, TeamMember, generateMemberId, updateTeamMemberPassword, loginTeamMember } from "../../lib/db";
+import { saveVacancy, fetchVacancies, DbVacancy, generateSpaceId, fetchTeamMembers, saveTeamMember, TeamMember, generateMemberId, updateTeamMemberPassword, loginTeamMember, restoreTeamSession, logoutTeamMember } from "../../lib/db";
 import { Vacancy } from "../../data/dummyVacancies";
 import regionsData from "../../data/regions.json";
 
@@ -91,7 +91,7 @@ export default function SurveyorPage() {
     setIsLoading(true);
     
     try {
-      const account = await loginTeamMember(loginId, password);
+      const { member: account, error: loginError } = await loginTeamMember(loginId, password);
       
       if (account) {
         const rank = calculateRank(account.hire_date);
@@ -107,6 +107,7 @@ export default function SurveyorPage() {
         if (typeof window !== "undefined") {
           localStorage.setItem("gongsil_surveyor_session", JSON.stringify(profile));
         }
+        loadTeam();
         
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition((pos) => {
@@ -114,7 +115,11 @@ export default function SurveyorPage() {
           });
         }
       } else {
-        alert("아이디 또는 비밀번호가 올바르지 않습니다. (DB 응답: 데이터 없음)");
+        alert(
+          loginError === "locked" ? "로그인 시도가 너무 많습니다. 15분 후에 다시 시도해주세요." :
+          loginError === "network" ? "서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요." :
+          "아이디 또는 비밀번호가 올바르지 않습니다."
+        );
       }
     } catch (err: any) {
       alert(`로그인 중 오류가 발생했습니다: ${err.message || err}`);
@@ -126,12 +131,23 @@ export default function SurveyorPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const session = localStorage.getItem("gongsil_surveyor_session");
-      if (session) {
-        const parsed = JSON.parse(session) as SurveyorProfile;
+      // 저장된 프로필을 신뢰하지 않고, 서버에서 토큰을 검증해 세션을 복원한다
+      restoreTeamSession().then((account) => {
+        if (!account) {
+          localStorage.removeItem("gongsil_surveyor_session");
+          return;
+        }
+        const rank = calculateRank(account.hire_date);
         setIsAuthenticated(true);
-        setCurrentUser(parsed);
-      }
+        setCurrentUser({
+          ...account,
+          calculatedRank: rank,
+          formattedName: account.role === "CEO" ? `대표이사 ${account.real_name}` :
+                         account.role === "OPS" ? `운영팀장 ${account.real_name}` :
+                         `툇마루단-${account.gu}-${account.real_name} ${rank}`
+        });
+        loadTeam();
+      });
     }
     
     if (navigator.geolocation) {
@@ -176,7 +192,9 @@ export default function SurveyorPage() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentUser(null);
+    setTeamMembers([]);
     localStorage.removeItem("gongsil_surveyor_session");
+    logoutTeamMember();
   };
 
   const confirmLocation = () => {
@@ -305,7 +323,7 @@ export default function SurveyorPage() {
     if (!currentUser || !newPw) return;
     setIsLoading(true);
     try {
-      const { error } = await updateTeamMemberPassword(currentUser.id, newPw);
+      const { error } = await updateTeamMemberPassword(newPw);
       
       if (error) throw new Error(error);
       alert("비밀번호가 변경되었습니다. 다시 로그인해주세요.");
@@ -630,9 +648,9 @@ export default function SurveyorPage() {
                             <tr key={m.id} className="hover:bg-slate-50/50">
                               <td className="px-6 py-4 font-black text-slate-950">{m.real_name} <span className="text-blue-500 ml-1">{calculateRank(m.hire_date)}</span></td>
                               <td className="px-6 py-4 font-mono font-bold text-slate-500">{m.id}</td>
-                              <td className="px-6 py-4 font-mono font-bold text-rose-500">{m.password}</td>
+                              <td className="px-6 py-4 font-mono font-bold text-rose-500">••••••</td>
                               <td className="px-6 py-4 font-bold text-slate-500">{m.gu} {m.dong}</td>
-                              <td className="px-6 py-4 font-black text-emerald-600">{m.base_salary.toLocaleString()}만</td>
+                              <td className="px-6 py-4 font-black text-emerald-600">{m.base_salary != null ? `${m.base_salary.toLocaleString()}만` : "-"}</td>
                             </tr>
                           ))}
                         </tbody>

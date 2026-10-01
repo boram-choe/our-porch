@@ -5,7 +5,7 @@ import { Vacancy, VoteItem } from "@/data/dummyVacancies";
 import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star, Info, ShieldCheck, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "./MyPage";
-import { saveVote, saveVacancy, submitDisputeReport } from "@/lib/db";
+import { saveVote, updateVacancyRemarks, submitDisputeReport } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "../lib/comments";
 import { getGeneralBuildingFengShui, getPersonaFengShuiTip } from "@/lib/fengShuiEngine";
@@ -325,7 +325,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
  if (userProfile?.isGuest) return; // 게스트: 조용히 차단
  if (e) e.preventDefault();
- let brand = (customBrand || inputValue).trim();
+ const brand = (customBrand || inputValue).trim();
  if (!brand) return;
 
  const catId = customCat || selectedCategory || 'etc';
@@ -434,18 +434,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  try {
  // 1. 공실의 surveyRemarks 업데이트
- await saveVacancy({
- id: vacancy.id,
- landmark: vacancy.landmark || "",
- address: vacancy.address || "",
- floor: vacancy.floor || "",
- lat: vacancy.lat,
- lng: vacancy.lng,
- neighborhood: vacancy.neighborhood || "",
- surveyRemarks: newRemarks,
- status: vacancy.status, // ← status는 사용자 신고로 절대 변경 불가
- displayId: vacancy.displayId
- });
+ await updateVacancyRemarks(vacancy.id, newRemarks);
  
  // 2. 구조화된 제보 테이블(reports)에 신규 데이터 삽입
  const userId = (typeof window !== "undefined" ? localStorage.getItem("gongsil_user_id") : null) || "anonymous_user";

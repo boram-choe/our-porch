@@ -30,47 +30,7 @@ export default function AdminDashboard({
   const [moveinInputs, setMoveinInputs] = useState<Record<string, string>>({});
   const [editingStoreName, setEditingStoreName] = useState<Record<string, string>>({});
   const [neighborhood, setNeighborhood] = useState("");
-
-  // AI 공실 스캐너 컨트롤러 상태
-  const [selectedScanDongs, setSelectedScanDongs] = useState<string[]>(["남가좌동", "북가좌동"]);
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanMessage, setScanMessage] = useState<string | null>(null);
-
-  const handleRunAiScan = async () => {
-    if (selectedScanDongs.length === 0) return;
-    setIsScanning(true);
-    setScanMessage(null);
-
-    try {
-      // 1차 스캐닝 시뮬레이션 및 데이터 저장 (status = 'pending' 확인필요공실)
-      const targetDong = selectedScanDongs[0];
-      const newCandidate = {
-        landmark: `${targetDong} 가좌역 인근 1층 상가 (AI 수집)`,
-        address: `서울특별시 서대문구 ${targetDong} 100`,
-        floor: "1층",
-        lat: 37.5742 + (Math.random() * 0.003 - 0.0015),
-        lng: 126.9135 + (Math.random() * 0.003 - 0.0015),
-        neighborhood: targetDong,
-        deposit: 2000,
-        monthlyRent: 120,
-        managementFee: 10,
-        status: "pending",
-        surveyRemarks: `[AI 자동수집] 폐업신고/무권리 매물 1차 포착. 툇마루단 현장 실사 및 QR 포스터 부착 미션 할당됨.`
-      };
-
-      const res = await saveVacancy(newCandidate);
-      if (!res.error && res.id) {
-        if (onUpdateVacancy) onUpdateVacancy({ ...newCandidate, id: res.id });
-        setScanMessage(`[성공] ${selectedScanDongs.join(", ")} 공실 수집 완료! 툇마루단 현장 미션(🟡 확인필요공실)으로 할당되었습니다.`);
-      } else {
-        setScanMessage(`[완료] ${selectedScanDongs.join(", ")} 타겟 지역 공실 수집 미션이 툇마루단으로 전달되었습니다.`);
-      }
-    } catch (err) {
-      setScanMessage("스캐닝 실행 완료: 툇마루단 확인필요 목록에 등록되었습니다.");
-    } finally {
-      setIsScanning(false);
-    }
-  };
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     const profileStr = localStorage.getItem("gongsil_user_profile");
@@ -141,84 +101,12 @@ export default function AdminDashboard({
 
       <div className="px-6 -translate-y-6 space-y-6 pb-24">
         
-        {/* 🤖 AI 공실 자동 스캐너 컨트롤 패널 */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-amber-500/30 text-white mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🤖</span>
-              <h3 className="font-black text-lg text-amber-400">AI 공실 자동 스캐너 컨트롤러</h3>
-            </div>
-            <span className="text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full">
-              대표자 실행 관제
-            </span>
+        {notice && (
+          <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs font-bold flex items-center justify-between gap-2">
+            <span>{notice}</span>
+            <button type="button" onClick={() => setNotice(null)} className="text-amber-600 font-black">닫기</button>
           </div>
-
-          <p className="text-slate-300 text-xs font-bold mb-5 leading-relaxed">
-            폐업 신고 API 및 부동산 무권리 매물을 수집하여 툇마루단 현장 검증 미션(`🟡 확인필요공실`)으로 자동 할당합니다.
-          </p>
-
-          <div className="space-y-4">
-            {/* 타겟 동 선택 칩 */}
-            <div className="bg-slate-900/80 p-4 rounded-2xl border border-white/10">
-              <label className="text-[11px] font-black text-amber-400 uppercase tracking-wider block mb-2">
-                🎯 수집 타겟 동 선택 (서대문구 툇마루단 활성 지역)
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {["남가좌동", "북가좌동", "연희동", "홍은동", "홍제동"].map((dong) => {
-                  const isSelected = selectedScanDongs.includes(dong);
-                  return (
-                    <button
-                      key={dong}
-                      type="button"
-                      onClick={() => {
-                        setSelectedScanDongs((prev) =>
-                          prev.includes(dong)
-                            ? prev.filter((d) => d !== dong)
-                            : [...prev, dong]
-                        );
-                      }}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
-                        isSelected
-                          ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20"
-                          : "bg-slate-800 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      {isSelected ? "✓ " : ""}{dong}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 수집 실행 버튼 */}
-            <button
-              type="button"
-              disabled={isScanning || selectedScanDongs.length === 0}
-              onClick={handleRunAiScan}
-              className="w-full py-4 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 font-black rounded-2xl text-sm shadow-lg shadow-amber-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isScanning ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                  <span>AI 데이터 스캐닝 & 툇마루단 미션 할당 중...</span>
-                </>
-              ) : (
-                <>
-                  <span>🚀</span>
-                  <span>{selectedScanDongs.join(", ")} AI 공실 스캐닝 & 툇마루단 미션 실행</span>
-                </>
-              )}
-            </button>
-
-            {/* 결과 토스트 */}
-            {scanMessage && (
-              <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs font-bold flex items-center gap-2 animate-fadeIn">
-                <span>✨</span>
-                <span>{scanMessage}</span>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* Pending Move-in Reports Section */}
         {pendingReports.length > 0 && (
@@ -249,7 +137,7 @@ export default function AdminDashboard({
                       <button
                         onClick={async () => {
                           if (!moveinInputs[report.id]) {
-                            setScanMessage("입점 매장명/업종을 입력해주세요.");
+                            setNotice("입점 매장명/업종을 입력해주세요.");
                             return;
                           }
                           // 1. Update report status
@@ -269,7 +157,7 @@ export default function AdminDashboard({
                                 surveyRemarks: `[입점 확정] ${moveinInputs[report.id]}` 
                               });
                             } else {
-                              setScanMessage('오류가 발생했습니다: ' + res.error);
+                              setNotice('오류가 발생했습니다: ' + res.error);
                             }
                           }
                           setPendingReports(prev => prev.filter(r => r.id !== report.id));
@@ -340,9 +228,9 @@ export default function AdminDashboard({
                                   });
                                   if (!res.error && onUpdateVacancy) {
                                     onUpdateVacancy({ ...v, status: 'available' });
-                                    setScanMessage('✅ 정상 공실로 확정되었습니다. 제보자에게 500P가 지급됩니다.');
+                                    setNotice('✅ 정상 공실로 확정되었습니다. 제보자에게 500P가 지급됩니다.');
                                   } else {
-                                    setScanMessage('확정 처리 중 오류가 발생했습니다: ' + res.error);
+                                    setNotice('확정 처리 중 오류가 발생했습니다: ' + res.error);
                                   }
                                 }
                               }}
@@ -366,7 +254,7 @@ export default function AdminDashboard({
                               onClick={async () => {
                                 const newName = editingStoreName[v.id];
                                 if (!newName) {
-                                  setScanMessage("입점 매장명/업종을 입력해주세요.");
+                                  setNotice("입점 매장명/업종을 입력해주세요.");
                                   return;
                                 }
                                 if (confirm(`'${newName}'(으)로 입점 확정 처리하시겠습니까?`)) {
@@ -378,9 +266,9 @@ export default function AdminDashboard({
                                   });
                                   if (!res.error && onUpdateVacancy) {
                                     onUpdateVacancy({ ...v, status: 'completed', surveyRemarks: `[입점 확정] ${newName}` });
-                                    setScanMessage('✅ 입점 완료 처리되었습니다.');
+                                    setNotice('✅ 입점 완료 처리되었습니다.');
                                   } else {
-                                    setScanMessage('오류가 발생했습니다: ' + res.error);
+                                    setNotice('오류가 발생했습니다: ' + res.error);
                                   }
                                 }
                               }}
@@ -414,9 +302,9 @@ export default function AdminDashboard({
                                 });
                                 if (!res.error && onUpdateVacancy) {
                                   onUpdateVacancy({ ...v, surveyRemarks: `[입점 확정] ${newName}` });
-                                  setScanMessage('✅ 매장명이 업데이트되었습니다.');
+                                  setNotice('✅ 매장명이 업데이트되었습니다.');
                                 } else {
-                                  setScanMessage('저장 중 오류가 발생했습니다: ' + res.error);
+                                  setNotice('저장 중 오류가 발생했습니다: ' + res.error);
                                 }
                               }}
                               className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap"
