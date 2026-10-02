@@ -659,7 +659,7 @@ export default function SurveyorPage() {
                         <tbody className="divide-y divide-slate-50">
                           {teamMembers.map(m => (
                             <tr key={m.id} className="hover:bg-slate-50/50">
-                              <td className="px-6 py-4 font-black text-slate-950">{m.real_name} <span className="text-blue-500 ml-1">{calculateRank(m.hire_date)}</span></td>
+                              <td className="px-6 py-4 font-black text-slate-950">{m.real_name} <span className="text-blue-500 ml-1">{calculateRank(m.hire_date)}</span>{m.disabled && <span className="ml-2 text-[10px] font-black bg-rose-50 text-rose-500 px-2 py-0.5 rounded-full">로그인 차단</span>}</td>
                               <td className="px-6 py-4 font-mono font-bold text-slate-500">{m.id}</td>
                               <td className="px-6 py-4 font-mono font-bold text-rose-500">••••••</td>
                               <td className="px-6 py-4 font-bold text-slate-500">{m.gu} {m.dong}</td>

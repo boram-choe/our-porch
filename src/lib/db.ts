@@ -91,6 +91,7 @@ export interface TeamMember {
   phone: string | null;
   hire_date: string;
   base_salary: number | null;
+  disabled?: boolean;
 }
 
 
