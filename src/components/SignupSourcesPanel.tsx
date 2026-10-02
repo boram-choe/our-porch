@@ -57,7 +57,7 @@ export default function SignupSourcesPanel() {
   const untracked = stats ? Math.max(stats.total_users - stats.tracked, 0) : 0;
 
   return (
-    <div className="bg-white p-5 md:p-7 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 space-y-5">
+    <div className="bg-white p-5 md:p-7 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 space-y-5 text-slate-950">
       <div>
         <h3 className="font-black text-base text-slate-950">가입 경로</h3>
         <p className="text-[11px] font-bold text-slate-400 mt-1">링크마다 꼬리표(src)가 붙어 어디서 들어온 가입자인지 집계됩니다.</p>

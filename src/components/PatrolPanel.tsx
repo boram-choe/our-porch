@@ -182,7 +182,7 @@ export default function PatrolPanel() {
   const kakaoMap = (s: Stop) => `https://map.kakao.com/link/map/${encodeURIComponent(s.label)},${s.lat},${s.lng}`;
 
   return (
-    <div className="bg-white p-5 md:p-7 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 space-y-5">
+    <div className="bg-white p-5 md:p-7 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 space-y-5 text-slate-950">
       <div>
         <h3 className="font-black text-base text-slate-950">공실 순회 경로</h3>
         <p className="text-[11px] font-bold text-slate-400 mt-1 leading-relaxed">
@@ -194,7 +194,7 @@ export default function PatrolPanel() {
         {ROUTES.map((r) => (
           <button key={r.key} type="button" onClick={() => { setRoute(r.key); setOpen(null); }}
             className={`flex-1 py-2.5 rounded-xl text-sm font-black border-2 ${route === r.key ? "bg-slate-950 text-white border-slate-950" : "bg-white text-slate-500 border-slate-100"}`}>
-            {r.label}{r.tag && <span className="ml-1 text-[10px] text-amber-500">{r.tag}</span>}
+            {r.label}{r.tag && <span className="block text-[10px] text-amber-500 leading-tight">{r.tag} 시작</span>}
           </button>
         ))}
       </div>
@@ -229,7 +229,7 @@ export default function PatrolPanel() {
                     endArrow strokeWeight={5} strokeColor={isRealtor ? "#d97706" : "#2563eb"} strokeOpacity={0.85} />
                 )
               )}
-              <CustomOverlayMap position={{ lat: meta.start.lat, lng: meta.start.lng }} yAnchor={1.2}>
+              <CustomOverlayMap position={{ lat: meta.start.lat, lng: meta.start.lng }} yAnchor={-0.4}>
                 <div className="px-2 py-1 rounded-full bg-slate-950 text-white text-[10px] font-black shadow">출발 · {meta.start.name}</div>
               </CustomOverlayMap>
               {list.map((s) => {
