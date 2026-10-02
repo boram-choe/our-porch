@@ -277,6 +277,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const [aiRecommended, setAiRecommended] = useState<string[]>([]);
  const [trdarName, setTrdarName] = useState<string>("이 공실 주변");
+ const [isExampleRec, setIsExampleRec] = useState<boolean>(false);
  const [isAiLoading, setIsAiLoading] = useState<boolean>(true);
 
  useEffect(() => {
@@ -293,7 +294,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  
  if (data.success && data.recommendations && data.recommendations.length >= 2) {
  setAiRecommended(data.recommendations);
- setTrdarName(`[${data.trdarName}] 상권`);
+ setTrdarName(data.trdarName);
+ setIsExampleRec(false);
  } else {
  // Fallback if API returns no data
  const fallbackCandidates = [
@@ -305,6 +307,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  const seed = Math.floor((vacancy.lat || 0) * 100000) + Math.floor((vacancy.lng || 0) * 100000);
  setAiRecommended(fallbackCandidates[seed % fallbackCandidates.length]);
  setTrdarName("이 공실 주변");
+ setIsExampleRec(true);
  }
  } catch (err) {
  console.error("Failed to load Seoul API data:", err);
@@ -315,6 +318,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  const seed = Math.floor((vacancy.lat || 0) * 100000) + Math.floor((vacancy.lng || 0) * 100000);
  setAiRecommended(fallbackCandidates[seed % fallbackCandidates.length]);
  setTrdarName("이 공실 주변");
+ setIsExampleRec(true);
  } finally {
  setIsAiLoading(false);
  }
@@ -842,14 +846,18 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  ) : (
  <>
  <p className="text-[11px] md:text-xs font-bold text-slate-300 leading-relaxed break-keep">
- 현재 <span className="text-blue-300 font-black">[{trdarName}]</span> 상권을 분석한 결과, 
+ {isExampleRec ? (
+ <span className="text-slate-400">이 위치는 서울시 상권 데이터가 없어 참고용 예시를 보여드려요. </span>
+ ) : (
+ <>가까운 <span className="text-blue-300 font-black">[{trdarName}]</span> 상권을 주변 상권과 비교한 결과, </>
+ )}
  {aiRecommended.map((r, i) => (
  <span key={i}>
  <strong className="text-white mx-1 text-[12px] md:text-[13px] bg-blue-500/20 px-1.5 py-0.5 rounded">[{r}]</strong>
  {i < aiRecommended.length - 2 ? ", " : i === aiRecommended.length - 2 ? "와 " : ""}
  </span>
  ))} 
- 업종이 현저히 부족합니다. <br className="hidden md:block"/>이웃과 함께 이 공간을 상상해보시는건 어떨까요?
+ {isExampleRec ? "업종은 어떨까요?" : "업종이 상대적으로 적습니다."} <br className="hidden md:block"/>이웃과 함께 이 공간을 상상해보시는건 어떨까요?
  </p>
  <div className="flex flex-wrap gap-2 mt-4">
  {aiRecommended.map(rec => (
