@@ -1,6 +1,7 @@
 "use client";
 
 import SignupSourcesPanel from "@/components/SignupSourcesPanel";
+import PatrolPanel from "@/components/PatrolPanel";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, MapPin, Search, Check, Building2, LogOut, Lock, ArrowRight, Zap, User, Phone, LocateFixed, ListChecks, Clock, Map as MapIcon, AlertTriangle, Users, TrendingUp, DollarSign, ChevronDown, ChevronUp, Briefcase, Sparkles, Building, Eye, EyeOff, ClipboardList, Info, UserPlus, GitMerge } from "lucide-react";
@@ -574,6 +575,9 @@ export default function SurveyorPage() {
                 </div>
               </div>
 
+
+              {/* 공실 순회 경로 + 현장 체크리스트 (조사원 전원) */}
+              <PatrolPanel />
 
               {/* 2. Vacancy Lifecycle Management (Grouped Lists) */}
               <div className="space-y-12">
