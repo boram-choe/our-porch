@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Map as KakaoMap, CustomOverlayMap, Polyline, useKakaoLoader } from "react-kakao-maps-sdk";
+import { KAKAO_APP_KEY, KAKAO_LIBRARIES } from "@/lib/kakaoConfig";
 import { supabase } from "@/lib/supabase";
 import { getTeamToken } from "@/lib/db";
 
@@ -108,6 +110,9 @@ export default function PatrolPanel() {
   const [showList, setShowList] = useState(false);
   const [form, setForm] = useState<{ result: "found" | "none" | "skipped"; count: number; note: string }>({ result: "none", count: 1, note: "" });
   const [saving, setSaving] = useState(false);
+  const [selectedStop, setSelectedStop] = useState<string | null>(null);
+  const [map, setMap] = useState<kakao.maps.Map | null>(null);
+  const [mapLoading, mapError] = useKakaoLoader({ appkey: KAKAO_APP_KEY, libraries: KAKAO_LIBRARIES });
 
   const load = useCallback(async () => {
     const token = getTeamToken();
@@ -135,6 +140,19 @@ export default function PatrolPanel() {
     const found = list.reduce((n, s) => n + (s.found_total || 0), 0);
     return { km, minutes, fresh, found };
   }, [list, meta]);
+
+  useEffect(() => {
+    if (!map || list.length === 0) return;
+    const b = new kakao.maps.LatLngBounds();
+    b.extend(new kakao.maps.LatLng(meta.start.lat, meta.start.lng));
+    list.forEach((s) => b.extend(new kakao.maps.LatLng(s.lat, s.lng)));
+    map.setBounds(b, 48, 32, 32, 32);
+  }, [map, list, meta]);
+
+  const focusStop = (s: Stop) => {
+    setSelectedStop(s.id);
+    document.getElementById(`stop-${s.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   const nextSeq = useMemo(() => {
     const todo = list.filter((s) => { const d = daysAgo(s.last_visited_at); return d === null || d > FRESH_DAYS; });
@@ -201,6 +219,45 @@ export default function PatrolPanel() {
       {error && <p className="text-xs font-bold text-rose-500">{error}</p>}
       {!stops && !error && <p className="text-xs font-bold text-slate-400">불러오는 중</p>}
 
+      {list.length > 0 && !mapLoading && !mapError && (
+        <div className="space-y-2">
+          <div className="h-72 md:h-96 rounded-2xl overflow-hidden border border-slate-100">
+            <KakaoMap center={{ lat: meta.start.lat, lng: meta.start.lng }} level={5} style={{ width: "100%", height: "100%" }} onCreate={setMap}>
+              {[{ lat: meta.start.lat, lng: meta.start.lng }, ...list].map((s, i, all) =>
+                i === 0 ? null : (
+                  <Polyline key={`seg-${i}`} path={[{ lat: all[i - 1].lat, lng: all[i - 1].lng }, { lat: s.lat, lng: s.lng }]}
+                    endArrow strokeWeight={5} strokeColor={isRealtor ? "#d97706" : "#2563eb"} strokeOpacity={0.85} />
+                )
+              )}
+              <CustomOverlayMap position={{ lat: meta.start.lat, lng: meta.start.lng }} yAnchor={1.2}>
+                <div className="px-2 py-1 rounded-full bg-slate-950 text-white text-[10px] font-black shadow">출발 · {meta.start.name}</div>
+              </CustomOverlayMap>
+              {list.map((s) => {
+                const d = daysAgo(s.last_visited_at);
+                const fresh = d !== null && d <= FRESH_DAYS;
+                const isNextStop = s.seq === nextSeq;
+                const chosen = selectedStop === s.id;
+                return (
+                  <CustomOverlayMap key={s.id} position={{ lat: s.lat, lng: s.lng }} zIndex={chosen ? 30 : isNextStop ? 20 : 10}>
+                    <div className="flex flex-col items-center">
+                      {chosen && <div className="mb-1 max-w-[180px] px-2 py-1 rounded-lg bg-white text-slate-900 text-[10px] font-black shadow border border-slate-200 break-keep text-center">{s.label}</div>}
+                      <button type="button" onClick={() => focusStop(s)} aria-label={`${s.seq}번 ${s.label}`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white border-2 border-white shadow-lg ${fresh ? "bg-emerald-500" : isNextStop ? "bg-amber-500 ring-4 ring-amber-300/60" : "bg-slate-900"}`}>
+                        {s.seq}
+                      </button>
+                    </div>
+                  </CustomOverlayMap>
+                );
+              })}
+            </KakaoMap>
+          </div>
+          <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
+            번호 순서대로 화살표 방향으로 이동합니다. 초록은 최근 {FRESH_DAYS}일 안에 다녀온 곳, 주황은 다음 순서입니다. 선은 정거장을 직선으로 이은 순서 표시이고, 실제로 걷는 길은 정거장의 <b>길찾기</b>를 따라가세요.
+          </p>
+        </div>
+      )}
+      {mapError && <p className="text-[11px] font-bold text-slate-400">지도를 불러오지 못했습니다. 아래 목록과 길찾기를 이용해 주세요.</p>}
+
       <p className="text-[11px] font-bold text-slate-500">
         출발: {meta.start.name} 앞 →{" "}
         <a className="text-blue-600 underline underline-offset-2" target="_blank" rel="noopener noreferrer"
@@ -214,7 +271,7 @@ export default function PatrolPanel() {
           const isNext = s.seq === nextSeq;
           const mixText = Object.entries(s.mix).slice(0, 2).map(([k, v]) => `${k} ${v}`).join(" · ");
           return (
-            <li key={s.id} className={`rounded-2xl border-2 p-4 ${isNext ? "border-amber-400 bg-amber-50/40" : "border-slate-100"}`}>
+            <li key={s.id} id={`stop-${s.id}`} className={`rounded-2xl border-2 p-4 ${isNext ? "border-amber-400 bg-amber-50/40" : selectedStop === s.id ? "border-blue-300" : "border-slate-100"}`}>
               <div className="flex gap-3 items-start">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 ${stale ? "bg-slate-950 text-white" : "bg-emerald-500 text-white"}`}>{s.seq}</div>
                 <div className="min-w-0 flex-1 space-y-1.5">

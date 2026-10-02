@@ -2,6 +2,7 @@
 
 import SignupSourcesPanel from "@/components/SignupSourcesPanel";
 import PatrolPanel from "@/components/PatrolPanel";
+import { KAKAO_APP_KEY, KAKAO_LIBRARIES } from "@/lib/kakaoConfig";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, MapPin, Search, Check, Building2, LogOut, Lock, ArrowRight, Zap, User, Phone, LocateFixed, ListChecks, Clock, Map as MapIcon, AlertTriangle, Users, TrendingUp, DollarSign, ChevronDown, ChevronUp, Briefcase, Sparkles, Building, Eye, EyeOff, ClipboardList, Info, UserPlus, GitMerge } from "lucide-react";
@@ -84,8 +85,8 @@ export default function SurveyorPage() {
   const [newMemberForm, setNewMemberForm] = useState({ name: "", phone: "", password: "", salary: 200 });
 
   const [loading, error] = useKakaoLoader({
-    appkey: process.env.NEXT_PUBLIC_KAKAO_APP_KEY || "4e959900c93f0a3268a637079835bb73",
-    libraries: ["services"],
+    appkey: KAKAO_APP_KEY,
+    libraries: KAKAO_LIBRARIES,
   });
 
   const handleLogin = async (e: React.FormEvent) => {
