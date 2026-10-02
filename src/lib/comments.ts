@@ -31,10 +31,9 @@ export async function fetchComments(vacancyId: string, currentUserId?: string) {
 
   // 2. Fetch profiles separately to avoid join errors
   const userIds = [...new Set((data || []).map(c => c.user_id))];
-  const { data: profilesData } = await supabase
-    .from("user_profiles")
-    .select("id, nickname, neighborhood, persona_label")
-    .in("id", userIds);
+  const { data: profilesData } = userIds.length
+    ? await supabase.rpc("public_profiles", { p_ids: userIds })
+    : { data: [] as { id: string; nickname: string; neighborhood: string; persona_label: string }[] };
 
   // 3. Fetch likes and reports
   const { data: likesData } = await supabase
@@ -46,7 +45,7 @@ export async function fetchComments(vacancyId: string, currentUserId?: string) {
     .select("comment_id");
 
   return (data || []).map((comment: any) => {
-    const profile = (profilesData || []).find(p => p.id === comment.user_id);
+    const profile = ((profilesData || []) as { id: string; nickname: string; neighborhood: string; persona_label: string }[]).find((p) => p.id === comment.user_id);
     const commentLikes = (likesData || []).filter(l => l.comment_id === comment.id);
     const commentReports = (reportsData || []).filter(r => r.comment_id === comment.id);
     

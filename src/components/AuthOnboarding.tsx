@@ -89,9 +89,8 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
   // 소셜 증명 — Supabase에서 총 유저 수 실시간 fetch
   useEffect(() => {
     supabase
-      .from('user_profiles')
-      .select('*', { count: 'exact', head: true })
-      .then(({ count }) => { if (count && count > 50) setUserCount(count); });
+      .rpc('user_count')
+      .then(({ data: count }) => { if (typeof count === 'number' && count > 50) setUserCount(count); });
   }, []);
 
   // 카카오 로그인 후 돌아왔을 때 세션이 있고 기존 프로필이 있으면 복원하고 바로 진입, 없으면 다음 단계(약관 동의)로 이동
@@ -269,14 +268,11 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
 
     try {
       // 해당 동(neighborhood)의 기존 유저 프로필 조회하여 닉네임 중복 체크
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("nickname")
-        .eq("neighborhood", currentNeighborhood);
+      const { data, error } = await supabase.rpc("taken_nicknames", { p_neighborhood: currentNeighborhood });
 
       if (error) throw error;
 
-      const takenNicknames = new Set(data?.map(row => row.nickname) || []);
+      const takenNicknames = new Set<string>((data as string[] | null) || []);
 
       // 중복되지 않는 첫 번째 단어 선택
       const availableSuffix = shuffledSuffixes.find(suffix => {

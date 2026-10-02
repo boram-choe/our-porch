@@ -1,0 +1,3 @@
+-- 사용자 프로필 개인정보 보호 1단계: 다른 사용자의 좌표·성별·연령을 직접 읽지 않아도 되도록 최소 정보 함수를 추가한다.
+-- public_profiles(ids), taken_nicknames(동), user_count(), neighborhood_demographics(동)
+-- (정의는 운영 DB 마이그레이션 profile_privacy_stage1_functions 와 같다.) 2단계에서 공개 SELECT 정책을 제거한다.

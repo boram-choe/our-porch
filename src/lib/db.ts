@@ -505,11 +505,12 @@ export interface DemographicSummary {
 }
 
 export async function getNeighborhoodReport(neighborhood: string): Promise<DemographicSummary> {
-  // 해당 동네 유저 가져오기
-  const { data: users } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("neighborhood", neighborhood);
+  // 해당 동네 사용자 집계 (개인 정보는 읽지 않고 서버 함수가 합계만 돌려준다)
+  const { data: demo } = await supabase.rpc("neighborhood_demographics", { p_neighborhood: neighborhood });
+  const stats = (demo ?? {}) as {
+    total?: number; male?: number; female?: number;
+    age_groups?: Record<string, number>; activity_times?: Record<string, number>;
+  };
 
   // 해당 동네 공실 가져오기
   const { data: vacancies } = await supabase
@@ -529,27 +530,7 @@ export async function getNeighborhoodReport(neighborhood: string): Promise<Demog
     votes = data ?? [];
   }
 
-  const userList: DbUserProfile[] = users ?? [];
 
-  // 성별 집계
-  const male = userList.filter(u => u.gender === "male").length;
-  const female = userList.filter(u => u.gender === "female").length;
-
-  // 연령대 집계
-  const ageGroups: Record<string, number> = {};
-  userList.forEach(u => {
-    if (u.age_range) {
-      ageGroups[u.age_range] = (ageGroups[u.age_range] || 0) + 1;
-    }
-  });
-
-  // 활동시간 집계
-  const activityTimes: Record<string, number> = {};
-  userList.forEach(u => {
-    (u.activity_times || []).forEach((t: string) => {
-      activityTimes[t] = (activityTimes[t] || 0) + 1;
-    });
-  });
 
   // 업종 투표 집계
   const categoryCount: Record<string, number> = {};
@@ -563,10 +544,10 @@ export async function getNeighborhoodReport(neighborhood: string): Promise<Demog
 
   return {
     neighborhood,
-    totalVoters: userList.length,
-    genderRatio: { male, female },
-    ageGroups,
-    activityTimes,
+    totalVoters: stats.total ?? 0,
+    genderRatio: { male: stats.male ?? 0, female: stats.female ?? 0 },
+    ageGroups: stats.age_groups ?? {},
+    activityTimes: stats.activity_times ?? {},
     topCategories,
   };
 }
