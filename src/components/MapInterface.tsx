@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Vacancy } from "@/data/dummyVacancies";
 import Building3D from "./Building3D";
+import { isLaunchArea } from "@/lib/launchArea";
 import MyPage from "./MyPage";
 import AdminDashboard from "./AdminDashboard";
 import SpaceCurator from "./SpaceCurator";
@@ -378,6 +379,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  hiddenReason: v.hidden_reason,
  hiddenComment: v.hidden_comment,
  displayId: v.display_id,
+ neighborhood: v.neighborhood,
  currentVotes: Object.values(voteCounts),
  };
  });
@@ -758,6 +760,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  vacancyPeriod: newSpacePeriod === "잘 모르겠어요" ? null : newSpacePeriod,
  status: "pending",
  tags: [...featureTags, "이웃발견"],
+ neighborhood: neighborhood,
  currentVotes: []
  };
  setVacancies([newV, ...vacancies]);
@@ -813,9 +816,10 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  const multiFloor = group.length > 1;
  const isHighlightedFs = highlightFengShuiId && group.some(v => v.id === highlightFengShuiId);
  const isRecentlyCompleted = rep.status === 'completed' && rep.updatedAt && (new Date().getTime() - new Date(rep.updatedAt).getTime() < 30 * 24 * 60 * 60 * 1000);
+ const comingSoon = !!rep.neighborhood && !isLaunchArea(rep.neighborhood);
  return (
  <CustomOverlayMap key={`${rep.id}-${hasVoted}-${isHighlightedFs}`} position={{ lat: rep.lat, lng: rep.lng }}>
- <button onClick={() => handlePinClick(rep)} className="relative group">
+ <button onClick={() => handlePinClick(rep)} className={`relative group ${comingSoon ? 'opacity-60 saturate-50' : ''}`}>
  {isHighlightedFs && (
  <span className="absolute -inset-4 bg-amber-400/35 rounded-full animate-ping pointer-events-none z-[-1] border-2 border-amber-400" />
  )}
@@ -832,6 +836,9 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  rep.status === 'completed' ? <Check size={24} /> : 
  <Lightbulb size={24} fill="currentColor" />}
  </div>
+ {comingSoon && (
+ <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-800 text-slate-200 text-[9px] font-black px-1.5 py-0.5 rounded-full border border-white/20">준비 중</span>
+ )}
  {multiFloor && (
  <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-400 rounded-full border-2 border-white flex items-center justify-center shadow">
  <span className="text-[9px] font-black text-slate-950">{group.length}</span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { recordSignupSource } from "@/lib/acquisition";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, User, ArrowRight, Sparkles, Navigation as NavigationIcon, CheckCircle2, Globe, Heart, MessageSquare, Briefcase, Baby, GraduationCap, Home, Dog, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
@@ -410,6 +411,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
       });
       if (dbId) {
         localStorage.setItem("gongsil_user_id", dbId);
+        if (session) await recordSignupSource(dbId);
       }
     } catch (e) {
       console.warn("Supabase 저장 실패 (로컬만 저장됨)", e);

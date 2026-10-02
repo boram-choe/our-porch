@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
+import AcquisitionTracker from "@/components/AcquisitionTracker";
 
 export const viewport: Viewport = {
   themeColor: "#020617",
@@ -51,6 +52,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col m-0 p-0 overflow-hidden bg-slate-950 text-white font-sans">
         {children}
+        <AcquisitionTracker />
         <Analytics />
       </body>
     </html>

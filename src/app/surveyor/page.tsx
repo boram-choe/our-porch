@@ -1,5 +1,6 @@
 "use client";
 
+import SignupSourcesPanel from "@/components/SignupSourcesPanel";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, MapPin, Search, Check, Building2, LogOut, Lock, ArrowRight, Zap, User, Phone, LocateFixed, ListChecks, Clock, Map as MapIcon, AlertTriangle, Users, TrendingUp, DollarSign, ChevronDown, ChevronUp, Briefcase, Sparkles, Building, Eye, EyeOff, ClipboardList, Info, UserPlus, GitMerge } from "lucide-react";
@@ -408,6 +409,8 @@ export default function SurveyorPage() {
                         )}
                         <h4 className="text-base font-black text-slate-950 leading-tight break-keep min-w-0">{v.landmark || "신규 제보"}</h4>
                         <p className="text-[10px] font-bold text-slate-400 mt-1 break-keep min-w-0">{v.address}</p>
+                        <a href={`/space/${v.id}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+                          className="inline-block mt-1.5 text-[10px] font-black text-blue-600 underline underline-offset-2">중개사용 수요 카드 열기</a>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -623,6 +626,9 @@ export default function SurveyorPage() {
                   "bg-purple-500"
                 )}
               </div>
+
+              {/* 가입 경로 집계 + 추적 링크 (CEO/OPS 전용) */}
+              {(currentUser?.role === "CEO" || currentUser?.role === "OPS") && <SignupSourcesPanel />}
 
               {/* 3. 인사기록부 (CEO/OPS 전용) */}
               {(currentUser?.role === "CEO" || currentUser?.role === "OPS") && (
