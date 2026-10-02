@@ -6,12 +6,13 @@ import { NextResponse } from 'next/server';
 
 const BASE = 'http://openapi.seoul.go.kr:8088';
 const MAX_DISTANCE_M = 1500;
-const NEIGHBORS = 2; // 비교용 주변 상권 수
+const NEIGHBORS = 3; // 비교용 주변 상권 수
+const MIN_NEARBY = 3; // 주변 상권에 이 수 이상 있어야 "수요가 있는 업종"으로 본다
 
 // 추천에서 제외할 업종 (생활 밀착 업종이 아니거나 공실 용도로 부적합)
 const IGNORED = new Set([
   '여관', '고시원', '통신기기수리', '가전제품수리', '건축물청소', '부동산중개업', '세무사사무소', '법무사사무소',
-  '자동차수리', '자동차미용', '노래방', 'PC방', '당구장', '골프연습장',
+  '자동차수리', '자동차미용', '노래방', 'PC방', '당구장', '골프연습장', '볼링장', '스크린골프', '예식장', '장례식장',
 ]);
 
 type Area = { code: string; name: string; lat: number; lng: number };
@@ -158,7 +159,7 @@ export async function GET(request: Request) {
 
     // 주변 상권에는 있는데 이 상권에는 적거나 없는 업종을 우선 추천
     const candidates = [...nearby.entries()]
-      .filter(([name, n]) => !IGNORED.has(name) && n > 0)
+      .filter(([name, n]) => !IGNORED.has(name) && n >= MIN_NEARBY)
       .map(([name, n]) => ({ name, here: here.get(name) ?? 0, nearby: n }))
       .sort((a, b) => a.here - b.here || b.nearby - a.nearby);
 
