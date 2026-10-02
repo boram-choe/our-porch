@@ -4,19 +4,27 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getTeamToken } from "@/lib/db";
 
+type RouteKey = "realtor" | "namgajwa" | "bukgajwa";
+
 type Stop = {
-  id: string; route: "namgajwa" | "bukgajwa"; seq: number; label: string; road: string;
-  landmarks: string[]; lat: number; lng: number; poi_count: number; mix: Record<string, number>;
+  id: string; route: RouteKey; seq: number; label: string; road: string;
+  landmarks: string[]; agent_names: string[]; lat: number; lng: number; poi_count: number; mix: Record<string, number>;
   visit_count: number; found_total: number;
   last_visited_at: string | null; last_by: string | null; last_result: "found" | "none" | "skipped" | null; last_note: string | null;
 };
 
+const START = { name: "가좌역 경의중앙선", lat: 37.56874, lng: 126.91482 };
 const ROUTES = [
-  { key: "namgajwa" as const, label: "남가좌동", start: { name: "가좌역 경의중앙선", lat: 37.56874, lng: 126.91482 } },
-  { key: "bukgajwa" as const, label: "북가좌동", start: { name: "가좌역 경의중앙선", lat: 37.56874, lng: 126.91482 } },
+  { key: "realtor" as const, label: "중개업소 순회", tag: "먼저", minutesPerStop: 20, start: START,
+    intro: "부동산에 매물로 나온 상가를 먼저 확인하는 경로입니다. 중개업소가 몰린 구역 10곳을 가좌역에서 시작하는 순서로 골랐습니다. 유리창에 붙은 상가 임대 매물을 확인하고, 중개사와 인사하며 매물을 등록합니다." },
+  { key: "namgajwa" as const, label: "남가좌동 거리", tag: "", minutesPerStop: 10, start: START,
+    intro: "점포가 몰린 구역 8곳을 순서대로 걸으며 빈 상가를 찾습니다. 중개업소 순회를 마친 뒤 거리에서 직접 확인할 때 쓰세요." },
+  { key: "bukgajwa" as const, label: "북가좌동 거리", tag: "", minutesPerStop: 10, start: START,
+    intro: "점포가 몰린 구역 8곳을 순서대로 걸으며 빈 상가를 찾습니다. 중개업소 순회를 마친 뒤 거리에서 직접 확인할 때 쓰세요." },
 ];
 
 const RESULT_LABEL = { found: "공실 발견", none: "공실 없음", skipped: "건너뜀" } as const;
+const REALTOR_RESULT_LABEL = { found: "매물 확인", none: "매물 없음", skipped: "건너뜀" } as const;
 const FRESH_DAYS = 14; // 이 기간 안에 다녀온 곳은 "이번 순회 완료"로 센다
 
 const hav = (a: [number, number], b: [number, number]) => {
@@ -28,6 +36,35 @@ const hav = (a: [number, number], b: [number, number]) => {
 
 const daysAgo = (iso: string | null) => (iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 86400000) : null);
 const agoText = (d: number | null) => (d === null ? "" : d <= 0 ? "오늘" : `${d}일 전`);
+
+const REALTOR_CHECKLIST: { title: string; items: string[] }[] = [
+  { title: "방문 전에", items: [
+    "먼저 유리창의 매물 게시판을 밖에서 읽습니다. 상가 임대 매물이 있으면 주소, 층, 면적, 보증금·월세를 메모합니다.",
+    "들어가기 전 인사말을 정해 둡니다: \"동네 빈 상가에 어떤 가게가 필요한지 주민 의견을 모으는 서비스(여긴뭐가) 조사 중입니다.\"",
+    "명함이나 앱 주소(QR)를 준비합니다. 대표 계정에서 만든 포스터 QR을 쓰면 가입 경로가 기록됩니다.",
+  ]},
+  { title: "매물로 나온 상가를 찾을 때", items: [
+    "현재 비어 있는 상가 매물을 우선합니다. 영업 중인 가게의 권리금 매물, 주택·사무실 매물은 제외합니다.",
+    "매물이 두 동 안(남가좌동·북가좌동)에 있는지 확인합니다. 밖이면 기록만 하고 등록하지 않습니다.",
+    "중개사에게 \"이 매물을 주민 의견 지도에 올려도 될까요?\"라고 먼저 동의를 구합니다. 거절하면 등록하지 않습니다.",
+    "동의받으면 지도에서 \"신규 공실 조사하기\"로 등록하고, 중개사 이름과 연락처를 중개사 정보 칸에 입력합니다.",
+  ]},
+  { title: "중개사에게 물어볼 것 (3가지만)", items: [
+    "상가가 비어 있을 때 가장 알고 싶은 정보가 무엇인지 (예: 주변에 어떤 업종이 필요한지)",
+    "이 동네 주민 수요 요약을 매물 소개에 참고한다면 한 달에 얼마까지 낼 의향이 있는지, 아니면 무료여야 하는지",
+    "건물주(임대인)에게 이 정보를 보여 줄 수 있는지, 건물주 연락 방법이 있는지",
+  ]},
+  { title: "기록할 것", items: [
+    "정거장의 \"방문 기록\"에서 \"매물 확인\"을 고르고, 확인한 임대 매물 수를 입력합니다.",
+    "메모에 중개사 상호와 반응을 적습니다 (예: 가재울중앙 – 관심 있음, 다음 주 재방문).",
+    "개인정보(임차인, 건물주 연락처)는 상대가 직접 건넨 경우가 아니면 적지 않습니다.",
+  ]},
+  { title: "하지 말아야 할 것", items: [
+    "계약 알선, 중개 수수료 이야기, 매물 가격 협상을 하지 않습니다. 우리는 정보 제공과 수요 조사만 합니다.",
+    "투표 결과로 임대가 잘 된다고 약속하지 않습니다. 표본이 작다는 점을 그대로 설명합니다.",
+    "거절하거나 바쁘다고 하면 바로 인사하고 나옵니다. 같은 곳을 같은 날 다시 방문하지 않습니다.",
+  ]},
+];
 
 const CHECKLIST: { title: string; items: string[] }[] = [
   { title: "출발 전", items: [
@@ -66,7 +103,7 @@ const CHECKLIST: { title: string; items: string[] }[] = [
 export default function PatrolPanel() {
   const [stops, setStops] = useState<Stop[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [route, setRoute] = useState<"namgajwa" | "bukgajwa">("namgajwa");
+  const [route, setRoute] = useState<RouteKey>("realtor");
   const [open, setOpen] = useState<string | null>(null);
   const [showList, setShowList] = useState(false);
   const [form, setForm] = useState<{ result: "found" | "none" | "skipped"; count: number; note: string }>({ result: "none", count: 1, note: "" });
@@ -85,13 +122,15 @@ export default function PatrolPanel() {
 
   const list = useMemo(() => (stops ?? []).filter((s) => s.route === route).sort((a, b) => a.seq - b.seq), [stops, route]);
   const meta = ROUTES.find((r) => r.key === route)!;
+  const isRealtor = route === "realtor";
+  const resultLabel = isRealtor ? REALTOR_RESULT_LABEL : RESULT_LABEL;
 
   const summary = useMemo(() => {
     if (list.length === 0) return null;
     let m = hav([meta.start.lat, meta.start.lng], [list[0].lat, list[0].lng]);
     for (let i = 1; i < list.length; i++) m += hav([list[i - 1].lat, list[i - 1].lng], [list[i].lat, list[i].lng]);
     const km = (m * 1.3) / 1000; // 직선거리 → 실제 보행거리 보정
-    const minutes = Math.round((km / 4.5) * 60 + list.length * 10);
+    const minutes = Math.round((km / 4.5) * 60 + list.length * meta.minutesPerStop);
     const fresh = list.filter((s) => { const d = daysAgo(s.last_visited_at); return d !== null && d <= FRESH_DAYS; }).length;
     const found = list.reduce((n, s) => n + (s.found_total || 0), 0);
     return { km, minutes, fresh, found };
@@ -129,7 +168,7 @@ export default function PatrolPanel() {
       <div>
         <h3 className="font-black text-base text-slate-950">공실 순회 경로</h3>
         <p className="text-[11px] font-bold text-slate-400 mt-1 leading-relaxed">
-          점포가 몰린 구역 8곳을 가좌역에서 시작하는 순서로 골랐습니다. 순서대로 걸으며 빈 상가를 찾아 등록하고, 정거장마다 방문 기록을 남기세요.
+          {meta.intro} 정거장마다 방문 기록을 남기세요.
         </p>
       </div>
 
@@ -137,7 +176,7 @@ export default function PatrolPanel() {
         {ROUTES.map((r) => (
           <button key={r.key} type="button" onClick={() => { setRoute(r.key); setOpen(null); }}
             className={`flex-1 py-2.5 rounded-xl text-sm font-black border-2 ${route === r.key ? "bg-slate-950 text-white border-slate-950" : "bg-white text-slate-500 border-slate-100"}`}>
-            {r.label} 경로
+            {r.label}{r.tag && <span className="ml-1 text-[10px] text-amber-500">{r.tag}</span>}
           </button>
         ))}
       </div>
@@ -154,7 +193,7 @@ export default function PatrolPanel() {
           </div>
           <div className="bg-slate-50 rounded-xl p-3">
             <div className="text-lg font-black tabular-nums">약 {Math.floor(summary.minutes / 60)}시간 {summary.minutes % 60}분</div>
-            <div className="text-[10px] font-bold text-slate-400">정거장당 10분 점검 포함</div>
+            <div className="text-[10px] font-bold text-slate-400">정거장당 {meta.minutesPerStop}분 점검 포함</div>
           </div>
         </div>
       )}
@@ -186,10 +225,14 @@ export default function PatrolPanel() {
                   <p className="text-[11px] font-bold text-slate-400 break-keep">
                     {s.road ? `${s.road} · ` : ""}근처: {s.landmarks.join(", ")}
                   </p>
-                  <p className="text-[11px] font-bold text-slate-500">점포 {s.poi_count}곳 ({mixText})</p>
+                  {isRealtor ? (
+                    <p className="text-[11px] font-bold text-slate-500 break-keep">중개업소 {s.poi_count}곳 · 예: {s.agent_names.join(", ")}</p>
+                  ) : (
+                    <p className="text-[11px] font-bold text-slate-500">점포 {s.poi_count}곳 ({mixText})</p>
+                  )}
                   <p className={`text-[11px] font-bold ${stale ? "text-slate-400" : "text-emerald-600"}`}>
                     {s.last_visited_at
-                      ? `${agoText(d)} ${s.last_by} · ${s.last_result ? RESULT_LABEL[s.last_result] : ""}${s.found_total ? ` (누적 발견 ${s.found_total}건)` : ""}`
+                      ? `${agoText(d)} ${s.last_by} · ${s.last_result ? (s.route === "realtor" ? REALTOR_RESULT_LABEL : RESULT_LABEL)[s.last_result] : ""}${s.found_total ? ` (누적 ${s.route === "realtor" ? "매물 확인" : "발견"} ${s.found_total}건)` : ""}`
                       : "아직 방문 기록이 없습니다"}
                   </p>
                   {s.last_note && <p className="text-[11px] text-slate-500 break-keep">메모: {s.last_note}</p>}
@@ -205,16 +248,16 @@ export default function PatrolPanel() {
                   {open === s.id && (
                     <div className="mt-3 p-3 rounded-xl bg-slate-50 space-y-3">
                       <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label="방문 결과">
-                        {(Object.keys(RESULT_LABEL) as (keyof typeof RESULT_LABEL)[]).map((k) => (
+                        {(Object.keys(resultLabel) as (keyof typeof RESULT_LABEL)[]).map((k) => (
                           <button key={k} type="button" role="radio" aria-checked={form.result === k} onClick={() => setForm({ ...form, result: k })}
                             className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 ${form.result === k ? "bg-slate-950 text-white border-slate-950" : "bg-white text-slate-600 border-slate-200"}`}>
-                            {RESULT_LABEL[k]}
+                            {resultLabel[k]}
                           </button>
                         ))}
                       </div>
                       {form.result === "found" && (
                         <label className="flex items-center gap-3 text-xs font-black text-slate-600">
-                          발견한 공실 수
+                          {isRealtor ? "확인한 임대 매물 수" : "발견한 공실 수"}
                           <input type="number" min={1} max={50} value={form.count}
                             onChange={(e) => setForm({ ...form, count: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })}
                             className="w-20 border-2 border-slate-200 rounded-lg px-2 py-1 text-sm font-black text-slate-900" />
@@ -224,7 +267,7 @@ export default function PatrolPanel() {
                       <label className="block text-xs font-black text-slate-600">
                         메모 (선택)
                         <textarea value={form.note} maxLength={500} rows={2} onChange={(e) => setForm({ ...form, note: e.target.value })}
-                          placeholder="예: 2층 미용실 폐업, 1층 모퉁이 가게 공사 중"
+                          placeholder={isRealtor ? "예: 가재울중앙 – 1층 상가 2곳 임대 중, 관심 있음" : "예: 2층 미용실 폐업, 1층 모퉁이 가게 공사 중"}
                           className="mt-1 w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm font-bold text-slate-900" />
                       </label>
                       <button type="button" disabled={saving} onClick={() => save(s)}
@@ -246,7 +289,7 @@ export default function PatrolPanel() {
         </button>
         {showList && (
           <div className="mt-3 space-y-4">
-            {CHECKLIST.map((g) => (
+            {(isRealtor ? [...REALTOR_CHECKLIST, ...CHECKLIST.filter((g) => g.title === "등록할 때 꼭 남길 것" || g.title === "지켜야 할 것")] : CHECKLIST).map((g) => (
               <div key={g.title}>
                 <h5 className="text-xs font-black text-slate-950 mb-1.5">{g.title}</h5>
                 <ul className="space-y-1.5">
