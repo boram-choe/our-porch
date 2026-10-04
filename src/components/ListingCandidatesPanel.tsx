@@ -11,7 +11,7 @@ type Candidate = {
   id: string; source: string; source_ref: string | null; label: string; address: string | null; neighborhood: string | null;
   floor: string | null; area: string | null; deposit: number | null; monthly_rent: number | null; management_fee: number | null;
   realtor_name: string | null; realtor_phone: string | null; lat: number; lng: number;
-  status: "todo" | "verified" | "invalid" | "registered"; note: string | null; vacancy_id: string | null;
+  status: "todo" | "verified" | "invalid" | "registered"; note: string | null; vacancy_id: string | null; score: number | null;
   created_at: string; checked_at: string | null; created_by_name: string | null; checked_by_name: string | null;
 };
 
@@ -95,6 +95,8 @@ export default function ListingCandidatesPanel() {
   const [items, setItems] = useState<Candidate[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<(typeof STATUS_TABS)[number]["key"]>("todo");
+  const [sourceTab, setSourceTab] = useState<"naver" | "permit">("naver");
+  const [visitCount, setVisitCount] = useState(10);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [places, setPlaces] = useState<Place[]>([]);
@@ -126,16 +128,31 @@ export default function ListingCandidatesPanel() {
   // 후보가 하나도 없으면 입력 화면부터 보여준다
   useEffect(() => { if (items && items.length === 0) setShowForm(true); }, [items]);
 
-  const counts = useMemo(() => {
-    const c = { todo: 0, verified: 0, registered: 0, invalid: 0 };
-    (items ?? []).forEach((i) => { c[i.status] += 1; });
-    return c;
+  const inSource = useMemo(
+    () => (items ?? []).filter((i) => (sourceTab === "permit" ? i.source === "permit" : i.source !== "permit")),
+    [items, sourceTab],
+  );
+  const sourceCounts = useMemo(() => {
+    const all = items ?? [];
+    return { naver: all.filter((i) => i.source !== "permit" && i.status === "todo").length, permit: all.filter((i) => i.source === "permit" && i.status === "todo").length };
   }, [items]);
 
+  const counts = useMemo(() => {
+    const c = { todo: 0, verified: 0, registered: 0, invalid: 0 };
+    inSource.forEach((i) => { c[i.status] += 1; });
+    return c;
+  }, [inSource]);
+
+  // 자동 후보는 수가 많아서 점수가 높은 순으로 오늘 방문할 N곳만 골라 경로를 만든다
+  const todoAll = useMemo(() => inSource.filter((i) => i.status === "todo"), [inSource]);
   const shown = useMemo(() => {
-    const list = (items ?? []).filter((i) => i.status === tab);
-    return tab === "todo" ? orderRoute(list, start) : list;
-  }, [items, tab, start]);
+    if (tab !== "todo") return inSource.filter((i) => i.status === tab);
+    if (sourceTab === "permit") {
+      const top = [...todoAll].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, visitCount);
+      return orderRoute(top, start);
+    }
+    return orderRoute(todoAll, start);
+  }, [inSource, todoAll, tab, sourceTab, visitCount, start]);
 
   useEffect(() => {
     if (!map || tab !== "todo" || shown.length === 0) return;
@@ -341,6 +358,22 @@ export default function ListingCandidatesPanel() {
         </div>
       )}
 
+      <div className="flex gap-2">
+        <button type="button" onClick={() => setSourceTab("naver")}
+          className={`flex-1 py-2.5 rounded-xl text-xs font-black border-2 ${sourceTab === "naver" ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-slate-500 border-slate-100"}`}>
+          네이버 매물 {sourceCounts.naver}
+        </button>
+        <button type="button" onClick={() => setSourceTab("permit")}
+          className={`flex-1 py-2.5 rounded-xl text-xs font-black border-2 ${sourceTab === "permit" ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-500 border-slate-100"}`}>
+          자동 후보 (인허가) {sourceCounts.permit}
+        </button>
+      </div>
+      {sourceTab === "permit" && (
+        <p className="text-[11px] font-bold text-indigo-700 bg-indigo-50 rounded-xl p-3 leading-relaxed">
+          서울시 인허가 데이터에서 최근 2년 안에 폐업했고 그 뒤로 같은 호수에 새로 문을 연 곳이 없는 건물을 자동으로 골랐습니다. 학원·병원·소매점이 들어왔는지는 알 수 없어서 실제 공실이 아닐 수 있으니 현장에서 꼭 확인하세요. 건물 하나가 한 번에 여러 호수일 수 있습니다.
+        </p>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {STATUS_TABS.map((t) => (
           <button key={t.key} type="button" onClick={() => setTab(t.key)}
@@ -349,6 +382,17 @@ export default function ListingCandidatesPanel() {
           </button>
         ))}
       </div>
+
+      {tab === "todo" && sourceTab === "permit" && todoAll.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-600">
+          <span>오늘 방문할 곳 (가능성 높은 순):</span>
+          {[5, 10, 20].map((n) => (
+            <button key={n} type="button" onClick={() => setVisitCount(n)}
+              className={`px-2.5 py-1 rounded-lg font-black border-2 ${visitCount === n ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-500 border-slate-100"}`}>{n}곳</button>
+          ))}
+          <span className="text-slate-400">전체 {todoAll.length}곳 중</span>
+        </div>
+      )}
 
       {tab === "todo" && (
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-500">
@@ -363,7 +407,9 @@ export default function ListingCandidatesPanel() {
       {items && shown.length === 0 && (
         <p className="text-xs font-bold text-slate-500 bg-slate-50 rounded-xl p-4 leading-relaxed">
           {tab === "todo"
-            ? "아직 방문할 매물이 없습니다. 네이버부동산에서 비어 있는 상가 매물의 주소를 찾아 위 칸에 붙여 넣으면, 그 매물들만 이어서 방문 경로가 이 자리에 지도로 그려집니다."
+            ? sourceTab === "permit"
+              ? "자동 후보가 아직 없습니다. 새 동네는 관리자에게 자동 후보 생성을 요청하세요."
+              : "아직 방문할 매물이 없습니다. 네이버부동산에서 비어 있는 상가 매물의 주소를 찾아 위 칸에 붙여 넣으면, 그 매물들만 이어서 방문 경로가 이 자리에 지도로 그려집니다."
             : "해당하는 매물이 없습니다."}
         </p>
       )}
