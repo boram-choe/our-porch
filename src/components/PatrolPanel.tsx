@@ -17,7 +17,7 @@ type Stop = {
 
 const START = { name: "가좌역 경의중앙선", lat: 37.56874, lng: 126.91482 };
 const ROUTES = [
-  { key: "realtor" as const, label: "중개업소 순회", tag: "먼저", minutesPerStop: 20, start: START,
+  { key: "realtor" as const, label: "중개업소 순회", tag: "", minutesPerStop: 20, start: START,
     intro: "부동산에 매물로 나온 상가를 먼저 확인하는 경로입니다. 중개업소가 몰린 구역 10곳을 가좌역에서 시작하는 순서로 골랐습니다. 유리창에 붙은 상가 임대 매물을 확인하고, 중개사와 인사하며 매물을 등록합니다." },
   { key: "namgajwa" as const, label: "남가좌동 거리", tag: "", minutesPerStop: 10, start: START,
     intro: "점포가 몰린 구역 8곳을 순서대로 걸으며 빈 상가를 찾습니다. 중개업소 순회를 마친 뒤 거리에서 직접 확인할 때 쓰세요." },
@@ -57,7 +57,7 @@ const REALTOR_CHECKLIST: { title: string; items: string[] }[] = [
     "건물주(임대인)에게 이 정보를 보여 줄 수 있는지, 건물주 연락 방법이 있는지",
   ]},
   { title: "기록할 것", items: [
-    "정거장의 \"방문 기록\"에서 \"매물 확인\"을 고르고, 확인한 임대 매물 수를 입력합니다.",
+    "방문 구역의 \"방문 기록\"에서 \"매물 확인\"을 고르고, 확인한 임대 매물 수를 입력합니다.",
     "메모에 중개사 상호와 반응을 적습니다 (예: 가재울중앙 – 관심 있음, 다음 주 재방문).",
     "개인정보(임차인, 건물주 연락처)는 상대가 직접 건넨 경우가 아니면 적지 않습니다.",
   ]},
@@ -72,7 +72,7 @@ const CHECKLIST: { title: string; items: string[] }[] = [
   { title: "출발 전", items: [
     "휴대폰 충전, 이 페이지에 로그인되어 있는지 확인",
     "카메라 권한과 위치 권한 허용",
-    "마지막 방문이 오래된 정거장부터 도는 게 효율적입니다 (아래 목록의 '다음 순서' 표시)",
+    "마지막 방문이 오래된 방문 구역부터 도는 게 효율적입니다 (아래 목록의 '다음 순서' 표시)",
   ]},
   { title: "공실로 볼 수 있는 신호 (2개 이상이면 등록)", items: [
     "간판이 철거됐거나 가려져 있다",
@@ -98,7 +98,7 @@ const CHECKLIST: { title: string; items: string[] }[] = [
     "사진에 사람 얼굴과 차량 번호판이 나오지 않게 찍는다",
     "영업 중인 가게 안은 찍지 않는다. 건물 안으로 들어가지 않는다",
     "주민이나 상인이 물으면 '동네 빈 상가 조사 중'이라고 설명하고 명함 또는 앱 주소를 안내한다",
-    "정거장을 다 돌았으면 꼭 '방문 기록'을 남긴다 (공실이 없어도 기록해야 다음 사람이 헛걸음하지 않습니다)",
+    "방문 구역을 다 돌았으면 꼭 '방문 기록'을 남긴다 (공실이 없어도 기록해야 다음 사람이 헛걸음하지 않습니다)",
   ]},
 ];
 
@@ -186,7 +186,7 @@ export default function PatrolPanel() {
       <div>
         <h3 className="font-black text-base text-slate-950">공실 순회 경로</h3>
         <p className="text-[11px] font-bold text-slate-400 mt-1 leading-relaxed">
-          {meta.intro} 정거장마다 방문 기록을 남기세요.
+          {meta.intro} 방문 구역마다 방문 기록을 남기세요.
         </p>
       </div>
 
@@ -211,7 +211,7 @@ export default function PatrolPanel() {
           </div>
           <div className="bg-slate-50 rounded-xl p-3">
             <div className="text-lg font-black tabular-nums">약 {Math.floor(summary.minutes / 60)}시간 {summary.minutes % 60}분</div>
-            <div className="text-[10px] font-bold text-slate-400">정거장당 {meta.minutesPerStop}분 점검 포함</div>
+            <div className="text-[10px] font-bold text-slate-400">방문 구역당 {meta.minutesPerStop}분 점검 포함</div>
           </div>
         </div>
       )}
@@ -252,7 +252,7 @@ export default function PatrolPanel() {
             </KakaoMap>
           </div>
           <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
-            번호 순서대로 화살표 방향으로 이동합니다. 초록은 최근 {FRESH_DAYS}일 안에 다녀온 곳, 주황은 다음 순서입니다. 선은 정거장을 직선으로 이은 순서 표시이고, 실제로 걷는 길은 정거장의 <b>길찾기</b>를 따라가세요.
+            번호 순서대로 화살표 방향으로 이동합니다. 초록은 최근 {FRESH_DAYS}일 안에 다녀온 곳, 주황은 다음 순서입니다. 선은 방문 구역을 직선으로 이은 순서 표시이고, 실제로 걷는 길은 방문 구역의 <b>길찾기</b>를 따라가세요.
           </p>
         </div>
       )}
@@ -363,7 +363,7 @@ export default function PatrolPanel() {
       </div>
 
       <p className="text-[10px] font-bold text-slate-300 leading-relaxed">
-        정거장은 카카오 지도의 점포 정보(2026-10 기준)에서 밀집 구역을 고른 것입니다. 걷는 거리는 직선거리에 1.3을 곱한 추정치입니다.
+        방문 구역은 카카오 지도의 점포 정보(2026-10 기준)에서 밀집 구역을 고른 것입니다. 걷는 거리는 직선거리에 1.3을 곱한 추정치입니다.
       </p>
     </div>
   );

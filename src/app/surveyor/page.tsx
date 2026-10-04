@@ -1,7 +1,7 @@
 "use client";
 
 import SignupSourcesPanel from "@/components/SignupSourcesPanel";
-import PatrolPanel from "@/components/PatrolPanel";
+import FallbackPatrol from "@/components/FallbackPatrol";
 import ListingCandidatesPanel from "@/components/ListingCandidatesPanel";
 import { KAKAO_APP_KEY, KAKAO_LIBRARIES } from "@/lib/kakaoConfig";
 import { useState, useEffect } from "react";
@@ -580,7 +580,7 @@ export default function SurveyorPage() {
 
               {/* 공실 순회 경로 + 현장 체크리스트 (조사원 전원) */}
               <ListingCandidatesPanel />
-              <PatrolPanel />
+              <FallbackPatrol />
 
               {/* 2. Vacancy Lifecycle Management (Grouped Lists) */}
               <div className="space-y-12">
