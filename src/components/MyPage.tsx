@@ -77,6 +77,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [editCustomPersona, setEditCustomPersona] = useState("");
   
   const [showAdminAuth, setShowAdminAuth] = useState(false);
+  const [adminAuthMessage, setAdminAuthMessage] = useState<string | null>(null);
 
   const [isRegisteringWork, setIsRegisteringWork] = useState(false);
   const [tempWorkLocation, setTempWorkLocation] = useState<{ neighborhood: string; lat: number; lng: number } | null>(null);
@@ -244,8 +245,6 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     localStorage.setItem("gongsil_user_profile", JSON.stringify(updatedProfile));
     setIsEditing(false);
   };
-
-  const [adminAuthMessage, setAdminAuthMessage] = useState<string | null>(null);
 
   // 관리자 인증: 조사원 페이지(/surveyor)에서 CEO/OPS 계정으로 로그인한 세션이 서버에서 확인될 때만 허용
   const handleAdminAuth = async () => {
