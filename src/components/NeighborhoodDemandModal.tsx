@@ -227,6 +227,11 @@ export default function NeighborhoodDemandModal({ neighborhood, isGuest, vacanci
                 </>
               )}
             </section>
+
+            <button type="button" onClick={onClose}
+              className="w-full py-4 rounded-2xl bg-amber-400 text-slate-950 text-base font-black flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
+              <MapPin size={18} /> 지도에서 우리 동네 둘러보기
+            </button>
           </div>
         )}
       </div>
