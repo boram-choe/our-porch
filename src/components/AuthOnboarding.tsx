@@ -475,12 +475,6 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                 <div className="w-20 h-20 rounded-[1.5rem] overflow-hidden shadow-[0_0_40px_rgba(245,158,11,0.25)]">
                   <Logo size={80} />
                 </div>
-                <span
-                  className="mt-3 text-[1.9rem] font-black tracking-tight text-amber-400 leading-none"
-                  style={{ fontFamily: '"Black Han Sans", "Pretendard Black", sans-serif' }}
-                >
-                  여긴뭐가
-                </span>
               </motion.div>
 
               {/* 소셜 증명 뱃지 */}

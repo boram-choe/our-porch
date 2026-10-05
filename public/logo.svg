@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="여긴뭐가">
-  <rect width="64" height="64" rx="16" fill="#F59E0B"/>
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="여긴뭐가">
+  <rect width="64" height="64" rx="16" fill="#FBBF24"/>
   <path d="M32 45C32 45 17 35 17 24.5a15 15 0 0 1 30 0c0 5-3.5 8.5-8 11.2" fill="none" stroke="#0B1020" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
   <circle cx="32" cy="54" r="4.2" fill="#0B1020"/>
 </svg>
