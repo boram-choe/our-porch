@@ -40,11 +40,15 @@ export async function fetchNeighborhoodDemand(neighborhood: string): Promise<Nei
 }
 
 export async function saveNeighborhoodDemand(neighborhood: string, categories: string[], opinion: string): Promise<SaveDemandResult> {
+  // 프로필은 브라우저에 저장돼 있어 투표 화면은 열리지만, 카카오 로그인 세션이 만료됐을 수 있다.
+  const { data: sess } = await supabase.auth.getSession();
+  if (!sess.session) return { ok: false, error: "unauthorized" };
   const { data, error } = await supabase.rpc("set_neighborhood_demand", {
     p_neighborhood: neighborhood,
     p_categories: categories,
     p_opinion: opinion.trim() || null,
   });
+  if (error?.code === "42501" || error?.code === "23503") return { ok: false, error: "unauthorized" };
   if (error || !data) return { ok: false, error: "network" };
   if (data.error) return { ok: false, error: data.error };
   return { ok: true };

@@ -10,7 +10,7 @@ import {
 } from "@/lib/neighborhood";
 
 const ERROR_TEXT: Record<string, string> = {
-  unauthorized: "카카오 로그인 후에 투표할 수 있어요.",
+  unauthorized: "로그인이 풀렸어요. 로그아웃 후 카카오로 다시 로그인해 주세요.",
   not_your_neighborhood: "내 동네에서만 투표할 수 있어요.",
   too_many: `업종은 최대 ${MAX_DEMAND_VOTES}개까지 고를 수 있어요.`,
   invalid_input: "입력한 내용을 다시 확인해 주세요.",
