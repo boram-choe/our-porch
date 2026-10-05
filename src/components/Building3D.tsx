@@ -545,7 +545,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  transition={{ delay: idx * 0.1 }}
  className={`relative flex-1 rounded-xl border-2 transition-all duration-700 flex items-center justify-center 
  ${isTarget 
- ? 'bg-slate-900 border-amber-500/50 shadow-[inset_0_0_30px_rgba(245,158,11,0.3)] ring-2 ring-amber-500/20 overflow-visible' 
+ ? 'bg-slate-900 border-amber-400/50 shadow-[inset_0_0_30px_rgba(251,191,36,0.3)] ring-2 ring-amber-400/20 overflow-visible' 
  : 'bg-slate-900/95 border-white/5 overflow-hidden'}
  `}
  >
@@ -562,14 +562,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  className="relative z-20 flex flex-col items-center justify-center w-full h-full"
  >
  <div className="relative min-w-[100px] h-16 bg-white rounded-xl border-b-4 border-slate-300 shadow-2xl flex flex-col items-center justify-center p-2">
- <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500 rounded-t-xl" />
+ <div className="absolute top-0 left-0 right-0 h-1 bg-amber-400 rounded-t-xl" />
  <span className="text-2xl">{topCategory.icon}</span>
  <span className="text-[10px] font-black text-slate-800">{topCategory.label}</span>
  </div>
  </motion.div>
  )}
  </AnimatePresence>
- <span className={`absolute bottom-1 right-2 text-[8px] font-black tracking-tighter ${isTarget ? 'text-amber-500/60' : 'text-white/10'}`}>
+ <span className={`absolute bottom-1 right-2 text-[8px] font-black tracking-tighter ${isTarget ? 'text-amber-400/60' : 'text-white/10'}`}>
  {f.label}
  </span>
  </motion.div>
@@ -597,7 +597,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  >
  {!imageLoaded && (
  <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center animate-pulse gap-3">
- <div className="w-8 h-8 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+ <div className="w-8 h-8 rounded-full border-4 border-amber-400/20 border-t-amber-400 animate-spin" />
  <span className="text-[10px] font-black text-slate-500 tracking-wider">현장 실사 사진 로드 중...</span>
  </div>
  )}
@@ -636,7 +636,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <div className="text-right bg-slate-900/95 px-4 py-3 rounded-2xl border border-white/10 pointer-events-none">
  <h2 className="text-xl font-black text-white">{vacancy.landmark || vacancy.address.split(' ').pop() || '선택한 위치'}</h2>
  <div className="flex items-center justify-end gap-2 mt-1">
- <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+ <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
  <p className="text-amber-200 font-bold text-xs uppercase tracking-widest">{vacancy.floor?.includes('층') || vacancy.floor?.includes('지하') ? vacancy.floor : `${vacancy.floor || '1'}층`} 상상 공간</p>
  </div>
  {vacancy.neighborhood && !isLaunchArea(vacancy.neighborhood) && (
@@ -662,14 +662,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  {votingStep === 'category' && (
  <div className="bg-slate-900/95 border border-white/5 rounded-[2.5rem] p-6 mb-5 w-full shadow-lg">
  <div className="flex items-center gap-2 mb-4">
- <Info size={16} className="text-amber-500" />
- <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest leading-none">💡 이 공간, 어떤 곳인가요?</h4>
+ <Info size={16} className="text-amber-400" />
+ <h4 className="text-xs font-black text-amber-400 uppercase tracking-widest leading-none">💡 이 공간, 어떤 곳인가요?</h4>
  </div>
  
  {/* 메인 정보 태그 그룹 */}
  <div className="flex flex-wrap gap-2 mb-5">
  {/* 1. 명칭 및 층수 태그 */}
- <div className="px-4 py-2 bg-amber-500 text-slate-950 rounded-full text-xs font-black shadow-lg shadow-amber-500/20 flex items-center gap-2">
+ <div className="px-4 py-2 bg-amber-400 text-slate-950 rounded-full text-xs font-black shadow-lg shadow-amber-400/20 flex items-center gap-2">
  <MapPin size={12} strokeWidth={3} />
  {vacancy.landmark || vacancy.address.split(' ').pop()} {vacancy.floor?.includes('층') ? vacancy.floor : `${vacancy.floor || '1'}층`}
  </div>
@@ -706,8 +706,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  return publicRemarks ? (
  <div className="w-full mb-5">
  <div className="flex items-center gap-1.5 mb-1.5 ml-1">
- <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
- <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-none">툇마루단의 한마디</p>
+ <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+ <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest leading-none">툇마루단의 한마디</p>
  </div>
  <div className="inline-flex px-4 py-2 bg-white/30 text-white rounded-2xl text-xs font-bold border border-white/10 shadow-sm">
  "{publicRemarks}"
@@ -725,7 +725,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <span className="text-[10px] font-bold text-slate-400">담당 중개사: <span className="text-white ml-1">{vacancy.realtorName}</span></span>
  </div>
  {vacancy.realtorPhone && (
- <a href={`tel:${vacancy.realtorPhone}`} className="text-[9px] font-black text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/10 hover:bg-amber-500/20 transition-all">
+ <a href={`tel:${vacancy.realtorPhone}`} className="text-[9px] font-black text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/10 hover:bg-amber-400/20 transition-all">
  문의하기
  </a>
  )}
@@ -736,9 +736,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  {/* [🗳️ 상상의 실 투표함 구역]
  참고자료 리포트 카드와 확실한 경계를 띄우고, 2px 골드빛 보더를 둘러 인터랙티브 포인트를 즉시 인지하도록 유도합니다! */}
- <div className="bg-slate-900/95 border-2 border-amber-500/20 rounded-[3rem] p-6 w-full shadow-[0_30px_70px_rgba(0,0,0,0.6)] overflow-hidden transition-all duration-500">
+ <div className="bg-slate-900/95 border-2 border-amber-400/20 rounded-[3rem] p-6 w-full shadow-[0_30px_70px_rgba(0,0,0,0.6)] overflow-hidden transition-all duration-500">
  <div className="flex items-center gap-4 mb-6">
- <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+ <div className="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-400/30">
  <Gift size={20} className="text-white" />
  </div>
  <div>
@@ -787,7 +787,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
  
  {/* 질문 헤더 수정 */}
- <div id="vote-section" className="bg-slate-900/50 p-6 rounded-[2.5rem] border border-amber-400/40 shadow-[0_0_40px_rgba(245,158,11,0.25)] relative overflow-hidden mb-2 mt-6">
+ <div id="vote-section" className="bg-slate-900/50 p-6 rounded-[2.5rem] border border-amber-400/40 shadow-[0_0_40px_rgba(251,191,36,0.25)] relative overflow-hidden mb-2 mt-6">
     <div className="absolute inset-0 border-[3px] border-amber-400 rounded-[2.5rem] animate-pulse pointer-events-none opacity-80" />
  <div className="text-center mb-6 relative z-10">
  <h4 className="text-xl font-black text-amber-400 tracking-tight leading-none mb-2 drop-shadow-md">
@@ -804,16 +804,16 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  setSelectedCategory(recommendedCategory ? getCategoryIdFromRecommendation(recommendedCategory) : null);
  handleVoteSubmit(undefined, recommendedCategory || undefined, recommendedCategory ? getCategoryIdFromRecommendation(recommendedCategory) : undefined);
  }}
- className="w-full p-4 md:p-6 bg-gradient-to-br from-amber-400 via-amber-300 to-amber-500 rounded-[2.5rem] border-[3px] border-white shadow-[0_25px_50px_rgba(245,158,11,0.3)] flex items-center justify-between group"
+ className="w-full p-4 md:p-6 bg-gradient-to-br from-amber-400 via-amber-300 to-amber-400 rounded-[2.5rem] border-[3px] border-white shadow-[0_25px_50px_rgba(251,191,36,0.3)] flex items-center justify-between group"
  >
  <div className="flex items-center gap-4">
- <div className="w-11 h-11 bg-slate-950 rounded-xl flex items-center justify-center text-amber-500 shadow-2xl group-hover:rotate-12 group-hover:scale-110 transition-all duration-500">
+ <div className="w-11 h-11 bg-slate-950 rounded-xl flex items-center justify-center text-amber-400 shadow-2xl group-hover:rotate-12 group-hover:scale-110 transition-all duration-500">
  <Sparkles size={20} fill="currentColor" />
  </div>
  <div className="text-left">
  <div className="flex items-center gap-3 mb-1">
  <p className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] leading-none opacity-80">{userProfile?.nickname || "대표님"}님을 위한 추천</p>
- <span className="px-2.5 py-0.5 bg-slate-950 text-amber-500 text-[9px] font-black rounded-full uppercase tracking-tighter shadow-lg">
+ <span className="px-2.5 py-0.5 bg-slate-950 text-amber-400 text-[9px] font-black rounded-full uppercase tracking-tighter shadow-lg">
  {CATEGORIES.find(c => c.id === getCategoryIdFromRecommendation(recommendedCategory || ""))?.label || "기타"}
  </span>
  </div>
@@ -824,7 +824,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  )}
  
  {demandPicks.length > 0 && (
- <div className="rounded-2xl bg-white/5 border border-amber-500/30 p-3.5">
+ <div className="rounded-2xl bg-white/5 border border-amber-400/30 p-3.5">
  <p className="text-[10px] font-black text-amber-400 tracking-wide mb-2.5">이웃들이 원하는 업종 · 이 공간 투표 후보</p>
  <div className="flex flex-wrap gap-2">
  {demandPicks.map((p) => (
@@ -835,7 +835,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  if (p.kind === "demand") { handleCategorySelect(p.catId); }
  else { setSelectedCategory(p.catId); handleVoteSubmit(undefined, p.label, p.catId); }
  }}
- className={`flex flex-col items-start rounded-xl px-3 py-2 text-left active:scale-95 transition-all border-2 ${p.kind === "demand" ? "bg-amber-500 border-amber-400 text-slate-950" : "bg-blue-500/20 border-blue-400/40 text-white"}`}
+ className={`flex flex-col items-start rounded-xl px-3 py-2 text-left active:scale-95 transition-all border-2 ${p.kind === "demand" ? "bg-amber-400 border-amber-400 text-slate-950" : "bg-blue-500/20 border-blue-400/40 text-white"}`}
  >
  <span className="text-[12px] font-black leading-tight">{p.label}</span>
  <span className={`text-[9px] font-bold leading-tight ${p.kind === "demand" ? "text-slate-800" : "text-blue-200"}`}>{p.badge}</span>
@@ -851,7 +851,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <button 
  key={cat.id} 
  onClick={() => handleCategorySelect(cat.id)} 
- className="flex flex-col items-center justify-center h-20 w-full bg-white/5 border border-white/10 rounded-2xl hover:bg-amber-500 hover:border-amber-400 active:scale-95 transition-all group"
+ className="flex flex-col items-center justify-center h-20 w-full bg-white/5 border border-white/10 rounded-2xl hover:bg-amber-400 hover:border-amber-300 active:scale-95 transition-all group"
  >
  <div className="text-white group-hover:scale-110 transition-transform mb-1.5 scale-90">{cat.icon}</div>
  <span className="text-[10px] font-black text-white/70 group-hover:text-white uppercase leading-none">{cat.label}</span>
@@ -937,7 +937,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  <div className="flex flex-wrap gap-2">
  {CATEGORIES.find(c => c.id === selectedCategory)?.subs.map(sub => (
- <button key={sub} onClick={() => handleSubSelect(sub)} className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2 ${inputValue === sub ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-lg' : 'bg-white/5 text-white/50 border-white/5 hover:border-white/20'}`}>{sub}</button>
+ <button key={sub} onClick={() => handleSubSelect(sub)} className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2 ${inputValue === sub ? 'bg-amber-400 text-slate-900 border-amber-400 shadow-lg' : 'bg-white/5 text-white/50 border-white/5 hover:border-white/20'}`}>{sub}</button>
  ))}
  </div>
  <form onSubmit={handleVoteSubmit} className="relative z-30">
@@ -946,11 +946,11 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  value={inputValue} 
  onChange={(e) => setInputValue(e.target.value)} 
  placeholder="직접 입력하거나 선택해 주세요..." 
- className="w-full bg-slate-950 text-white placeholder-slate-600 font-bold rounded-2xl py-4 pl-6 pr-16 focus:outline-none focus:ring-2 focus:ring-amber-500 border border-white/5 text-sm" 
+ className="w-full bg-slate-950 text-white placeholder-slate-600 font-bold rounded-2xl py-4 pl-6 pr-16 focus:outline-none focus:ring-2 focus:ring-amber-400 border border-white/5 text-sm" 
  />
  <button 
  type="submit" 
- className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-amber-500 rounded-xl flex items-center justify-center text-slate-950 hover:bg-amber-400 active:scale-90 transition-all shadow-xl shadow-amber-500/40 z-40"
+ className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-amber-400 rounded-xl flex items-center justify-center text-slate-950 hover:bg-amber-300 active:scale-90 transition-all shadow-xl shadow-amber-400/40 z-40"
  >
  <CheckCircle2 size={24} />
  </button>
@@ -960,11 +960,11 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <motion.div key="results" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
  <div className="bg-white/5 rounded-2xl p-4 border border-white/10 flex items-center justify-between group cursor-pointer hover:bg-white/30 transition-all" onClick={() => setExpandedCategoryId(expandedCategoryId === 'all' ? null : 'all')}>
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center shadow-lg animate-bounce">
+ <div className="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center shadow-lg animate-bounce">
  {groupedVotes[0]?.icon || <Sparkles size={16} />}
  </div>
  <div className="flex-1">
- <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">최다 상상 키워드</p>
+ <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">최다 상상 키워드</p>
  <h4 className="text-sm font-black text-white truncate max-w-[150px]">
  {groupedVotes.length > 0 
  ? groupedVotes.filter(g => g.total === groupedVotes[0].total).map(g => g.label).join(' · ') 
@@ -989,20 +989,20 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <div className="flex items-center gap-3 p-3 bg-white/5">
  <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-black text-white">{idx+1}</div>
  <span className="text-xs font-black text-white flex-1">{group.label}</span>
- <span className="text-[10px] font-black text-amber-500">{group.total}표</span>
+ <span className="text-[10px] font-black text-amber-400">{group.total}표</span>
  </div>
  <div className="p-3 pt-1 flex flex-wrap gap-2">
  {group.items.map(item => (
  <div key={item.id} className="flex items-center gap-1.5 bg-slate-950/50 px-2 py-1 rounded-lg border border-white/5">
  <img src={item.logo} alt="" className="w-3 h-3 rounded-full" />
  <span className="text-[9px] font-bold text-white/60">{item.brand}</span>
- <span className="text-[8px] font-black text-amber-500/80">{item.count}</span>
+ <span className="text-[8px] font-black text-amber-400/80">{item.count}</span>
  </div>
  ))}
  </div>
  </div>
  ))}
- <button onClick={handleShare} className="w-full py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-xl text-[10px] font-black flex items-center justify-center gap-2 transition-all mt-2">
+ <button onClick={handleShare} className="w-full py-3 bg-amber-400/10 hover:bg-amber-400/20 text-amber-400 rounded-xl text-[10px] font-black flex items-center justify-center gap-2 transition-all mt-2">
  <Share2 size={12} /> 상상 조각 공유하기
  </button>
  </motion.div>
@@ -1011,8 +1011,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
 
  {userProfile?.isGuest && (
- <div className="p-6 bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-slate-900 border border-amber-500/20 rounded-[2.5rem] text-center mt-4 shadow-xl select-none">
- <p className="text-xs font-black text-amber-500 mb-2 flex items-center justify-center gap-1.5">
+ <div className="p-6 bg-gradient-to-br from-amber-400/10 via-amber-400/5 to-slate-900 border border-amber-400/20 rounded-[2.5rem] text-center mt-4 shadow-xl select-none">
+ <p className="text-xs font-black text-amber-400 mb-2 flex items-center justify-center gap-1.5">
  <ShieldCheck size={14} /> 상상 참여 권장
  </p>
  <p className="text-[11px] font-bold text-slate-300 leading-relaxed break-keep">
@@ -1025,7 +1025,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  onClick={() => setShowComments(true)} 
  className="w-full py-5 bg-slate-800 text-white rounded-[2rem] text-sm font-black shadow-lg hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-4 border border-white/5"
  >
- <MessageSquare size={18} className="text-amber-500" /> 이웃들의 의견 보기
+ <MessageSquare size={18} className="text-amber-400" /> 이웃들의 의견 보기
  </button>
 
  {/* 베타 버전에서는 예비사장님 모드 진입 버튼 숨김
@@ -1061,7 +1061,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  <div className="mt-8 pt-6 border-t border-white/5 flex flex-col gap-4">
  <div className="flex items-center justify-between">
- <button onClick={() => setReportMode("choice")} className="flex items-center gap-2 text-slate-500 hover:text-amber-400 transition-colors text-[10px] font-black uppercase tracking-widest"><AlertTriangle size={12} /> 정보 정정하기</button>
+ <button onClick={() => setReportMode("choice")} className="flex items-center gap-2 text-slate-500 hover:text-amber-300 transition-colors text-[10px] font-black uppercase tracking-widest"><AlertTriangle size={12} /> 정보 정정하기</button>
  <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
  <div className="flex -space-x-2">
  {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[8px] text-white font-black">{i}</div>)}
@@ -1075,7 +1075,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  onClick={() => setShowRealtor(!showRealtor)}
  className="w-full flex items-center justify-between bg-slate-800/50 hover:bg-slate-800 px-4 py-3 rounded-xl border border-white/5 transition-all text-xs font-bold text-slate-300"
  >
- <span className="flex items-center gap-2"><Briefcase size={14} className="text-amber-500" /> 담당 공인중개사무소 정보 보기</span>
+ <span className="flex items-center gap-2"><Briefcase size={14} className="text-amber-400" /> 담당 공인중개사무소 정보 보기</span>
  <ChevronDown size={14} className={`transition-transform ${showRealtor ? 'rotate-180' : ''}`} />
  </button>
  
@@ -1091,11 +1091,11 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  {(vacancy.realtorName || vacancy.realtorPhone) ? (
  <>
  <div>
- <p className="text-[10px] font-black text-amber-500 mb-1">전속 중개 파트너</p>
+ <p className="text-[10px] font-black text-amber-400 mb-1">전속 중개 파트너</p>
  <p className="text-sm font-black text-white">{vacancy.realtorName || '담당 공인중개사'}</p>
  </div>
  {vacancy.realtorPhone && (
- <a href={`tel:${vacancy.realtorPhone}`} className="bg-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 flex-shrink-0 ml-4">
+ <a href={`tel:${vacancy.realtorPhone}`} className="bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black hover:bg-amber-300 transition-colors shadow-lg shadow-amber-400/20 flex-shrink-0 ml-4">
  전화연결
  </a>
  )}
@@ -1124,7 +1124,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  >
  {/* 이전 투표창과 완벽히 통일된 딥 실버/슬레이트 카드 스타일 */}
  <div className="bg-slate-900/95 border border-white/5 rounded-[2.5rem] p-8 w-full shadow-2xl relative overflow-hidden text-white">
- <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 to-orange-500" />
+ <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 to-orange-500" />
  <button 
  onClick={() => {
  if (reportMode === "input") {
@@ -1144,7 +1144,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  {reportSubmitted ? (
  /* 정정 리포트 제출 성공 서브 스크린 - 툇마루단/CEO 에스컬레이션 알림 포함 */
  <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-4 text-center">
- <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-inner text-amber-500">
+ <div className="w-16 h-16 bg-amber-400/10 border border-amber-400/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-inner text-amber-400">
  <AlertTriangle size={32} />
  </div>
  <span className="inline-block px-3 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-black rounded-full mb-3 uppercase tracking-widest">
@@ -1158,8 +1158,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  {/* 사용자 제보 내용 표시 */}
  <div className="bg-slate-950/60 border border-white/5 rounded-2xl p-5 mb-8 text-left max-w-md mx-auto">
  <div className="flex items-center gap-1.5 mb-2">
- <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
- <span className="text-[9px] font-black text-amber-500 tracking-wider uppercase">제보된 공간 정정 의견</span>
+ <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+ <span className="text-[9px] font-black text-amber-400 tracking-wider uppercase">제보된 공간 정정 의견</span>
  </div>
  <p className="text-xs font-bold text-slate-300 leading-relaxed whitespace-pre-wrap">
  "{reportText}"
@@ -1173,7 +1173,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  setReportText("");
  setReportType(null);
  }} 
- className="w-full max-w-md bg-amber-500 text-slate-950 font-black py-4.5 rounded-2xl text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
+ className="w-full max-w-md bg-amber-400 text-slate-950 font-black py-4.5 rounded-2xl text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
  >
  확인
  </button>
@@ -1182,8 +1182,8 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  /* 정정 리포트 유형 선택 서브 스크린 (입점소식 알아요 vs 달라요) */
  <motion.div key="choice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
  <div className="flex items-center gap-2 mb-2 ml-1">
- <AlertTriangle size={18} className="text-amber-500" />
- <h3 className="text-lg font-black text-amber-500 uppercase tracking-widest leading-none">공간 정보 정정</h3>
+ <AlertTriangle size={18} className="text-amber-400" />
+ <h3 className="text-lg font-black text-amber-400 uppercase tracking-widest leading-none">공간 정보 정정</h3>
  </div>
  <p className="text-[11px] font-bold text-slate-400 mb-6">실제 현장 소식과 다른 내용이 있나요? 올바른 정보를 제보해주세요.</p>
  
@@ -1191,9 +1191,9 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  {/* 1. 입점소식을 알아요 */}
  <button
  onClick={() => { setReportType("movein"); setReportMode("input"); }}
- className="flex flex-col items-center justify-center p-6 rounded-3xl border border-white/5 bg-slate-950/40 hover:bg-slate-950/95 hover:border-amber-500/50 transition-all shadow-md group text-center"
+ className="flex flex-col items-center justify-center p-6 rounded-3xl border border-white/5 bg-slate-950/40 hover:bg-slate-950/95 hover:border-amber-400/50 transition-all shadow-md group text-center"
  >
- <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mb-4 group-hover:scale-110 transition-transform">
+ <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 mb-4 group-hover:scale-110 transition-transform">
  <Sparkles size={24} />
  </div>
  <span className="text-sm font-black text-white mb-1">입점소식을 알아요</span>
@@ -1203,7 +1203,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  {/* 2. 제가 아는 정보와 달라요 */}
  <button
  onClick={() => { setReportType("dispute"); setReportMode("input"); }}
- className="flex flex-col items-center justify-center p-6 rounded-3xl border border-white/5 bg-slate-950/40 hover:bg-slate-950/95 hover:border-amber-500/50 transition-all shadow-md group text-center"
+ className="flex flex-col items-center justify-center p-6 rounded-3xl border border-white/5 bg-slate-950/40 hover:bg-slate-950/95 hover:border-amber-400/50 transition-all shadow-md group text-center"
  >
  <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 mb-4 group-hover:scale-110 transition-transform">
  <AlertTriangle size={24} />
@@ -1218,7 +1218,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
  <div className="flex items-center gap-2 mb-2 ml-1">
  {reportType === "movein" ? (
- <Sparkles size={18} className="text-amber-500" />
+ <Sparkles size={18} className="text-amber-400" />
  ) : (
  <AlertTriangle size={18} className="text-orange-500" />
  )}
@@ -1241,7 +1241,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  : "예: 이 공간은 이미 공실이 아니라 옷가게가 영업을 시작했어요 / 1층이 아니라 2층 공실이에요."
  } 
  rows={4} 
- className="w-full px-6 py-5 bg-slate-950/95 border border-white/10 rounded-3xl focus:outline-none focus:ring-4 focus:ring-amber-500/20 font-bold resize-none mb-6 text-white placeholder-slate-600 text-sm" 
+ className="w-full px-6 py-5 bg-slate-950/95 border border-white/10 rounded-3xl focus:outline-none focus:ring-4 focus:ring-amber-400/20 font-bold resize-none mb-6 text-white placeholder-slate-600 text-sm" 
  />
  
  <div className="flex gap-4">
@@ -1258,7 +1258,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  }
  }}
  disabled={!reportText.trim()}
- className="flex-1 py-4.5 bg-amber-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 font-black rounded-2xl text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-amber-500/10"
+ className="flex-1 py-4.5 bg-amber-400 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 font-black rounded-2xl text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-amber-400/10"
  >
  제보 완료하기
  </button>
@@ -1289,7 +1289,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <div className="w-12 h-1 bg-slate-200 rounded-full mb-6" />
  <div className="w-full flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 bg-amber-500 rounded-2xl flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/30">
+ <div className="w-10 h-10 bg-amber-400 rounded-2xl flex items-center justify-center text-slate-950 shadow-lg shadow-amber-400/30">
  <MessageSquare size={20} fill="currentColor" />
  </div>
  <div>
@@ -1350,7 +1350,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <div className="flex flex-col items-center gap-4">
  <button 
  onClick={() => handleLike(comment.id, comment.is_liked)}
- className={`flex flex-col items-center gap-1 transition-all ${comment.is_liked ? "text-amber-500 scale-110" : "text-slate-300 hover:text-slate-400"}`}
+ className={`flex flex-col items-center gap-1 transition-all ${comment.is_liked ? "text-amber-400 scale-110" : "text-slate-300 hover:text-slate-400"}`}
  >
  <Heart size={20} fill={comment.is_liked ? "currentColor" : "none"} strokeWidth={comment.is_liked ? 0 : 2.5} />
  <span className="text-[10px] font-black">{comment.likes_count}</span>
@@ -1373,7 +1373,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddComment(); } }}
  disabled={!!userProfile?.isGuest}
  placeholder={userProfile?.isGuest ? "의견 작성은 카카오 로그인 회원만 참여할 수 있습니다." : "이웃들에게 상세 의견을 나눠주세요..."} 
- className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/20 transition-all text-slate-800 placeholder-slate-400 disabled:opacity-60 disabled:cursor-not-allowed"
+ className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400/20 transition-all text-slate-800 placeholder-slate-400 disabled:opacity-60 disabled:cursor-not-allowed"
  />
  </div>
  <button 
@@ -1405,7 +1405,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  {/* 상단바: 닫기 버튼 및 타이틀 */}
  <div className="flex items-center justify-between w-full relative z-10 max-w-4xl mx-auto mt-4">
  <div>
- <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">툇마루단 실사 갤러리</p>
+ <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">툇마루단 실사 갤러리</p>
  <h4 className="text-sm font-black text-white">{vacancy.landmark || vacancy.address}</h4>
  </div>
  <button
@@ -1463,7 +1463,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  key={idx}
  onClick={() => setGalleryIndex(idx)}
  className={`h-2 rounded-full transition-all duration-300 ${
- idx === galleryIndex ? "w-6 bg-amber-500" : "w-2 bg-white/30 hover:bg-white/50"
+ idx === galleryIndex ? "w-6 bg-amber-400" : "w-2 bg-white/30 hover:bg-white/50"
  }`}
  />
  ))}
@@ -1484,13 +1484,13 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  animate={{ y: 24, opacity: 1, x: "-50%" }} 
  exit={{ y: -80, opacity: 0, x: "-50%" }} 
  transition={{ type: "spring", stiffness: 300, damping: 25 }}
- className="fixed top-0 left-1/2 z-[9999] bg-slate-900/95 px-8 py-5 rounded-[2rem] border border-amber-500/30 shadow-2xl flex items-center gap-4 min-w-[320px] select-none"
+ className="fixed top-0 left-1/2 z-[9999] bg-slate-900/95 px-8 py-5 rounded-[2rem] border border-amber-400/30 shadow-2xl flex items-center gap-4 min-w-[320px] select-none"
  >
- <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+ <div className="w-10 h-10 bg-amber-400 rounded-full flex items-center justify-center text-slate-950 shadow-[0_0_20px_rgba(251,191,36,0.5)]">
  <Gift size={20} strokeWidth={3} />
  </div>
  <div>
- <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-0.5">상상 포인트 적립!</p>
+ <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-0.5">상상 포인트 적립!</p>
  <p className="text-sm font-black text-white">+10P 상상 포인트가 적립되었습니다! 🎁</p>
  </div>
  </motion.div>

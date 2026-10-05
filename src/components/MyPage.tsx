@@ -334,7 +334,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
             )}
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
               나의 페이지
-              {userProfile.isAdmin && <ShieldCheck className="text-amber-500" size={20} />}
+              {userProfile.isAdmin && <ShieldCheck className="text-amber-400" size={20} />}
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -343,7 +343,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               onClick={() => setActiveTab("notifications")}
               className="relative p-2 hover:bg-slate-100 rounded-xl transition-all"
             >
-              <Bell size={22} className={unreadCount > 0 ? "text-amber-500" : "text-slate-400"} />
+              <Bell size={22} className={unreadCount > 0 ? "text-amber-400" : "text-slate-400"} />
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] font-black text-white flex items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
@@ -417,7 +417,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                     type="text"
                     value={editNickname}
                     onChange={(e) => setEditNickname(e.target.value)}
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold focus:border-amber-500 transition-all outline-none"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold focus:border-amber-400 transition-all outline-none"
                   />
                 </div>
                 
@@ -435,11 +435,11 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                           key={p.id}
                           onClick={() => toggleEditPersona(p.id)}
                           className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
-                            isSelected ? "border-amber-500 bg-amber-50" : "border-slate-50 bg-slate-50"
+                            isSelected ? "border-amber-400 bg-amber-50" : "border-slate-50 bg-slate-50"
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 ${
-                            isSelected ? "bg-amber-500 text-white" : "bg-white text-slate-400"
+                            isSelected ? "bg-amber-400 text-white" : "bg-white text-slate-400"
                           }`}>
                             {p.icon}
                           </div>
@@ -451,7 +451,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
 
                   {editPersonaIds.includes("other") && (
                     <div className="mt-4 p-3 bg-white border-2 border-slate-100 rounded-2xl flex items-center gap-3">
-                      <Edit3 size={16} className="text-amber-500" />
+                      <Edit3 size={16} className="text-amber-400" />
                       <input 
                          type="text" 
                          value={editCustomPersona}
@@ -469,7 +469,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                     </p>
                   </div>
 
-                  <button onClick={saveChanges} className="w-full bg-amber-500 text-slate-950 font-black py-4 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-95 transition-all mt-4">
+                  <button onClick={saveChanges} className="w-full bg-amber-400 text-slate-950 font-black py-4 rounded-2xl shadow-xl shadow-amber-400/20 active:scale-95 transition-all mt-4">
                     조각 수정 완료
                   </button>
                 </div>
@@ -479,7 +479,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-black text-slate-900 flex items-center gap-2">
-                      <Award size={18} className="text-amber-500" />
+                      <Award size={18} className="text-amber-400" />
                       나의 동네 프로필
                     </h3>
                     <button onClick={() => setIsEditing(true)} className="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg hover:bg-amber-100">
@@ -506,7 +506,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                        <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-amber-500">
+                         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-amber-400">
                            <Home size={20} />
                          </div>
                          <div>
@@ -634,7 +634,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       onClick={() => setActiveTab("store")}
                       className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 text-left hover:border-amber-300 hover:scale-[1.02] active:scale-95 transition-all w-full cursor-pointer flex flex-col items-start group"
                     >
-                      <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-amber-500/10 group-hover:bg-amber-200 transition-all">
+                      <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-3 shadow-md shadow-amber-400/10 group-hover:bg-amber-200 transition-all">
                         <Star size={20} className="text-amber-600" />
                       </div>
                       <div className="flex items-center justify-between w-full mb-1">
@@ -643,7 +643,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       </div>
                       <div className="flex flex-col items-start gap-1">
                         <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
-                        <span className="text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md group-hover:bg-amber-100 transition-all">5,000P부터 사용 가능</span>
+                        <span className="text-[9px] font-bold text-amber-400 bg-amber-50 px-1.5 py-0.5 rounded-md group-hover:bg-amber-100 transition-all">5,000P부터 사용 가능</span>
                       </div>
                     </button>
                     <button 
@@ -665,14 +665,14 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                   </div>
 
                   {/* 🎁 상상 포인트 혜택 안내 가이드 카드 */}
-                  <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 rounded-[2.5rem] border border-amber-500/20 shadow-xl relative overflow-hidden select-none">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 scale-150"><Award size={80} className="text-amber-500" /></div>
+                  <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 rounded-[2.5rem] border border-amber-400/20 shadow-xl relative overflow-hidden select-none">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 scale-150"><Award size={80} className="text-amber-400" /></div>
                     <div className="relative z-10">
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-500">
+                        <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center text-amber-400">
                           <Gift size={14} fill="currentColor" />
                         </div>
-                        <h4 className="text-[11px] font-black text-amber-500 uppercase tracking-widest leading-none">상상 포인트 혜택 안내</h4>
+                        <h4 className="text-[11px] font-black text-amber-400 uppercase tracking-widest leading-none">상상 포인트 혜택 안내</h4>
                       </div>
                       <p className="text-xs font-bold text-slate-200 leading-relaxed break-keep">
                         이웃님이 모으신 상상 포인트는 <span className="text-amber-400 font-black">기프티콘</span>으로 교환해 드릴 예정이며, 향후 '여긴뭐가'를 통해 실제 오프라인 골목에 오픈하는 매장의 <span className="text-amber-400 font-black">할인 쿠폰</span>으로도 교환될 수 있게 준비 중입니다! 🎁
@@ -721,12 +721,12 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
 
             {isLoadingActivity ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <div className="w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-3"></div>
                 <p className="text-xs font-bold text-slate-400">활동 내역을 불러오고 있어요...</p>
               </div>
             ) : (isEntrepreneurMode ? votes.length === 0 : activityTimeline.length === 0) ? (
               <div className="bg-white p-10 rounded-[2.5rem] text-center border-2 border-dashed border-slate-200/80 flex flex-col items-center justify-center py-14 px-6">
-                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4 text-amber-500 shadow-inner">
+                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4 text-amber-400 shadow-inner">
                   <Lightbulb size={28} />
                 </div>
                 <p className="text-slate-900 font-black text-sm mb-1.5 break-keep">아직 상상한 기록이 없어요</p>
@@ -816,7 +816,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       >
                         <div className="flex items-center gap-4 flex-1 min-w-0 mr-3">
                           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 ${
-                            item.type === 'vote' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-blue-500 shadow-blue-500/20'
+                            item.type === 'vote' ? 'bg-amber-400 shadow-amber-400/20' : 'bg-blue-500 shadow-blue-500/20'
                           }`}>
                             {item.type === 'vote' ? <Sparkles size={22} /> : <MessageSquare size={22} />}
                           </div>
@@ -878,7 +878,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                      <div className="text-3xl">{item.image}</div>
                      <div>
                        <p className="text-sm font-black text-slate-900">{item.name}</p>
-                       <p className="text-xs font-bold text-amber-500">{item.price.toLocaleString()} P</p>
+                       <p className="text-xs font-bold text-amber-400">{item.price.toLocaleString()} P</p>
                      </div>
                    </div>
                    <button 
@@ -995,12 +995,12 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                 {userProfile.isAdmin && (
                   <button onClick={() => (window as any).showAdminDashboard()} className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition-all text-left group">
                     <div className="flex items-center gap-3">
-                      <LayoutDashboard size={18} className="text-amber-500" />
+                      <LayoutDashboard size={18} className="text-amber-400" />
                       <span className="text-sm font-bold text-slate-700">마을 인사이트 리포트</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="text-[10px] font-black text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">DATA</span>
-                      <ChevronRight size={18} className="text-slate-300 group-hover:text-amber-500 transition-all" />
+                      <span className="text-[10px] font-black text-amber-400 bg-amber-50 px-2 py-0.5 rounded-full">DATA</span>
+                      <ChevronRight size={18} className="text-slate-300 group-hover:text-amber-400 transition-all" />
                     </div>
                   </button>
                 )}
@@ -1096,9 +1096,9 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               className="bg-slate-900 border border-slate-800 text-white p-6 md:p-8 rounded-[2.5rem] max-w-sm w-full shadow-2xl relative overflow-hidden text-center"
             >
               {/* 상단 다이나믹 앰비언트 글로우 라이팅 */}
-              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/20 rounded-full blur-[80px]" />
+              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-400/20 rounded-full blur-[80px]" />
               
-              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-inner mx-auto mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-400 shadow-inner mx-auto mb-6">
                 <Briefcase size={28} />
               </div>
               
@@ -1112,7 +1112,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
               
               <button
                 onClick={() => setShowEntrepreneurModal(false)}
-                className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black rounded-2xl text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-amber-500/10 pointer-events-auto"
+                className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-400 hover:from-amber-400 hover:to-amber-600 text-slate-950 font-black rounded-2xl text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-amber-400/10 pointer-events-auto"
               >
                 확인했습니다
               </button>
@@ -1145,7 +1145,7 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <div className="w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-3"></div>
         <p className="text-xs font-bold text-slate-400">제보 내역을 불러오고 있어요...</p>
       </div>
     );
@@ -1166,7 +1166,7 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
           <p className="text-slate-400 font-bold text-sm leading-relaxed">
             아직 제보하신 내역이 없습니다.<br/>
             실제와 다른 공실 정보가 있다면<br/>
-            <span className="text-amber-500 font-black">"정보 정정하기"</span>를 통해 제보해 주세요! ✍️
+            <span className="text-amber-400 font-black">"정보 정정하기"</span>를 통해 제보해 주세요! ✍️
           </p>
         </div>
       ) : (
@@ -1198,7 +1198,7 @@ function UserReportsSection({ vacancies }: { vacancies: any[] }) {
                         </>
                       ) : (
                         <>
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> 확인 중
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> 확인 중
                         </>
                       )}
                     </span>

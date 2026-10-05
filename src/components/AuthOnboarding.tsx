@@ -472,7 +472,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                 initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
                 className="flex flex-col items-center mb-5"
               >
-                <div className="w-20 h-20 rounded-[1.5rem] overflow-hidden shadow-[0_0_40px_rgba(245,158,11,0.25)]">
+                <div className="w-20 h-20 rounded-[1.5rem] overflow-hidden shadow-[0_0_40px_rgba(251,191,36,0.25)]">
                   <Logo size={80} />
                 </div>
               </motion.div>
@@ -511,7 +511,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                 <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-3 text-center">지금 이웃들의 상상</p>
                 <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
                   {[
-                    { dong: "남가좌동", name: "가좌역 앞 1층 공간",    emoji: "☕", category: "카페",   votes: 34, from: "from-amber-500/10",   to: "to-amber-500/5" },
+                    { dong: "남가좌동", name: "가좌역 앞 1층 공간",    emoji: "☕", category: "카페",   votes: 34, from: "from-amber-400/10",   to: "to-amber-400/5" },
                     { dong: "연희동",   name: "연세로 골목 2층 공간",  emoji: "🏋️", category: "필라테스", votes: 22, from: "from-indigo-500/10",  to: "to-indigo-500/5" },
                     { dong: "홍은동",   name: "홍은사거리 1층 공간",  emoji: "🏪", category: "편의점", votes: 47, from: "from-emerald-500/10", to: "to-emerald-500/5" },
                   ].map((card, i) => (
@@ -521,8 +521,8 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                       className={`flex-shrink-0 w-44 bg-gradient-to-br ${card.from} ${card.to} border border-white/10 rounded-2xl p-4 backdrop-blur-sm`}
                     >
                       <div className="flex items-center gap-1 mb-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                        <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">{card.dong}</p>
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest">{card.dong}</p>
                       </div>
                       <p className="text-xs font-black text-white mb-3 line-clamp-1">{card.name}</p>
                       <div className="flex items-center gap-2">
@@ -729,11 +729,11 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.1, type: "spring" }}
               className="relative w-32 h-32 mx-auto mb-8"
             >
-              <div className="absolute inset-0 rounded-full border-2 border-amber-500/15 animate-ping" style={{ animationDuration: '3s' }} />
-              <div className="absolute inset-[10px] rounded-full border-2 border-amber-500/25" />
-              <div className="absolute inset-[22px] rounded-full border-2 border-amber-500/40" />
+              <div className="absolute inset-0 rounded-full border-2 border-amber-400/15 animate-ping" style={{ animationDuration: '3s' }} />
+              <div className="absolute inset-[10px] rounded-full border-2 border-amber-400/25" />
+              <div className="absolute inset-[22px] rounded-full border-2 border-amber-400/40" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-12 h-12 bg-amber-500 rounded-[1.2rem] flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.5)]">
+                <div className="w-12 h-12 bg-amber-400 rounded-[1.2rem] flex items-center justify-center shadow-[0_0_30px_rgba(251,191,36,0.5)]">
                   <MapPin size={24} className="text-slate-950" fill="currentColor" />
                 </div>
               </div>
@@ -753,7 +753,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
               onClick={handleLocationAuth} disabled={isLocating}
-              className="w-full bg-amber-400 text-slate-950 py-6 rounded-3xl text-xl font-black shadow-[0_10px_40px_rgba(245,158,11,0.3)] flex items-center justify-center gap-3 disabled:opacity-60"
+              className="w-full bg-amber-400 text-slate-950 py-6 rounded-3xl text-xl font-black shadow-[0_10px_40px_rgba(251,191,36,0.3)] flex items-center justify-center gap-3 disabled:opacity-60"
             >
               {isLocating
                 ? <><div className="w-6 h-6 border-4 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" /><span>동네 확인 중...</span></>

@@ -194,7 +194,7 @@ export default function PatrolPanel() {
         {ROUTES.map((r) => (
           <button key={r.key} type="button" onClick={() => { setRoute(r.key); setOpen(null); }}
             className={`flex-1 py-2.5 rounded-xl text-sm font-black border-2 ${route === r.key ? "bg-slate-950 text-white border-slate-950" : "bg-white text-slate-500 border-slate-100"}`}>
-            {r.label}{r.tag && <span className="block text-[10px] text-amber-500 leading-tight">{r.tag} 시작</span>}
+            {r.label}{r.tag && <span className="block text-[10px] text-amber-400 leading-tight">{r.tag} 시작</span>}
           </button>
         ))}
       </div>
@@ -242,7 +242,7 @@ export default function PatrolPanel() {
                     <div className="flex flex-col items-center">
                       {chosen && <div className="mb-1 max-w-[180px] px-2 py-1 rounded-lg bg-white text-slate-900 text-[10px] font-black shadow border border-slate-200 break-keep text-center">{s.label}</div>}
                       <button type="button" onClick={() => focusStop(s)} aria-label={`${s.seq}번 ${s.label}`}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white border-2 border-white shadow-lg ${fresh ? "bg-emerald-500" : isNextStop ? "bg-amber-500 ring-4 ring-amber-300/60" : "bg-slate-900"}`}>
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white border-2 border-white shadow-lg ${fresh ? "bg-emerald-500" : isNextStop ? "bg-amber-400 ring-4 ring-amber-300/60" : "bg-slate-900"}`}>
                         {s.seq}
                       </button>
                     </div>

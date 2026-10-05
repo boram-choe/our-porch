@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { isLaunchArea } from "@/lib/launchArea";
 import CopyLinkButton from "@/components/CopyLinkButton";
+import Logo from "@/components/Logo";
 
 // 중개사·건물주에게 보내는 공실 "주민 수요 카드". 로그인 없이 볼 수 있고, 투표 수는 매번 최신으로 집계한다.
 export const dynamic = "force-dynamic";
@@ -83,7 +84,10 @@ export default async function SpacePage({ params }: Params) {
     <div className="h-full overflow-y-auto bg-stone-50 text-slate-900">
       <main className="mx-auto w-full max-w-2xl px-4 py-8 md:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3">
-          <p className="text-sm font-bold text-slate-500">여긴뭐가 · 주민 수요 카드</p>
+          <p className="flex items-center gap-2 text-sm font-bold text-slate-500">
+            <Logo size={28} className="rounded-lg" />
+            여긴뭐가 · 주민 수요 카드
+          </p>
           <h1 className="text-2xl md:text-3xl font-black leading-tight text-balance">{name}</h1>
           <p className="text-slate-600">
             {[v.address, floor].filter(Boolean).join(" · ")}
@@ -153,7 +157,7 @@ export default async function SpacePage({ params }: Params) {
                 <li key={c.category} className="grid grid-cols-[88px_1fr_48px] items-center gap-3 text-sm">
                   <span className="font-bold text-slate-700">{c.category}</span>
                   <span className="h-3 rounded-full bg-stone-100 overflow-hidden">
-                    <span className="block h-full rounded-full bg-amber-500" style={{ width: `${Math.round((c.count / demand.top[0].count) * 100)}%` }} />
+                    <span className="block h-full rounded-full bg-amber-400" style={{ width: `${Math.round((c.count / demand.top[0].count) * 100)}%` }} />
                   </span>
                   <span className="text-right tabular-nums text-slate-600">{c.count}명</span>
                 </li>

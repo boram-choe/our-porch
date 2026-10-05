@@ -112,7 +112,7 @@ export default function NeighborhoodDemandModal({ neighborhood, isGuest, vacanci
                 const full = !on && picks.length >= MAX_DEMAND_VOTES;
                 return (
                   <button key={c.id} type="button" onClick={() => toggle(c.label)} disabled={full} aria-pressed={on}
-                    className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl border-2 px-2 py-3.5 text-center transition-all active:scale-95 ${on ? "bg-amber-500 border-amber-400 text-slate-950" : "bg-white/5 border-white/10 text-white hover:border-white/30"} ${full ? "opacity-35" : ""}`}>
+                    className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl border-2 px-2 py-3.5 text-center transition-all active:scale-95 ${on ? "bg-amber-400 border-amber-400 text-slate-950" : "bg-white/5 border-white/10 text-white hover:border-white/30"} ${full ? "opacity-35" : ""}`}>
                     <span className="text-2xl leading-none">{c.emoji}</span>
                     <span className="text-[12px] font-black leading-tight">{c.label}</span>
                     <span className={`text-[9px] font-bold leading-tight break-keep ${on ? "text-slate-800" : "text-slate-400"}`}>{c.hint}</span>
@@ -137,7 +137,7 @@ export default function NeighborhoodDemandModal({ neighborhood, isGuest, vacanci
 
             <div className="flex flex-col gap-2">
               <button type="button" onClick={submit} disabled={saving || picks.length === 0}
-                className="w-full py-4 rounded-2xl bg-amber-500 text-slate-950 text-base font-black disabled:opacity-40 active:scale-[0.98] transition-all">
+                className="w-full py-4 rounded-2xl bg-amber-400 text-slate-950 text-base font-black disabled:opacity-40 active:scale-[0.98] transition-all">
                 {saving ? "저장 중" : demand?.mine?.categories.length ? "내 투표 수정하기" : "투표하고 이웃들의 선택 보기"}
               </button>
               <button type="button" onClick={demand?.mine?.categories.length ? () => setPhase("results") : onClose} className="w-full py-3 rounded-2xl text-sm font-black text-slate-400">
@@ -167,10 +167,10 @@ export default function NeighborhoodDemandModal({ neighborhood, isGuest, vacanci
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 text-[13px] font-black">
                           <span>{cat?.emoji}</span><span className="truncate">{t.category}</span>
-                          {mine && <span className="text-[9px] font-black bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full">내 선택</span>}
+                          {mine && <span className="text-[9px] font-black bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded-full">내 선택</span>}
                         </div>
                         <div className="mt-1.5 h-2.5 rounded-full bg-white/10 overflow-hidden">
-                          <div className={`h-full rounded-full ${i < 3 ? "bg-amber-500" : "bg-slate-500"}`} style={{ width: `${Math.max(6, (t.count / maxCount) * 100)}%` }} />
+                          <div className={`h-full rounded-full ${i < 3 ? "bg-amber-400" : "bg-slate-500"}`} style={{ width: `${Math.max(6, (t.count / maxCount) * 100)}%` }} />
                         </div>
                       </div>
                       <span className="text-right text-sm font-black tabular-nums">{t.count}표</span>
@@ -213,7 +213,7 @@ export default function NeighborhoodDemandModal({ neighborhood, isGuest, vacanci
                       const done = votedVacancyIds.includes(v.id);
                       return (
                         <li key={v.id}>
-                          <button type="button" onClick={() => onPickVacancy(v)} className="w-full flex items-center justify-between gap-3 rounded-2xl bg-white/5 border border-white/10 hover:border-amber-400 px-4 py-3 text-left transition-all">
+                          <button type="button" onClick={() => onPickVacancy(v)} className="w-full flex items-center justify-between gap-3 rounded-2xl bg-white/5 border border-white/10 hover:border-amber-300 px-4 py-3 text-left transition-all">
                             <span className="min-w-0">
                               <span className="block text-[13px] font-black truncate">{v.landmark || v.address}</span>
                               <span className="block text-[10px] font-bold text-slate-400">{v.floor || ""}{done ? " · 투표 완료" : " · 이 공간에 투표하기"}</span>

@@ -432,7 +432,7 @@ export default function ListingCandidatesPanel() {
                   <div className="flex flex-col items-center">
                     {selected === c.id && <div className="mb-1 max-w-[180px] px-2 py-1 rounded-lg bg-white text-slate-900 text-[10px] font-black shadow border border-slate-200 break-keep text-center">{c.label}</div>}
                     <button type="button" aria-label={`${i + 1}번 ${c.label}`} onClick={() => { setSelected(c.id); document.getElementById(`cand-${c.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white border-2 border-white shadow-lg ${i === 0 ? "bg-amber-500 ring-4 ring-amber-300/60" : "bg-emerald-700"}`}>
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white border-2 border-white shadow-lg ${i === 0 ? "bg-amber-400 ring-4 ring-amber-300/60" : "bg-emerald-700"}`}>
                       {i + 1}
                     </button>
                   </div>
@@ -452,7 +452,7 @@ export default function ListingCandidatesPanel() {
           return (
             <li key={c.id} id={`cand-${c.id}`} className={`rounded-2xl border-2 p-4 ${selected === c.id ? "border-blue-300" : "border-slate-100"}`}>
               <div className="flex gap-3 items-start">
-                {tab === "todo" && <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white flex-shrink-0 ${i === 0 ? "bg-amber-500" : "bg-emerald-700"}`}>{i + 1}</div>}
+                {tab === "todo" && <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white flex-shrink-0 ${i === 0 ? "bg-amber-400" : "bg-emerald-700"}`}>{i + 1}</div>}
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <h4 className="font-black text-slate-950 break-keep">{c.label}</h4>
                   <p className="text-[11px] font-bold text-slate-400 break-keep">{c.address}{c.floor ? ` · ${c.floor}` : ""}{c.area ? ` · ${c.area}` : ""}</p>

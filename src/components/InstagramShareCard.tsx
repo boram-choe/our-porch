@@ -1,5 +1,6 @@
 import React from 'react';
-import { Home, Compass, Target, Info, Sparkles, MapPin, Map } from 'lucide-react';
+import Logo from './Logo';
+import { Home, Target, Info, Sparkles, MapPin, Map } from 'lucide-react';
 import { Vacancy } from '../data/dummyVacancies';
 
 export interface InstagramShareCardProps {
@@ -55,7 +56,7 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
         >
           {/* Background Effects */}
           <div className="absolute top-0 right-0 w-full h-full bg-purple-600/30 rounded-full blur-[200px] translate-x-1/3 -translate-y-1/3 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-full h-full bg-amber-500/20 rounded-full blur-[200px] -translate-x-1/3 translate-y-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-full h-full bg-amber-400/20 rounded-full blur-[200px] -translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
           {/* Content Box with Safe Area for IG Story */}
           <div className="relative z-10 w-full h-full bg-slate-900/70 backdrop-blur-xl border border-slate-700/60 rounded-[4rem] shadow-2xl flex flex-col p-14 justify-between items-center">
@@ -63,7 +64,7 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
             {/* Top Section */}
             <div className="flex flex-col items-center justify-center w-full mt-8 mb-6">
               <div className="flex items-center justify-center gap-3 mb-8 bg-slate-800/90 px-8 py-3 rounded-full border border-slate-600 shadow-xl">
-                <Compass className="text-amber-400" size={32} />
+                <Logo size={44} className="rounded-xl" />
                 <span className="text-[1.8rem] font-black text-slate-200 tracking-widest">여긴뭐가 풍수수호신</span>
               </div>
               <h1 className="text-[6.5rem] font-black text-white tracking-tight text-center leading-[1.2] drop-shadow-2xl break-keep">
@@ -73,16 +74,16 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
 
             {/* Middle Section (Score + Grade in Row) */}
             <div className="flex w-full mt-6 mb-6 gap-8">
-              <div className="flex-1 bg-slate-950/80 p-10 rounded-[3.5rem] border border-amber-500/40 text-center shadow-2xl flex flex-col justify-center items-center gap-4">
+              <div className="flex-1 bg-slate-950/80 p-10 rounded-[3.5rem] border border-amber-400/40 text-center shadow-2xl flex flex-col justify-center items-center gap-4">
                 <span className="text-3xl font-bold text-slate-400 uppercase tracking-widest">종합 점수</span>
-                <p className="text-[8.5rem] font-black text-amber-400 leading-none drop-shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+                <p className="text-[8.5rem] font-black text-amber-400 leading-none drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">
                   {homeFsResult.score}<span className="text-5xl text-white ml-2 font-bold">점</span>
                 </p>
               </div>
-              <div className="flex-1 bg-slate-950/80 p-10 rounded-[3.5rem] border border-amber-500/40 text-center shadow-2xl flex flex-col justify-center items-center gap-4">
+              <div className="flex-1 bg-slate-950/80 p-10 rounded-[3.5rem] border border-amber-400/40 text-center shadow-2xl flex flex-col justify-center items-center gap-4">
                 <span className="text-3xl font-bold text-slate-400">주거 격식 등급</span>
                 <p className="text-[2.6rem] font-black text-white mt-2 break-keep leading-snug">{homeFsResult.grade || "배산임수형 주거명당"}</p>
-                <div className="mt-4 text-amber-400 font-black text-3xl px-8 py-3 bg-amber-500/10 rounded-full border border-amber-500/30">대길 (大吉)</div>
+                <div className="mt-4 text-amber-400 font-black text-3xl px-8 py-3 bg-amber-400/10 rounded-full border border-amber-400/30">대길 (大吉)</div>
               </div>
             </div>
 
@@ -113,7 +114,7 @@ export const InstagramShareCard = React.forwardRef<HTMLDivElement, InstagramShar
               <p className="text-[2rem] font-bold text-slate-500 tracking-wider">
                 #여긴뭐가 #명당찾기 #우리집풍수
               </p>
-              <p className="text-[2rem] font-black text-amber-500/70">
+              <p className="text-[2rem] font-black text-amber-400/70">
                 여긴뭐가.kr
               </p>
             </div>

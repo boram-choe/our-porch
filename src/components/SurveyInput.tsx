@@ -53,7 +53,7 @@ const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeho
           <motion.span 
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-[9px] md:text-[10px] font-black text-amber-500 bg-amber-50 px-2 py-1 rounded-md border border-amber-100"
+            className="text-[9px] md:text-[10px] font-black text-amber-400 bg-amber-50 px-2 py-1 rounded-md border border-amber-100"
           >
             약 {getEokDisplay(value)}
           </motion.span>
@@ -74,7 +74,7 @@ const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeho
             }
           }}
           placeholder={placeholder}
-          className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl md:rounded-[2rem] py-3.5 px-5 md:py-5 md:px-8 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-sm md:text-lg group-hover:border-slate-200"
+          className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl md:rounded-[2rem] py-3.5 px-5 md:py-5 md:px-8 font-bold text-slate-950 focus:outline-none focus:border-amber-400 transition-all text-sm md:text-lg group-hover:border-slate-200"
         />
         {suffix && (
           <span className="absolute right-5 md:right-8 top-1/2 -translate-y-1/2 text-xs md:text-sm font-black text-slate-400 uppercase tracking-widest">{suffix}</span>
@@ -223,7 +223,7 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
         {/* Header */}
         <div className="p-6 md:p-12 pb-4 md:pb-8 border-b border-slate-50 relative flex-shrink-0">
           <div className="flex items-center gap-3 md:gap-6 mb-2 md:mb-3">
-            <div className="w-10 h-10 md:w-16 md:h-16 bg-slate-950 rounded-xl md:rounded-[1.5rem] flex items-center justify-center text-amber-500 shadow-xl border-2 border-white/10 flex-shrink-0">
+            <div className="w-10 h-10 md:w-16 md:h-16 bg-slate-950 rounded-xl md:rounded-[1.5rem] flex items-center justify-center text-amber-400 shadow-xl border-2 border-white/10 flex-shrink-0">
               <Building2 size={20} className="md:w-8 md:h-8" />
             </div>
             <div>
@@ -252,7 +252,7 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
             </label>
             <div className="grid grid-cols-5 gap-2 md:gap-4">
               {[0, 1, 2, 3, 4].map((idx) => (
-                <div key={idx} className="relative aspect-square bg-slate-50 rounded-xl md:rounded-[1.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden group hover:border-amber-500 transition-all">
+                <div key={idx} className="relative aspect-square bg-slate-50 rounded-xl md:rounded-[1.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden group hover:border-amber-400 transition-all">
                   {formData.images?.[idx] ? (
                     <>
                       <img src={formData.images[idx]} className="w-full h-full object-cover" alt={`공실 사진 ${idx + 1}`} />
@@ -261,14 +261,14 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
                           <Trash2 size={16} className="md:w-5 md:h-5" />
                         </button>
                       </div>
-                      {idx === 0 && <span className="absolute top-1.5 left-1.5 md:top-3 md:left-3 bg-amber-500 text-slate-950 text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2 md:py-1 rounded">대표</span>}
+                      {idx === 0 && <span className="absolute top-1.5 left-1.5 md:top-3 md:left-3 bg-amber-400 text-slate-950 text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2 md:py-1 rounded">대표</span>}
                     </>
                   ) : (
                     <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
                       {isUploading === idx ? (
-                        <div className="w-5 h-5 md:w-8 md:h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 md:w-8 md:h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <Plus size={20} className="text-slate-300 group-hover:text-amber-500 transition-colors md:w-8 md:h-8" />
+                        <Plus size={20} className="text-slate-300 group-hover:text-amber-400 transition-colors md:w-8 md:h-8" />
                       )}
                       <input 
                         type="file" 
@@ -289,7 +289,7 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
           <div className="grid grid-cols-1 gap-6 mb-2">
             <div className="p-4 md:p-8 bg-amber-50 rounded-2xl md:rounded-[2.5rem] border-2 border-amber-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3 md:gap-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl md:rounded-2xl flex items-center justify-center text-amber-500 shadow-sm border border-amber-200">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl md:rounded-2xl flex items-center justify-center text-amber-400 shadow-sm border border-amber-200">
                   <MapPin size={20} className="md:w-6 md:h-6" />
                 </div>
                 <div>
@@ -321,7 +321,7 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
                 <button 
                   key={d} 
                   onClick={() => setFormData({...formData, vacancyPeriod: d})}
-                  className={`py-3 md:py-4 rounded-xl md:rounded-2xl text-[10px] font-black border-2 transition-all ${formData.vacancyPeriod === d ? 'bg-amber-500 border-amber-500 text-slate-950 shadow-lg' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
+                  className={`py-3 md:py-4 rounded-xl md:rounded-2xl text-[10px] font-black border-2 transition-all ${formData.vacancyPeriod === d ? 'bg-amber-400 border-amber-400 text-slate-950 shadow-lg' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
                 >
                   {d}
                 </button>
@@ -523,7 +523,7 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
 
           <div className="space-y-4 md:space-y-8">
             <div className="flex items-center gap-3 md:gap-4 mb-2 md:mb-4">
-              <div className="h-6 w-1.5 md:h-10 md:w-2 bg-amber-500 rounded-full" />
+              <div className="h-6 w-1.5 md:h-10 md:w-2 bg-amber-400 rounded-full" />
               <h3 className="text-lg md:text-2xl font-black text-slate-950 tracking-tight">툇마루단 소견</h3>
             </div>
             <div className="space-y-3 md:space-y-4 font-bold text-slate-800 leading-relaxed italic">
@@ -621,7 +621,7 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
                 value={formData.surveyRemarks || ""}
                 onChange={(e) => setFormData({...formData, surveyRemarks: e.target.value})}
                 placeholder="공실의 특징을 한줄로 요약해 주세요 (예: 층고가 높고 채광이 좋음)"
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl md:rounded-[2.5rem] py-4 px-6 md:py-6 md:px-8 font-bold text-slate-950 focus:outline-none focus:border-amber-500 transition-all text-sm md:text-lg min-h-[100px] md:min-h-[160px]"
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl md:rounded-[2.5rem] py-4 px-6 md:py-6 md:px-8 font-bold text-slate-950 focus:outline-none focus:border-amber-400 transition-all text-sm md:text-lg min-h-[100px] md:min-h-[160px]"
               />
             </div>
           </div>

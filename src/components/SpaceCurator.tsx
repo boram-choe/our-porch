@@ -108,7 +108,7 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
       <AnimatePresence mode="wait">
         {step === "intro" ? (
           <motion.div key="intro" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }} className="max-w-xl text-center">
-            <div className="w-20 h-20 bg-amber-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
+            <div className="w-20 h-20 bg-amber-400 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
               <Zap size={40} className="text-slate-950" fill="currentColor" />
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight break-keep">
@@ -117,7 +117,7 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
             </h1>
             <p className="text-slate-400 text-lg mb-12 leading-relaxed break-keep">
               잠재된 공간 취향을 찾아드리는<br/>
-              <span className="text-amber-500 font-black">공간 이상형 월드컵</span>을 시작합니다!
+              <span className="text-amber-400 font-black">공간 이상형 월드컵</span>을 시작합니다!
             </p>
             <button onClick={() => setStep("tournament")} className="w-full py-6 bg-white text-slate-950 rounded-[2.5rem] text-xl font-black shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4">
               월드컵 시작하기 <ArrowRight size={24} strokeWidth={3} />
@@ -126,7 +126,7 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
         ) : step === "tournament" ? (
           <motion.div key="tournament" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full flex flex-col">
             <div className="pt-12 text-center">
-              <span className="bg-amber-500/10 text-amber-500 px-6 py-2 rounded-full text-sm font-black tracking-widest uppercase mb-4 inline-block border border-amber-500/20">
+              <span className="bg-amber-400/10 text-amber-400 px-6 py-2 rounded-full text-sm font-black tracking-widest uppercase mb-4 inline-block border border-amber-400/20">
                 {round === 8 ? "운명의 8강전" : round === 4 ? "최종 후보 결정" : "최후의 선택"} ({Math.floor(matchIdx/2) + 1} / {round/2})
               </span>
               <h2 className="text-2xl md:text-4xl font-black tracking-tight mt-2">우리 집 바로 앞에 생긴다면? 🏠</h2>
@@ -137,7 +137,7 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
                 <>
                   <MatchCard key={currentMatch[0].id} candidate={currentMatch[0]} onSelect={() => handleMatchWinner(currentMatch[0])} side="left" />
                   <div className="flex-shrink-0 w-12 h-12 md:w-20 md:h-20 bg-slate-900/50 backdrop-blur-xl border-4 border-white/5 rounded-full flex items-center justify-center z-10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-                    <span className="italic font-black text-amber-500 text-xl md:text-3xl tracking-tighter">VS</span>
+                    <span className="italic font-black text-amber-400 text-xl md:text-3xl tracking-tighter">VS</span>
                   </div>
                   <MatchCard key={currentMatch[1].id} candidate={currentMatch[1]} onSelect={() => handleMatchWinner(currentMatch[1])} side="right" />
                 </>
@@ -147,13 +147,13 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
         ) : (
           <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-xl text-center">
             <div className="relative mb-12">
-               <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", damping: 12 }} className="w-32 h-32 bg-amber-500 rounded-[3rem] flex items-center justify-center mx-auto shadow-[0_0_80px_rgba(245,158,11,0.4)]">
+               <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", damping: 12 }} className="w-32 h-32 bg-amber-400 rounded-[3rem] flex items-center justify-center mx-auto shadow-[0_0_80px_rgba(251,191,36,0.4)]">
                  <Trophy size={64} className="text-slate-950" fill="currentColor" />
                </motion.div>
                <div className="absolute inset-0 animate-ping opacity-20"><Trophy size={100} className="mx-auto" /></div>
             </div>
             
-            <h3 className="text-xl font-bold text-amber-500 mb-2">{userProfile?.nickname || "대표님"}님의 최종 선택!</h3>
+            <h3 className="text-xl font-bold text-amber-400 mb-2">{userProfile?.nickname || "대표님"}님의 최종 선택!</h3>
             <h2 className="text-5xl md:text-6xl font-black tracking-tighter mb-10 break-keep">"{finalWinner?.name}"</h2>
             
             <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-2xl ${finalWinner?.color} mb-12 shadow-xl`}>
@@ -179,7 +179,7 @@ export default function SpaceCurator({ userProfile, onClose, onComplete }: Space
       {/* 배경 장식 */}
       <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-500/30 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-amber-500/30 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-amber-400/30 rounded-full blur-[150px]" />
       </div>
     </div>
   );

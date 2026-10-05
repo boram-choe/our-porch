@@ -350,8 +350,8 @@ const FeasibilityReport = ({ initialData }: { initialData?: { location: string; 
 
               <div className="p-6 bg-slate-900 rounded-[2rem] space-y-3 shadow-xl">
                  <div className="flex justify-between items-center">
-                   <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Landmark size={14} className="text-amber-500" /> 부족한 필요 차입금</span>
-                   <span className="text-xl font-black text-amber-500">{(analysis.calculatedLoan / 10000).toLocaleString()}만원</span>
+                   <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Landmark size={14} className="text-amber-400" /> 부족한 필요 차입금</span>
+                   <span className="text-xl font-black text-amber-400">{(analysis.calculatedLoan / 10000).toLocaleString()}만원</span>
                  </div>
                  <div className="flex items-center gap-4 pt-2 border-t border-slate-800">
                     <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest shrink-0">예상 연 이자율</label>

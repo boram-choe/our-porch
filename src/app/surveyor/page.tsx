@@ -470,7 +470,7 @@ export default function SurveyorPage() {
             <ShieldCheck size={120} className="text-slate-900" />
           </div>
           <div className="relative z-10">
-            <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-500 mb-8 shadow-xl">
+            <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-400 mb-8 shadow-xl">
               <Lock size={32} />
             </div>
             <h1 className="text-3xl font-black text-slate-950 tracking-tighter mb-10">툇마루단 전용 채널 🔐</h1>
@@ -484,7 +484,7 @@ export default function SurveyorPage() {
                     value={loginId}
                     onChange={(e) => setLoginId(e.target.value)}
                     placeholder="아이디를 입력하세요"
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-black text-slate-950 focus:border-amber-500 outline-none transition-all"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-black text-slate-950 focus:border-amber-400 outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
@@ -502,7 +502,7 @@ export default function SurveyorPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-black text-slate-950 focus:border-amber-500 outline-none transition-all pr-14"
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-black text-slate-950 focus:border-amber-400 outline-none transition-all pr-14"
                     />
                     <button
                       type="button"
@@ -542,7 +542,7 @@ export default function SurveyorPage() {
           >
             <div className="bg-white p-4 md:p-8 pb-3 md:pb-6 shadow-sm flex items-center justify-between flex-shrink-0 border-b border-slate-100 gap-2 w-full min-w-0">
               <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-950 rounded-xl md:rounded-2xl flex items-center justify-center text-amber-500 shadow-xl flex-shrink-0">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-950 rounded-xl md:rounded-2xl flex items-center justify-center text-amber-400 shadow-xl flex-shrink-0">
                   <ShieldCheck size={20} className="md:w-6 md:h-6" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -565,7 +565,7 @@ export default function SurveyorPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm md:text-xl font-black tracking-tight break-keep min-w-0 truncate">{currentUser?.real_name} <span className="text-[9px] md:text-xs font-bold text-slate-400 ml-1">{currentUser?.calculatedRank}</span></h3>
-                      <p className="text-amber-500/80 text-[9px] md:text-xs font-bold tracking-widest uppercase mt-0.5 break-keep min-w-0 truncate">📍 {currentUser?.city} {currentUser?.gu} {currentUser?.dong}</p>
+                      <p className="text-amber-400/80 text-[9px] md:text-xs font-bold tracking-widest uppercase mt-0.5 break-keep min-w-0 truncate">📍 {currentUser?.city} {currentUser?.gu} {currentUser?.dong}</p>
                     </div>
                   </div>
                   <button 
@@ -609,7 +609,7 @@ export default function SurveyorPage() {
                   "확인 필요 공실", 
                   <AlertTriangle size={24} />, 
                   v => ((!v.images || (v.images as any).length === 0) || !!v.survey_remarks?.includes("[신고접수")) && (v.status === 'available' || !v.status), 
-                  "bg-amber-500"
+                  "bg-amber-400"
                 )}
 
                 {renderVacancyList(
@@ -702,7 +702,7 @@ export default function SurveyorPage() {
                     <div className="flex flex-col items-center">
                       {/* CEO Node */}
                       <div className="bg-slate-950 text-white p-8 rounded-[2.5rem] shadow-2xl border border-white/10 text-center min-w-[240px]">
-                        <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">CEO</p>
+                        <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">CEO</p>
                         <h4 className="text-2xl font-black">{teamMembers.find(m => m.role === "CEO")?.real_name || "최보람"}</h4>
                       </div>
                       <div className="h-12 w-0.5 bg-gradient-to-b from-slate-200 to-transparent" />
@@ -930,7 +930,7 @@ export default function SurveyorPage() {
               }}
               className="bg-slate-950 text-white px-6 py-4 md:px-10 md:py-6 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl font-black shadow-2xl flex items-center gap-2 md:gap-4 pointer-events-auto"
             >
-              <Building2 size={20} className="text-amber-500 md:w-6 md:h-6" /> 신규 공실 조사하기
+              <Building2 size={20} className="text-amber-400 md:w-6 md:h-6" /> 신규 공실 조사하기
             </motion.button>
           ) : (
             <motion.div 
@@ -941,7 +941,7 @@ export default function SurveyorPage() {
               className="flex items-center gap-2 md:gap-4"
             >
               <button onClick={() => setIsPinpointing(false)} className="bg-white text-slate-400 px-5 py-4 md:px-8 md:py-6 rounded-2xl md:rounded-[2.5rem] text-sm md:text-lg font-black shadow-xl pointer-events-auto border-2 border-slate-100">취소</button>
-              <button onClick={confirmLocation} className="bg-amber-500 text-slate-950 px-7 py-4 md:px-12 md:py-6 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl font-black shadow-2xl flex items-center gap-2 md:gap-4 pointer-events-auto border-2 md:border-4 border-white">
+              <button onClick={confirmLocation} className="bg-amber-400 text-slate-950 px-7 py-4 md:px-12 md:py-6 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl font-black shadow-2xl flex items-center gap-2 md:gap-4 pointer-events-auto border-2 md:border-4 border-white">
                 <Check size={20} className="md:w-7 md:h-7" strokeWidth={4} /> 위치 확정 및 데이터 입력
               </button>
             </motion.div>
@@ -973,7 +973,7 @@ export default function SurveyorPage() {
 
       {isLoading && (
         <div className="fixed inset-0 z-[1000] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center">
-          <div className="w-20 h-20 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-20 h-20 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
@@ -1028,7 +1028,7 @@ export default function SurveyorPage() {
                   value={newPw}
                   onChange={(e) => setNewPw(e.target.value)}
                   placeholder="새 비밀번호 입력"
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-black text-slate-950 focus:border-amber-500 outline-none transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 font-black text-slate-950 focus:border-amber-400 outline-none transition-all"
                 />
                 <button 
                   onClick={handleChangePassword}

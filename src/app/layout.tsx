@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "여긴뭐가",
     images: [
       {
-        url: "/images/logo.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "여긴뭐가 서비스 로고",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "여긴뭐가 | 우리 동네를 채우는 가장 즐거운 상상",
     description: "내가 사랑하는 동네의 비어있는 공간에 새로운 꿈을 채워보세요.",
-    images: ["/images/logo.png"],
+    images: ["/og-image.png"],
   },
 };
 

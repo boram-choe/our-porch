@@ -60,7 +60,7 @@ export default function AdminDashboard({
   if (loading) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
       <div className="text-center">
-        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <div className="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="text-slate-500 font-bold text-sm">데이터를 불러오는 중...</p>
       </div>
     </div>
@@ -85,7 +85,7 @@ export default function AdminDashboard({
           <button onClick={onBack} className="p-2 bg-white/10 rounded-xl hover:bg-white/20 transition-all">
             <ArrowLeft size={20} />
           </button>
-          <div className="flex items-center gap-2 bg-amber-500 px-4 py-1.5 rounded-full shadow-lg shadow-amber-500/20">
+          <div className="flex items-center gap-2 bg-amber-400 px-4 py-1.5 rounded-full shadow-lg shadow-amber-400/20">
              <TrendingUp size={16} className="text-slate-950" />
              <span className="text-xs font-black text-slate-900 uppercase tracking-widest">Village Insights</span>
           </div>
@@ -185,7 +185,7 @@ export default function AdminDashboard({
             if (groupVacancies.length === 0) return null;
             
             const colorClasses = {
-              amber: 'bg-amber-50 border-amber-200 text-amber-900 text-amber-500',
+              amber: 'bg-amber-50 border-amber-200 text-amber-900 text-amber-400',
               blue: 'bg-blue-50 border-blue-200 text-blue-900 text-blue-500',
               emerald: 'bg-emerald-50 border-emerald-200 text-emerald-900 text-emerald-500',
               purple: 'bg-purple-50 border-purple-200 text-purple-900 text-purple-500',
@@ -232,7 +232,7 @@ export default function AdminDashboard({
                                   }
                                 }
                               }}
-                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 transition-all active:scale-95 whitespace-nowrap"
+                              className="bg-amber-400 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-xl text-xs font-black shadow-lg shadow-amber-400/20 transition-all active:scale-95 whitespace-nowrap"
                             >
                               정상 공실 확정
                             </button>
@@ -331,7 +331,7 @@ export default function AdminDashboard({
              {report.totalVoters === 0 && <p className="text-[10px] text-slate-300 mt-1">첫 이웃을 기다리는 중</p>}
           </div>
           <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
-             <div className="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center mb-4">
+             <div className="w-10 h-10 bg-amber-50 text-amber-400 rounded-xl flex items-center justify-center mb-4">
                 <MessageSquare size={20} />
              </div>
              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">수집된 투표</p>
@@ -343,7 +343,7 @@ export default function AdminDashboard({
         <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
            <div className="flex items-center justify-between mb-6">
               <h3 className="font-black text-slate-900 flex items-center gap-2">
-                 <Sparkles size={18} className="text-amber-500" />
+                 <Sparkles size={18} className="text-amber-400" />
                  원하는 업종 TOP {report.topCategories.length || "?"}
               </h3>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">실시간</span>
@@ -367,7 +367,7 @@ export default function AdminDashboard({
                     <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden">
                        <motion.div 
                           initial={{ width: 0 }} animate={{ width: `${(cat.count / (report.topCategories[0]?.count || 1)) * 100}%` }}
-                          className="h-full bg-amber-500 rounded-full" 
+                          className="h-full bg-amber-400 rounded-full" 
                        />
                     </div>
                  </div>
@@ -379,7 +379,7 @@ export default function AdminDashboard({
         {/* Activity Time */}
         <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
            <h3 className="font-black text-slate-900 flex items-center gap-2 mb-6">
-              <Clock size={18} className="text-amber-500" />
+              <Clock size={18} className="text-amber-400" />
               동네 체류 골든 타임
            </h3>
            {activityEntries.length === 0 ? (
