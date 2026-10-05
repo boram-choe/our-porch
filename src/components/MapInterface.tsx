@@ -1313,10 +1313,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  )}
  </AnimatePresence>
 
- <AnimatePresence>
  {showDemand && homeDong && (
  <NeighborhoodDemandModal
- key="demand"
  neighborhood={homeDong}
  isGuest={userProfile?.isGuest}
  vacancies={vacancies}
@@ -1325,7 +1323,6 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  onPickVacancy={(v) => { setShowDemand(false); handlePinClick(v); }}
  />
  )}
- </AnimatePresence>
 
  <AnimatePresence>
  {selectedVacancy && (

@@ -87,7 +87,7 @@ export default function NeighborhoodDemandModal({ neighborhood, isGuest, vacanci
   const topLabel = top[0]?.category;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
       className="fixed inset-0 z-[400] bg-slate-950/95 backdrop-blur-md overflow-y-auto" role="dialog" aria-modal="true" aria-label="동네 수요 투표">
       <div className="mx-auto w-full max-w-lg px-5 pt-6 pb-24 text-white">
         <div className="flex items-center justify-between mb-5">
