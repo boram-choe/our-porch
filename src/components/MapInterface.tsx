@@ -173,25 +173,38 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
 
  const [isEntrepreneurMode, setIsEntrepreneurMode] = useState(false);
  const [showDashboard, setShowDashboard] = useState(false);
-  // 모바일 뒤로 가기(Back) 사이트 이탈 방지 로직
+  // 화면마다 세부 주소(#/vacancy/아이디, #/mypage ...)를 주고, 뒤로 가기는 열린 화면을 닫는다 (사이트 이탈 방지)
+  const MODAL_HASH = /^#\/(vacancy|mypage|demand|register|fengshui|curator|dashboard|admin|floors|guide)(\/|$)/;
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const anyModalOpen = !!(showFengShui || showDashboard || showAdmin || showCurator || showAddModal || selectedVacancy || showMyPage || showTutorial || showDemand || floorPickerGroup);
-    if (anyModalOpen) {
-      if (window.location.hash !== "#modal") {
-        window.history.pushState({ modalOpen: true }, "", window.location.pathname + window.location.search + "#modal");
-      }
-    } else {
-      if (window.location.hash === "#modal") {
-        window.history.back();
-      }
+    const screenHash =
+      showAdmin ? "#/admin"
+      : showDashboard ? "#/dashboard"
+      : showCurator ? "#/curator"
+      : showAddModal ? "#/register"
+      : showFengShui ? "#/fengshui"
+      : showMyPage ? "#/mypage"
+      : showDemand ? "#/demand"
+      : selectedVacancy ? `#/vacancy/${selectedVacancy.id}`
+      : floorPickerGroup ? "#/floors"
+      : showTutorial ? "#/guide"
+      : "";
+    const current = window.location.hash;
+    const base = window.location.pathname + window.location.search;
+    if (screenHash) {
+      if (current === screenHash) return;
+      // 화면에서 화면으로 넘어갈 때는 기록을 쌓지 않고 주소만 바꾼다 (뒤로 가기 한 번이면 지도로 돌아온다)
+      if (MODAL_HASH.test(current)) window.history.replaceState({ screen: true }, "", base + screenHash);
+      else window.history.pushState({ screen: true }, "", base + screenHash);
+    } else if (MODAL_HASH.test(current)) {
+      window.history.back();
     }
   }, [showFengShui, showDashboard, showAdmin, showCurator, showAddModal, selectedVacancy, showMyPage, showTutorial, showDemand, floorPickerGroup]);
-  
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handlePopState = () => {
-      if (window.location.hash !== "#modal") {
+      if (!MODAL_HASH.test(window.location.hash)) {
         setShowFengShui(false);
         setShowDashboard(false);
         setShowAdmin(false);

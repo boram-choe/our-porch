@@ -1,7 +1,7 @@
 "use client";
 
 import { recordSignupSource } from "@/lib/acquisition";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, User, ArrowRight, Sparkles, Navigation as NavigationIcon, CheckCircle2, Globe, Heart, MessageSquare, Briefcase, Baby, GraduationCap, Home, Dog, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
 import { saveUserProfile, fetchUserProfile } from "@/lib/db";
@@ -44,9 +44,44 @@ export function loadSavedProfile(): UserProfile | null {
   return saved ? JSON.parse(saved) : null;
 }
 
+const JOIN_STEPS = ["start", "agree", "location", "nickname", "persona", "done"];
+
 export default function AuthOnboarding({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
   const [step, setStep] = useState(0); // 0: 개인정보동의, 1: Kakao, 2: Location, 3: Nickname, 4: Persona
   const [isGuest, setIsGuest] = useState(false);
+
+  // 가입 단계마다 세부 주소(#/join/단계)를 주어, 뒤로 가기가 사이트 이탈이 아니라 이전 단계로 가게 한다
+  const stepRef = useRef(0);
+  const leavingRef = useRef(false);
+  useEffect(() => {
+    // 새로고침으로 들어왔을 때 남아 있는 단계 주소는 지운다 (입력한 값이 사라지므로 처음부터 시작)
+    if (/^#\/join\//.test(window.location.hash)) window.history.replaceState({ onbIdx: 0 }, "", window.location.pathname + window.location.search);
+    const onPop = () => {
+      if (leavingRef.current) return;
+      const m = window.location.hash.match(/^#\/join\/(\w+)/);
+      const idx = m ? JOIN_STEPS.indexOf(m[1]) : 0;
+      setStep(idx < 0 ? 0 : idx);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  useEffect(() => {
+    stepRef.current = step;
+    if (leavingRef.current) return;
+    const want = step === 0 ? "" : `#/join/${JOIN_STEPS[step]}`;
+    if (window.location.hash === want) return;
+    const idx = ((window.history.state?.onbIdx as number | undefined) ?? 0) + 1;
+    window.history.pushState({ onbIdx: idx }, "", window.location.pathname + window.location.search + want);
+  }, [step]);
+  // 가입을 마치면 쌓인 단계 기록을 되감고 나서 지도로 넘어간다 (지도에서 뒤로 가기를 눌렀을 때 가입 화면 주소가 남지 않도록)
+  const leaveOnboarding = (done: () => void) => {
+    if (leavingRef.current) return; // 이미 나가는 중 (로그인 이벤트가 여러 번 올 수 있다)
+    const n = (window.history.state?.onbIdx as number | undefined) ?? 0;
+    if (n <= 0) { done(); return; }
+    leavingRef.current = true;
+    window.history.go(-n);
+    window.setTimeout(done, 120);
+  };
 
   // 개인정보 동의 상태
   const [consentAll, setConsentAll] = useState(false);
@@ -121,14 +156,14 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               };
               localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
               localStorage.setItem("gongsil_user_id", dbProfile.id);
-              onComplete(profile);
+              leaveOnboarding(() => onComplete(profile));
               return;
             }
           } catch (err) {
             console.warn("기존 프로필 복원 오류, 온보딩 계속 진행:", err);
           }
 
-          if (step === 0) {
+          if (stepRef.current === 0) {
             setStep(1);
           }
         }
@@ -162,16 +197,16 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               };
               localStorage.setItem("gongsil_user_profile", JSON.stringify(profile));
               localStorage.setItem("gongsil_user_id", dbProfile.id);
-              onComplete(profile);
+              leaveOnboarding(() => onComplete(profile));
               return;
             }
-            if (step === 0) {
+            if (stepRef.current === 0) {
               setStep(1);
             }
           }
         } catch (err) {
           console.warn("onAuthStateChange profile fetch error:", err);
-          if (step === 0) {
+          if (stepRef.current === 0) {
             setStep(1);
           }
         }
@@ -414,7 +449,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
       console.warn("Supabase 저장 실패 (로컬만 저장됨)", e);
     }
 
-    onComplete(profile);
+    leaveOnboarding(() => onComplete(profile));
   };
 
   const PERSONAS_WITH_OTHER = [
