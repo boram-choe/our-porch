@@ -176,7 +176,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
   // 모바일 뒤로 가기(Back) 사이트 이탈 방지 로직
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const anyModalOpen = !!(showFengShui || showDashboard || showAdmin || showCurator || showAddModal || selectedVacancy || showMyPage || showTutorial);
+    const anyModalOpen = !!(showFengShui || showDashboard || showAdmin || showCurator || showAddModal || selectedVacancy || showMyPage || showTutorial || showDemand || floorPickerGroup);
     if (anyModalOpen) {
       if (window.location.hash !== "#modal") {
         window.history.pushState({ modalOpen: true }, "", window.location.pathname + window.location.search + "#modal");
@@ -186,7 +186,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         window.history.back();
       }
     }
-  }, [showFengShui, showDashboard, showAdmin, showCurator, showAddModal, selectedVacancy, showMyPage, showTutorial]);
+  }, [showFengShui, showDashboard, showAdmin, showCurator, showAddModal, selectedVacancy, showMyPage, showTutorial, showDemand, floorPickerGroup]);
   
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -200,6 +200,8 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
         setSelectedVacancy(null);
         setShowMyPage(false);
         setShowTutorial(false);
+        setShowDemand(false);
+        setFloorPickerGroup(null);
       }
     };
     window.addEventListener("popstate", handlePopState);
