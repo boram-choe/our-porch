@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, User, ArrowRight, Sparkles, Navigation as NavigationIcon, CheckCircle2, Globe, Heart, MessageSquare, Briefcase, Baby, GraduationCap, Home, Dog, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
 import { saveUserProfile, fetchUserProfile } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
+import Logo from "./Logo";
 export interface UserLocation {
   neighborhood: string;
   lat: number;
@@ -469,15 +470,9 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
               {/* 로고 */}
               <motion.div
                 initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-                className="w-16 h-16 bg-black rounded-[1.5rem] border border-amber-500/30 flex flex-col items-center justify-center mb-5 shadow-[0_0_40px_rgba(245,158,11,0.15)]"
-                style={{ fontFamily: '"Black Han Sans", "Pretendard Black", sans-serif' }}
+                className="w-20 h-20 rounded-[1.5rem] overflow-hidden mb-5 shadow-[0_0_40px_rgba(245,158,11,0.25)]"
               >
-                <div className="flex w-full justify-between px-[5px] text-amber-500 font-black text-[17px] leading-tight">
-                  <span>여</span><span>긴</span>
-                </div>
-                <div className="flex w-full justify-between px-[5px] text-amber-500 font-black text-[17px] leading-tight">
-                  <span>뭐</span><span>가</span>
-                </div>
+                <Logo size={80} />
               </motion.div>
 
               {/* 소셜 증명 뱃지 */}
