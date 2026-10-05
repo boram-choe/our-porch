@@ -18,16 +18,18 @@ async function loadSpace(id: string) {
   const { data: v } = await supabase.from("vacancies").select("*").eq("id", id).maybeSingle();
   if (!v || HIDDEN_STATUSES.includes(v.status || "")) return null;
 
-  const [{ data: votes }, { count: commentCount }] = await Promise.all([
+  const [{ data: votes }, { count: commentCount }, { data: dongDemand }] = await Promise.all([
     supabase.from("votes").select("category").eq("vacancy_id", id),
     supabase.from("comments").select("id", { count: "exact", head: true }).eq("vacancy_id", id),
+    v.neighborhood ? supabase.rpc("neighborhood_demand", { p_neighborhood: v.neighborhood }) : Promise.resolve({ data: null }),
   ]);
 
   const tally = new Map<string, number>();
   for (const row of votes ?? []) tally.set(row.category, (tally.get(row.category) ?? 0) + 1);
   const categories = [...tally.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
 
-  return { v, categories, totalVotes: votes?.length ?? 0, commentCount: commentCount ?? 0 };
+  const demand = (dongDemand ?? null) as { voters: number; top: { category: string; count: number }[] } | null;
+  return { v, categories, totalVotes: votes?.length ?? 0, commentCount: commentCount ?? 0, demand };
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -58,7 +60,7 @@ export default async function SpacePage({ params }: Params) {
   const { id } = await params;
   const data = await loadSpace(id);
   if (!data) notFound();
-  const { v, categories, totalVotes, commentCount } = data;
+  const { v, categories, totalVotes, commentCount, demand } = data;
 
   const name = v.landmark || v.address || "이름 없는 공간";
   const floor = v.floor ? (/층|지하/.test(v.floor) ? v.floor : `${v.floor}층`) : null;
@@ -139,6 +141,27 @@ export default async function SpacePage({ params }: Params) {
             </>
           )}
         </section>
+
+        {demand && demand.voters > 0 && (
+          <section className="rounded-2xl bg-white border border-stone-200 p-5 md:p-6 flex flex-col gap-4">
+            <div>
+              <h2 className="text-lg font-black">{v.neighborhood} 이웃들이 가장 필요하다고 한 업종</h2>
+              <p className="text-sm text-slate-500 mt-1">이 공간만이 아니라 동네 전체에서 "없어서 옆 동네까지 가야 했던" 업종을 이웃 {demand.voters}명이 골랐습니다. 한 사람이 최대 3개까지 선택합니다.</p>
+            </div>
+            <ul className="flex flex-col gap-2.5">
+              {demand.top.slice(0, 5).map((c) => (
+                <li key={c.category} className="grid grid-cols-[88px_1fr_48px] items-center gap-3 text-sm">
+                  <span className="font-bold text-slate-700">{c.category}</span>
+                  <span className="h-3 rounded-full bg-stone-100 overflow-hidden">
+                    <span className="block h-full rounded-full bg-amber-500" style={{ width: `${Math.round((c.count / demand.top[0].count) * 100)}%` }} />
+                  </span>
+                  <span className="text-right tabular-nums text-slate-600">{c.count}명</span>
+                </li>
+              ))}
+            </ul>
+            {demand.voters < 10 && <p className="text-xs text-slate-500">참여자가 {demand.voters}명이라 표본이 작습니다. 참고용으로만 봐 주세요.</p>}
+          </section>
+        )}
 
         <section className="rounded-2xl bg-white border border-stone-200 p-5 md:p-6 flex flex-col gap-4">
           <h2 className="text-lg font-black">공간 정보</h2>

@@ -8,6 +8,7 @@ import { recordVote } from "./MyPage";
 import { saveVote, updateVacancyRemarks, submitDisputeReport } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { isLaunchArea } from "@/lib/launchArea";
+import { fetchNeighborhoodDemand, categoryIdOfLabel } from "@/lib/neighborhood";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "../lib/comments";
 import { getGeneralBuildingFengShui, getPersonaFengShuiTip } from "@/lib/fengShuiEngine";
 
@@ -276,6 +277,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  };
 
  const [aiRecommended, setAiRecommended] = useState<string[]>([]);
+ const [demandTop, setDemandTop] = useState<{ category: string; count: number }[]>([]); // 동네 수요 투표 TOP3
  const [trdarName, setTrdarName] = useState<string>("이 공실 주변");
  const [isExampleRec, setIsExampleRec] = useState<boolean>(false);
  const [isAiLoading, setIsAiLoading] = useState<boolean>(true);
@@ -326,6 +328,22 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  
  fetchSeoulRecommendations();
  }, [vacancy.lat, vacancy.lng]);
+
+ // 이 공실이 있는 동네의 수요 TOP3 (동네 수요 투표 결과)
+ useEffect(() => {
+ let live = true;
+ if (!vacancy.neighborhood) { setDemandTop([]); return; }
+ fetchNeighborhoodDemand(vacancy.neighborhood).then((d) => { if (live) setDemandTop((d?.top ?? []).slice(0, 3)); });
+ return () => { live = false; };
+ }, [vacancy.neighborhood]);
+
+ // 공실 투표 후보: 동네 수요 TOP3 + 서울시 상권 데이터 추천 1~2개를 섞어서 보여준다
+ const demandPicks = useMemo(() => {
+ const fromDemand = demandTop.map((t, i) => ({ kind: "demand" as const, label: t.category, catId: categoryIdOfLabel(t.category), badge: `동네 ${i + 1}위 · ${t.count}표` }));
+ const fromSeoul = isExampleRec ? [] : aiRecommended.slice(0, 2).map((r) => ({ kind: "seoul" as const, label: r, catId: getCategoryIdFromRecommendation(r), badge: "상권 데이터" }));
+ return [...fromDemand, ...fromSeoul];
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [demandTop, aiRecommended, isExampleRec]);
 
  const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
  if (userProfile?.isGuest) return; // 게스트: 조용히 차단
@@ -805,6 +823,28 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </motion.button>
  )}
  
+ {demandPicks.length > 0 && (
+ <div className="rounded-2xl bg-white/5 border border-amber-500/30 p-3.5">
+ <p className="text-[10px] font-black text-amber-400 tracking-wide mb-2.5">이웃들이 원하는 업종 · 이 공간 투표 후보</p>
+ <div className="flex flex-wrap gap-2">
+ {demandPicks.map((p) => (
+ <button
+ key={`${p.kind}-${p.label}`}
+ type="button"
+ onClick={() => {
+ if (p.kind === "demand") { handleCategorySelect(p.catId); }
+ else { setSelectedCategory(p.catId); handleVoteSubmit(undefined, p.label, p.catId); }
+ }}
+ className={`flex flex-col items-start rounded-xl px-3 py-2 text-left active:scale-95 transition-all border-2 ${p.kind === "demand" ? "bg-amber-500 border-amber-400 text-slate-950" : "bg-blue-500/20 border-blue-400/40 text-white"}`}
+ >
+ <span className="text-[12px] font-black leading-tight">{p.label}</span>
+ <span className={`text-[9px] font-bold leading-tight ${p.kind === "demand" ? "text-slate-800" : "text-blue-200"}`}>{p.badge}</span>
+ </button>
+ ))}
+ </div>
+ </div>
+ )}
+
  {/* 3x3 Grid 개편 */}
  <div className="grid grid-cols-3 gap-3">
  {CATEGORIES.map((cat) => (

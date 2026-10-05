@@ -1,0 +1,4 @@
+-- 동네 수요 투표 (운영 DB 마이그레이션 neighborhood_demand_votes 와 같다)
+-- neighborhood_votes(user_id, neighborhood, category[9종]), neighborhood_opinions(user_id, neighborhood, content<=140)
+-- 읽기·쓰기는 함수로만: set_neighborhood_demand(동, 업종[최대3], 의견) = 로그인한 본인의 동네에만, neighborhood_demand(동) = 누구나 조회.
+-- 공실별 투표(votes)는 변경 없이 공실당 1표 유지.

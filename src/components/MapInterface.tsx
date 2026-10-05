@@ -12,6 +12,8 @@ import {
 import { Vacancy } from "@/data/dummyVacancies";
 import Building3D from "./Building3D";
 import { isLaunchArea } from "@/lib/launchArea";
+import NeighborhoodDemandModal from "./NeighborhoodDemandModal";
+import { fetchNeighborhoodDemand } from "@/lib/neighborhood";
 import MyPage from "./MyPage";
 import AdminDashboard from "./AdminDashboard";
 import SpaceCurator from "./SpaceCurator";
@@ -110,8 +112,24 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  const [userVotedVacancyIds, setUserVotedVacancyIds] = useState<string[]>([]);
  const [showTutorial, setShowTutorial] = useState(false);
  const [floorPickerGroup, setFloorPickerGroup] = useState<Vacancy[] | null>(null); // 같은 건물 다층 선택
+ const [showDemand, setShowDemand] = useState(false); // 동네 수요 투표
+ const homeDong = userProfile?.home?.neighborhood || "";
  
  const mapRef = useRef<kakao.maps.Map>(null);
+
+  // 동네 투표를 먼저: 내 동네에 아직 투표하지 않았다면 이 세션에서 한 번만 자동으로 연다
+  useEffect(() => {
+    if (!homeDong || userProfile?.isGuest) return;
+    const key = `gongsil_demand_prompted_${homeDong}`;
+    try { if (sessionStorage.getItem(key)) return; } catch { /* 무시 */ }
+    let live = true;
+    fetchNeighborhoodDemand(homeDong).then((d) => {
+      if (!live || !d || !d.mine) return; // d.mine 이 null 이면 로그인 세션이 없는 사용자
+      try { sessionStorage.setItem(key, "1"); } catch { /* 무시 */ }
+      if (d.mine.categories.length === 0) setShowDemand(true);
+    });
+    return () => { live = false; };
+  }, [homeDong, userProfile?.isGuest]);
 
   useEffect(() => {
     (window as any).showAdminDashboard = () => setShowAdmin(true);
@@ -1041,6 +1059,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  </motion.button>
  </div>
  )}
+ {!isPinpointing && !selectedVacancy && homeDong && (<motion.button initial={{ scale: 0, x: 20 }} animate={{ scale: 1, x: 0 }} onClick={() => setShowDemand(true)} className="w-14 h-14 bg-white text-slate-950 rounded-2xl shadow-2xl flex flex-col items-center justify-center border-2 border-amber-400"><span className="text-xl leading-none">🗳️</span><span className="text-[8px] font-black mt-0.5">동네수요</span></motion.button>)}
  {!showDashboard && !isPinpointing && !selectedVacancy && (<motion.button initial={{ scale: 0, x: 20 }} animate={{ scale: 1, x: 0 }} onClick={() => setShowDashboard(true)} className="w-14 h-14 bg-amber-500 text-slate-950 rounded-2xl shadow-2xl flex flex-col items-center justify-center border-2 border-white"><History size={20} /><span className="text-[8px] font-black mt-0.5">상상목록</span></motion.button>)}
  <motion.button whileHover={{ scale: 1.1 }} onClick={moveToMyLocation} className="w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center text-slate-900 border border-slate-100"><LocateFixed size={28} /></motion.button>
  </div>
@@ -1291,6 +1310,20 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  </div>
  </motion.div>
  </motion.div>
+ )}
+ </AnimatePresence>
+
+ <AnimatePresence>
+ {showDemand && homeDong && (
+ <NeighborhoodDemandModal
+ key="demand"
+ neighborhood={homeDong}
+ isGuest={userProfile?.isGuest}
+ vacancies={vacancies}
+ votedVacancyIds={userVotedVacancyIds}
+ onClose={() => setShowDemand(false)}
+ onPickVacancy={(v) => { setShowDemand(false); handlePinClick(v); }}
+ />
  )}
  </AnimatePresence>
 
