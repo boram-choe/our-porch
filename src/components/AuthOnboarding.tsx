@@ -502,7 +502,7 @@ export default function AuthOnboarding({ onComplete }: { onComplete: (profile: U
                 className="text-center mb-7"
               >
                 <h1 className="text-[2.6rem] font-black text-white tracking-tighter leading-[1.1] mb-3 break-keep">
-                  이 자리에<br/><span className="text-amber-400">뭐가 생기면</span><br/>좋을까요?
+                  <span className="text-amber-400">여긴 뭐가</span><br/>생기면<br/>좋을까요?
                 </h1>
                 <p className="text-slate-400 font-bold text-sm leading-relaxed break-keep">
                   동네 빈 공간을 발견하면<br/>이웃들과 함께 상상해보세요 ✨
