@@ -240,9 +240,12 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  ? userProfile.work || userProfile.home
  : userProfile.home;
  if (!activeLoc?.lat || !activeLoc?.lng) return vacancies;
+ // 검토 전(pending) 공실은 등록한 본인에게만 보인다 (낯선 사람이 올린 글이 바로 모두에게 노출되지 않도록)
+ const myId = typeof window !== "undefined" ? localStorage.getItem("gongsil_user_id") : null;
  return vacancies.filter((v) =>
- v.status !== 'hidden' && 
- v.status !== 'merged' && 
+ (v.status !== 'pending' || (!!myId && (v as any).registered_by === myId)) &&
+ v.status !== 'hidden' &&
+ v.status !== 'merged' &&
  v.status !== 'rejected' &&
  (
  votedIds.includes(v.id) ||
@@ -404,6 +407,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  hiddenComment: v.hidden_comment,
  displayId: v.display_id,
  neighborhood: v.neighborhood,
+ registered_by: v.registered_by,
  currentVotes: Object.values(voteCounts),
  };
  });
@@ -618,6 +622,11 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  };
 
  const startDiscovery = () => {
+ if (userProfile?.isGuest) {
+ setShowSuccessToast("🔑 공실 등록은 카카오 로그인 후에 할 수 있어요. 마이페이지에서 로그아웃한 뒤 카카오로 시작해 주세요.");
+ setTimeout(() => setShowSuccessToast(null), 6000);
+ return;
+ }
  if (mapRef.current) {
  const center = mapRef.current.getCenter();
  setPinLocation({ lat: center.getLat(), lng: center.getLng() });
@@ -789,8 +798,9 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  status: "pending",
  tags: [...featureTags, "이웃발견"],
  neighborhood: neighborhood,
+ registered_by: localStorage.getItem("gongsil_user_id") || undefined,
  currentVotes: []
- };
+ } as Vacancy;
  setVacancies([newV, ...vacancies]);
  setShowAddModal(false);
  setSelectedFeatures([]);
