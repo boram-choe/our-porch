@@ -174,9 +174,14 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  const [isEntrepreneurMode, setIsEntrepreneurMode] = useState(false);
  const [showDashboard, setShowDashboard] = useState(false);
   // 화면마다 세부 주소(#/vacancy/아이디, #/mypage ...)를 주고, 뒤로 가기는 열린 화면을 닫는다 (사이트 이탈 방지)
-  const MODAL_HASH = /^#\/(vacancy|mypage|demand|register|fengshui|curator|dashboard|admin|floors|guide)(\/|$)/;
+  // 공실은 ?vacancyId=아이디 (공유·새로고침해도 같은 공실이 열린다), 나머지 화면은 #/화면이름
+  const MODAL_HASH = /^#\/(mypage|demand|register|fengshui|curator|dashboard|admin|floors|guide)$/;
+  const isScreenOpen = () => MODAL_HASH.test(window.location.hash) || new URLSearchParams(window.location.search).has("vacancyId");
+  const deepLinkPendingRef = useRef(typeof window !== "undefined" && new URLSearchParams(window.location.search).has("vacancyId"));
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // 공유 링크로 들어온 직후에는 공실 목록이 오기 전이라 주소를 정리하지 않는다
+    if (deepLinkPendingRef.current) return;
     const screenHash =
       showAdmin ? "#/admin"
       : showDashboard ? "#/dashboard"
@@ -185,26 +190,31 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
       : showFengShui ? "#/fengshui"
       : showMyPage ? "#/mypage"
       : showDemand ? "#/demand"
-      : selectedVacancy ? `#/vacancy/${selectedVacancy.id}`
       : floorPickerGroup ? "#/floors"
       : showTutorial ? "#/guide"
       : "";
-    const current = window.location.hash;
-    const base = window.location.pathname + window.location.search;
-    if (screenHash) {
-      if (current === screenHash) return;
+    const params = new URLSearchParams(window.location.search);
+    if (selectedVacancy) params.set("vacancyId", selectedVacancy.id); else params.delete("vacancyId");
+    const query = params.toString();
+    const target = window.location.pathname + (query ? `?${query}` : "") + screenHash;
+    const current = window.location.pathname + window.location.search + window.location.hash;
+    const wantOpen = !!(screenHash || selectedVacancy);
+    if (wantOpen) {
+      if (current === target) return;
       // 화면에서 화면으로 넘어갈 때는 기록을 쌓지 않고 주소만 바꾼다 (뒤로 가기 한 번이면 지도로 돌아온다)
-      if (MODAL_HASH.test(current)) window.history.replaceState({ screen: true }, "", base + screenHash);
-      else window.history.pushState({ screen: true }, "", base + screenHash);
-    } else if (MODAL_HASH.test(current)) {
-      window.history.back();
+      if (isScreenOpen()) window.history.replaceState({ screen: true }, "", target);
+      else window.history.pushState({ screen: true }, "", target);
+    } else if (isScreenOpen()) {
+      // 우리가 쌓은 기록이면 한 칸 뒤로, 링크로 바로 들어온 경우면 주소만 정리한다
+      if (window.history.state?.screen) window.history.back();
+      else window.history.replaceState(null, "", target);
     }
   }, [showFengShui, showDashboard, showAdmin, showCurator, showAddModal, selectedVacancy, showMyPage, showTutorial, showDemand, floorPickerGroup]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handlePopState = () => {
-      if (!MODAL_HASH.test(window.location.hash)) {
+      if (!isScreenOpen()) {
         setShowFengShui(false);
         setShowDashboard(false);
         setShowAdmin(false);
@@ -291,29 +301,9 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  }
  }, []);
 
- // ─── 공실 선택 상태와 브라우저 URL 딥링크 동기화 ─────────────────────────────
+ // 공실이 열리면 알림 문구를 지운다 (주소 동기화는 위의 화면 주소 효과가 맡는다)
  useEffect(() => {
- if (selectedVacancy) {
- setShowSuccessToast(null);
- // 모달이 열릴 때 브라우저 주소 표시줄에 vacancyId 동기화
- if (typeof window !== "undefined") {
- const searchParams = new URLSearchParams(window.location.search);
- if (searchParams.get("vacancyId") !== selectedVacancy.id) {
- searchParams.set("vacancyId", selectedVacancy.id);
- window.history.pushState(null, "", `${window.location.pathname}?${searchParams.toString()}`);
- }
- }
- } else {
- // 모달이 닫힐 때 브라우저 주소 표시줄에서 vacancyId 깔끔하게 제거
- if (typeof window !== "undefined") {
- const searchParams = new URLSearchParams(window.location.search);
- if (searchParams.has("vacancyId")) {
- searchParams.delete("vacancyId");
- const query = searchParams.toString();
- window.history.pushState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
- }
- }
- }
+ if (selectedVacancy) setShowSuccessToast(null);
  }, [selectedVacancy]);
 
  useEffect(() => {
@@ -436,6 +426,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  }
  }
 
+ deepLinkPendingRef.current = false;
  if (isWithinRange && found) {
  setSelectedVacancy(found);
  setMapCenter({ lat: found.lat, lng: found.lng });
@@ -449,14 +440,17 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  setShowSuccessToast("📍 공유받은 상상 조각이 회원님의 인증 동네(반경 2.5km)를 벗어나 있어 열어볼 수 없습니다.");
  searchParams.delete("vacancyId");
  const query = searchParams.toString();
- window.history.pushState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+ window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
  }
  }
+ deepLinkPendingRef.current = false;
  }
  } else {
+ deepLinkPendingRef.current = false;
  setVacancies([]);
  }
  }).catch(() => {
+ deepLinkPendingRef.current = false;
  setVacancies([]);
  });
  }
