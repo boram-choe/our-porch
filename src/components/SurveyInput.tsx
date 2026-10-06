@@ -306,6 +306,35 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
             </div>
           </div>
 
+          {initialData?.id && formData.address && (
+            <div className="p-5 md:p-6 bg-sky-50 border-2 border-sky-100 rounded-2xl md:rounded-3xl space-y-4">
+              <div>
+                <p className="text-[11px] md:text-xs font-black text-sky-700">📞 확인 도우미 (주민 제보 → 부동산 매물 확인 → 중개사 전화)</p>
+                <p className="text-[10px] md:text-[11px] font-bold text-sky-700/70 mt-1 leading-relaxed">
+                  아래 순서로 확인한 뒤, 중개사 이름·연락처·임대 조건을 이 화면에 적고 상태를 바꿔 주세요.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a href={`https://m.land.naver.com/search/result/${encodeURIComponent(formData.address)}`} target="_blank" rel="noopener noreferrer"
+                  className="px-4 py-2.5 bg-white border border-sky-200 rounded-xl text-[11px] font-black text-sky-800 hover:bg-sky-100">① 네이버부동산에서 이 주소 검색 ↗</a>
+                <a href={`https://map.kakao.com/link/map/${encodeURIComponent(formData.landmark || "공실")},${formData.lat},${formData.lng}`} target="_blank" rel="noopener noreferrer"
+                  className="px-4 py-2.5 bg-white border border-sky-200 rounded-xl text-[11px] font-black text-sky-800 hover:bg-sky-100">② 카카오맵으로 위치 보기 ↗</a>
+                <a href={`https://map.kakao.com/link/roadview/${formData.lat},${formData.lng}`} target="_blank" rel="noopener noreferrer"
+                  className="px-4 py-2.5 bg-white border border-sky-200 rounded-xl text-[11px] font-black text-sky-800 hover:bg-sky-100">③ 로드뷰로 현장 보기 ↗</a>
+              </div>
+              <div className="bg-white border border-sky-100 rounded-xl p-4 space-y-1.5">
+                <p className="text-[11px] font-black text-slate-700">전화 멘트 예시</p>
+                <p className="text-[11px] font-bold text-slate-500 leading-relaxed">
+                  &quot;안녕하세요, 동네 빈 상가에 어떤 가게가 필요한지 주민 의견을 모으는 서비스 &apos;여긴뭐가&apos;입니다.
+                  {" "}{formData.address} {formData.floor || ""} 상가가 지금 나와 있는지 확인하고 싶어서 연락드렸어요.&quot;
+                </p>
+                <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
+                  확인할 것: ① 지금 임대 중인가 ② 언제부터 비어 있었나 (2개월 이상인지) ③ 보증금·월세·관리비 ④ 담당 중개사 이름·연락처 ⑤ 주민 의견을 매물 소개에 활용해도 되는지
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             <InputField label="랜드마크 명칭" icon={Landmark} value={formData.landmark} onChange={(v: string) => setFormData({...formData, landmark: v})} placeholder="예: 무악재역 인근 건물" />
             <InputField label="해당 층수" icon={Layers} value={formData.floor} onChange={(v: string) => setFormData({...formData, floor: v})} placeholder="예: 1층" />
