@@ -18,9 +18,9 @@ export const POINT_RULES: { kind: string; label: string; points: number; note?: 
   { kind: "demand_opinion", label: "한 줄 의견 남기기", points: 100, note: "동네마다 한 번" },
   { kind: "vote", label: "빈 공간에 투표", points: 100, note: "공간마다 한 번" },
   { kind: "comment", label: "빈 공간에 의견 남기기", points: 50, note: "공간마다 한 번" },
-  { kind: "vacancy_verified", label: "내가 등록한 공실이 확인됨", points: 1000 },
-  { kind: "vacancy_longterm", label: "2개월 넘은 공실로 확인됨", points: 500, note: "추가" },
-  { kind: "movein_report", label: "가게 입점 제보가 확인됨", points: 500 },
+  { kind: "vacancy_verified", label: "내가 등록한 공실이 확인됨", points: 500 },
+  { kind: "vacancy_longterm", label: "2개월 넘은 공실로 확인되면", points: 500, note: "추가 적립" },
+  { kind: "movein_report", label: "가게 입점 제보가 확인됨", points: 300, note: "공간마다 가장 먼저 제보한 1명" },
 ];
 export const POINT_LABEL: Record<string, string> = Object.fromEntries(POINT_RULES.map((r) => [r.kind, r.label]));
 

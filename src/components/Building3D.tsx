@@ -1228,9 +1228,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </div>
  <p className="text-[11px] font-bold text-slate-400 mb-6">
  {reportType === "movein" 
- ? "현수막이나 공사 현황을 보셨나요? 정보를 나눠주세요." 
+ ? "현수막이나 공사 현황을 보셨나요? 정보를 나눠주세요."
  : "실제 현장 정보와 어떤 점이 다른가요? 상세하게 적어주세요."}
  </p>
+ {reportType === "movein" && (
+ <p className="text-[11px] font-bold text-amber-400/90 bg-amber-400/10 border border-amber-400/20 rounded-2xl px-4 py-3 mb-6 leading-relaxed break-keep">
+ 입점 사실이 확인되면 300P가 적립돼요. 다만 이 공간에 먼저 입점을 제보해 주신 이웃이 있다면, 제보해 주셔도 포인트 지급이 어려울 수 있어요.
+ </p>
+ )}
  
  <textarea 
  value={reportText} 

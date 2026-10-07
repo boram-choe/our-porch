@@ -17,3 +17,8 @@
 --
 -- 예산·주기 조정 예:  update reward_settings set budget_points = 300000, cooldown_days = 14 where id = 1;
 -- 교환 일시 중지:      update reward_settings set enabled = false where id = 1;
+--
+-- rewards_amounts_and_owner_guard (2026-10-07)
+--   - 등록자는 자기 공실의 status / vacancy_period / registered_by / display_id 등을 직접 바꿀 수 없음 (포인트 자가 승인 방지)
+--   - 공실 확인 500P, 2개월 넘은 공실로 확인되면 +500P (운영팀이 공실 기간을 '오래됐어요'로 확정할 때)
+--   - 입점 제보 300P: 같은 공실에서 가장 먼저 제보한 사람에게만 (처리 순서와 무관)

@@ -218,7 +218,7 @@ export default function AdminDashboard({
                           {statusGroup.id === 'pending' && (
                             <button
                               onClick={async () => {
-                                if (confirm('이 공실을 정상 공실로 확정하시겠습니까?\\n확정 시 제보자에게 1,000P(2개월 넘은 공실이면 +500P)가 자동으로 적립됩니다.')) {
+                                if (confirm('이 공실을 정상 공실로 확정하시겠습니까?\\n확정 시 제보자에게 500P가 자동으로 적립됩니다. (공실 기간을 "오래됐어요"로 확인해 두면 500P가 추가됩니다)')) {
                                   const res = await saveVacancy({
                                     ...v,
                                     userId: v.registered_by,
