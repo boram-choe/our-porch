@@ -10,7 +10,7 @@ import {
 import { UserProfile, loadSavedProfile, PERSONAS } from "./AuthOnboarding";
 import FeasibilityReport from "./FeasibilityReport";
 import { fetchUserReports, DbReport, fetchUserNotifications, markNotificationsRead, DbNotification, restoreTeamSession } from "@/lib/db";
-import { fetchGifticonRequests, purchaseGifticon, STORE_ITEMS, GifticonRequest } from "@/lib/gifticon";
+import { fetchMyPoints, requestReward, STORE_ITEMS, POINT_RULES, MyPoints } from "@/lib/gifticon";
 import { supabase } from "@/lib/supabase";
 
 const VOTES_KEY = "gongsil_user_votes";
@@ -58,7 +58,8 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
   const [dbComments, setDbComments] = useState<any[]>([]);
   const [dbReports, setDbReports] = useState<DbReport[]>([]);
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
-  const [gifticonRequests, setGifticonRequests] = useState<GifticonRequest[]>([]);
+  const [points, setPoints] = useState<MyPoints | null>(null);
+  const [purchaseMessage, setPurchaseMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [reportedVacancies, setReportedVacancies] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<DbNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -114,6 +115,11 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   }, [activeTab]);
 
+  // 포인트는 서버 장부(point_events)에서 읽는다
+  useEffect(() => {
+    fetchMyPoints().then(setPoints);
+  }, []);
+
   // 2. Load Supabase activity once on mount
   useEffect(() => {
     async function loadSupabaseActivity() {
@@ -162,7 +168,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
         title: v.comment || v.category,
         location: matched ? (matched.landmark || matched.address) : "우리동네 공실",
         timestamp: v.created_at,
-        points: 50,
+        points: 100,
         vacancyId: v.vacancy_id
       };
     }),
@@ -180,11 +186,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
     })
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  const approvedReports = reportedVacancies.filter(v => v.status === "available" || v.status === "completed");
-  const approvedReportsCount = dbReports.filter(r => r.status === "resolved").length;
-  const totalEarnedPoints = (dbVotes.length * 50) + (dbComments.length * 50) + (approvedReports.length * 500) + (approvedReportsCount * 500);
-  const totalSpentPoints = gifticonRequests.reduce((sum, req) => sum + req.price, 0);
-  const totalPoints = totalEarnedPoints - totalSpentPoints;
+  const totalPoints = points?.balance ?? 0;
 
   if (!userProfile) return null;
 
@@ -643,7 +645,7 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                       </div>
                       <div className="flex flex-col items-start gap-1">
                         <p className="text-xl font-black text-slate-900">{totalPoints} P</p>
-                        <span className="text-[9px] font-bold text-amber-400 bg-amber-50 px-1.5 py-0.5 rounded-md group-hover:bg-amber-100 transition-all">5,000P부터 사용 가능</span>
+                        <span className="text-[9px] font-bold text-amber-400 bg-amber-50 px-1.5 py-0.5 rounded-md group-hover:bg-amber-100 transition-all">4,500P부터 기프티콘 교환</span>
                       </div>
                     </button>
                     <button 
@@ -675,12 +677,12 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                         <h4 className="text-[11px] font-black text-amber-400 uppercase tracking-widest leading-none">상상 포인트 혜택 안내</h4>
                       </div>
                       <p className="text-xs font-bold text-slate-200 leading-relaxed break-keep">
-                        이웃님이 모으신 상상 포인트는 <span className="text-amber-400 font-black">기프티콘</span>으로 교환해 드릴 예정이며, 향후 '여긴뭐가'를 통해 실제 오프라인 골목에 오픈하는 매장의 <span className="text-amber-400 font-black">할인 쿠폰</span>으로도 교환될 수 있게 준비 중입니다! 🎁
+                        활동할 때마다 상상 포인트가 쌓이고, <span className="text-amber-400 font-black">4,500P</span>가 되면 <span className="text-amber-400 font-black">스타벅스 아이스 아메리카노</span> 기프티콘을 문자로 보내드려요. 🎁
                       </p>
-                      <div className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-[10px] text-slate-500 font-black tracking-tighter">
-                        <span>🗳️ 투표참여 10P</span>
-                        <span>•</span>
-                        <span>💬 의견작성 10P</span>
+                      <div className="mt-4 pt-3 border-t border-white/5 grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-slate-400 font-black tracking-tighter">
+                        {POINT_RULES.slice(0, 6).map((r) => (
+                          <span key={r.kind} className="flex justify-between gap-2"><span className="truncate">{r.label}</span><span className="text-amber-400 flex-shrink-0">+{r.points}P</span></span>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -870,6 +872,22 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                </span>
              </div>
              
+             {/* 교환까지 진행 상황 */}
+             <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+               <div className="flex items-center justify-between text-[11px] font-black text-slate-500 mb-2">
+                 <span>스타벅스 기프티콘까지</span>
+                 <span className="text-amber-600">{Math.min(totalPoints, 4500).toLocaleString()} / 4,500P</span>
+               </div>
+               <div className="h-3 rounded-full bg-slate-100 overflow-hidden">
+                 <div className="h-full rounded-full bg-amber-400 transition-all" style={{ width: `${Math.min(100, (totalPoints / 4500) * 100)}%` }} />
+               </div>
+               {!points && <p className="mt-2 text-[10px] font-bold text-slate-400">카카오로 로그인하면 포인트가 쌓여요.</p>}
+             </div>
+
+             {purchaseMessage && (
+               <p className={`px-1 text-xs font-black ${purchaseMessage.ok ? "text-emerald-600" : "text-rose-500"}`}>{purchaseMessage.text}</p>
+             )}
+
              {/* 상점 아이템 */}
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                {STORE_ITEMS.map((item) => (
@@ -897,20 +915,35 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
                ))}
              </div>
 
+             {/* 포인트 모으는 법 */}
+             <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+               <h4 className="text-sm font-black text-slate-900 mb-3">포인트 모으는 법</h4>
+               <ul className="space-y-2">
+                 {POINT_RULES.map((r) => (
+                   <li key={r.kind} className="flex items-center justify-between text-xs font-bold text-slate-600">
+                     <span>{r.label}{r.note && <span className="ml-1.5 text-[10px] text-slate-400">({r.note})</span>}</span>
+                     <span className="font-black text-amber-600">+{r.points.toLocaleString()}P</span>
+                   </li>
+                 ))}
+               </ul>
+             </div>
+
              {/* 교환 내역 */}
-             {gifticonRequests.length > 0 && (
+             {points && points.requests.length > 0 && (
                <div className="mt-8">
                  <h4 className="text-sm font-black text-slate-900 mb-4 px-1">기프티콘 교환 내역</h4>
                  <div className="space-y-3">
-                   {gifticonRequests.map(req => (
+                   {points.requests.map(req => (
                      <div key={req.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                        <div>
                          <p className="text-xs font-black text-slate-900">{req.item_name}</p>
                          <p className="text-[10px] font-bold text-slate-400">{new Date(req.created_at).toLocaleString()}</p>
                        </div>
                        <div className="text-right">
-                         <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">발송 완료</span>
-                         <p className="text-[10px] font-bold text-slate-400 mt-1">-${req.price.toLocaleString()} P</p>
+                         <span className={`text-[10px] font-black px-2 py-1 rounded-md ${req.status === "sent" ? "text-emerald-600 bg-emerald-50" : req.status === "rejected" ? "text-rose-600 bg-rose-50" : "text-amber-700 bg-amber-50"}`}>
+                           {req.status === "sent" ? "발송 완료" : req.status === "rejected" ? "반려 (포인트 반환)" : "발송 준비 중"}
+                         </span>
+                         <p className="text-[10px] font-bold text-slate-400 mt-1">{req.status === "rejected" ? "" : `-${req.points.toLocaleString()} P`}</p>
                        </div>
                      </div>
                    ))}
@@ -1120,6 +1153,42 @@ export default function MyPage({ onLogout, isEntrepreneurMode, onModeChange, onC
           </motion.div>
         )}
       </AnimatePresence>
+
+      {showPhoneModal && selectedGifticon && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-950/80" role="dialog" aria-modal="true" aria-label="기프티콘 교환 신청">
+          <div className="w-full max-w-sm bg-white rounded-3xl p-6 space-y-4 text-slate-900">
+            <div>
+              <h3 className="text-lg font-black">{selectedGifticon.name}</h3>
+              <p className="text-xs font-bold text-slate-500 mt-1">{selectedGifticon.price.toLocaleString()}P로 교환해요. 기프티콘은 아래 번호로 문자로 보내드려요.</p>
+            </div>
+            <input
+              type="tel" inputMode="numeric" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="010-1234-5678"
+              className="w-full border-2 border-slate-100 focus:border-amber-400 outline-none rounded-2xl px-4 py-3 text-sm font-bold"
+            />
+            <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
+              번호는 기프티콘 발송에만 쓰고, 발송이 끝나면 더 쓰지 않아요. 한 달에 한 번 교환할 수 있어요.
+            </p>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setShowPhoneModal(false)} className="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-500 text-sm font-black">취소</button>
+              <button
+                type="button" disabled={isPurchasing}
+                onClick={async () => {
+                  setIsPurchasing(true);
+                  const res = await requestReward(selectedGifticon.id, phoneNumber);
+                  setIsPurchasing(false);
+                  setPurchaseMessage({ ok: res.success, text: res.message });
+                  setShowPhoneModal(false);
+                  if (res.success) setPoints(await fetchMyPoints());
+                }}
+                className="flex-1 py-3 rounded-2xl bg-amber-400 text-slate-950 text-sm font-black disabled:opacity-50"
+              >
+                {isPurchasing ? "신청 중" : "교환 신청"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

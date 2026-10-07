@@ -1,0 +1,19 @@
+-- 이 파일은 MCP(apply_migration)로 이미 적용한 변경의 기록입니다. (전체 SQL은 Supabase 대시보드 > Database > Migrations 에서 확인)
+--
+-- vacancies_insert_requires_login (2026-10-07)
+--   - "Allow anyone to insert vacancies" 정책 삭제: 로그인하지 않은 사용자는 공실 등록 불가
+--   - vacancies_guard(): 비관리자 INSERT 는 status='pending', registered_by=auth.uid() 로 강제
+--
+-- points_and_rewards (2026-10-07)
+--   - point_events(user_id, kind, ref, points)  unique(user_id, kind, ref): 활동별 1회 적립 장부
+--   - reward_requests: 기프티콘 교환 신청 (pending / sent / rejected)
+--   - reward_settings: 예산 한도(budget_points, 기본 500000), 교환 주기(cooldown_days, 기본 30), enabled
+--   - 적립 트리거: votes 100, comments 50, user_profiles(가입) 300,
+--     vacancies pending→available/completed 1000 (+공실 오래됨 500), reports movein resolved 500
+--   - set_neighborhood_demand(): 동네 수요 투표 200, 한 줄 의견 100
+--   - my_points(), request_reward(item, phone)  (authenticated 전용)
+--   - staff_reward_requests(token), staff_reward_mark(token, id, status, note)  (CEO/OPS)
+--   - 기존 활동 소급 적립
+--
+-- 예산·주기 조정 예:  update reward_settings set budget_points = 300000, cooldown_days = 14 where id = 1;
+-- 교환 일시 중지:      update reward_settings set enabled = false where id = 1;

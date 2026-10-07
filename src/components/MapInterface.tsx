@@ -807,7 +807,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  
  // 풍수지리 격식 가져와 성공 멘트에 주입
  const fsInfo = getGeneralBuildingFengShui(newV);
- setShowSuccessToast(`🎉 공간 제보가 접수되었습니다! (검토 후 500P 지급)\n이곳은 [${fsInfo.grade}] 명당이네요. 어떤 공간으로 바꿀지 먼저 투표해 보세요!`);
+ setShowSuccessToast(`🎉 공간 제보가 접수되었습니다! (확인되면 1,000P 적립)\n이곳은 [${fsInfo.grade}] 명당이네요. 어떤 공간으로 바꿀지 먼저 투표해 보세요!`);
  
  // 3D 상세 분석 뷰로 자동 전환!
  setSelectedVacancy(newV);
@@ -1531,7 +1531,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  <div>
  <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">TIP 3 &middot; 풍수와 동네 기운 살리기</p>
  <p className="text-sm font-black text-slate-900 leading-snug">나쁜 음기를 뿜는 빈 상가를 제보하고,<br />우리 집 풍수 운세와 동네 명당을 확인해 보세요!</p>
- <p className="text-[11px] text-slate-500 font-bold mt-1">등록 시 기프티콘용 500P 지급 🎁</p>
+ <p className="text-[11px] text-slate-500 font-bold mt-1">확인되면 1,000P 적립 · 4,500P 모으면 커피 기프티콘 🎁</p>
  </div>
  </div>
  </div>
@@ -1593,7 +1593,7 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  className="w-full mt-4 py-3.5 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black rounded-xl shadow-lg shadow-amber-400/10 active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
  >
  <Plus size={18} strokeWidth={3} />
- 빈 공간 등록하고 500P받기(등록 확정시 바로 지급)
+ 빈 공간 등록하고 1,000P 받기 (확인되면 적립)
  </button>
  </motion.div>
  </div>

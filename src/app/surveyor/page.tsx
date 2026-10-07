@@ -1,6 +1,7 @@
 "use client";
 
 import SignupSourcesPanel from "@/components/SignupSourcesPanel";
+import RewardRequestsPanel from "@/components/RewardRequestsPanel";
 import FallbackPatrol from "@/components/FallbackPatrol";
 import ListingCandidatesPanel from "@/components/ListingCandidatesPanel";
 import { KAKAO_APP_KEY, KAKAO_LIBRARIES } from "@/lib/kakaoConfig";
@@ -636,6 +637,9 @@ export default function SurveyorPage() {
 
               {/* 가입 경로 집계 + 추적 링크 (CEO/OPS 전용) */}
               {(currentUser?.role === "CEO" || currentUser?.role === "OPS") && <SignupSourcesPanel />}
+
+              {/* 기프티콘 지급 대기 (CEO/OPS 전용) */}
+              {(currentUser?.role === "CEO" || currentUser?.role === "OPS") && <RewardRequestsPanel />}
 
               {/* 3. 인사기록부 (CEO/OPS 전용) */}
               {(currentUser?.role === "CEO" || currentUser?.role === "OPS") && (

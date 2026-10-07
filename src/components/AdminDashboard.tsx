@@ -218,7 +218,7 @@ export default function AdminDashboard({
                           {statusGroup.id === 'pending' && (
                             <button
                               onClick={async () => {
-                                if (confirm('이 공실을 정상 공실로 확정하시겠습니까?\\n확정 시 제보자에게 500P가 지급됩니다.')) {
+                                if (confirm('이 공실을 정상 공실로 확정하시겠습니까?\\n확정 시 제보자에게 1,000P(2개월 넘은 공실이면 +500P)가 자동으로 적립됩니다.')) {
                                   const res = await saveVacancy({
                                     ...v,
                                     userId: v.registered_by,
@@ -226,7 +226,7 @@ export default function AdminDashboard({
                                   });
                                   if (!res.error && onUpdateVacancy) {
                                     onUpdateVacancy({ ...v, status: 'available' });
-                                    setNotice('✅ 정상 공실로 확정되었습니다. 제보자에게 500P가 지급됩니다.');
+                                    setNotice('✅ 정상 공실로 확정되었습니다. 제보자에게 포인트가 자동으로 적립됩니다.');
                                   } else {
                                     setNotice('확정 처리 중 오류가 발생했습니다: ' + res.error);
                                   }

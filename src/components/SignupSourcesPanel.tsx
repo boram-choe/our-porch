@@ -13,6 +13,9 @@ type Stats = { total_users: number; tracked: number; last7: number; by_source: S
 
 // 자주 쓰는 채널. 직접 입력도 가능하다.
 const PRESETS = [
+  { src: "reels", label: "인스타 릴스" },
+  { src: "shorts", label: "유튜브 쇼츠" },
+  { src: "tiktok", label: "틱톡" },
   { src: "poster", label: "포스터 QR" },
   { src: "band", label: "상가번영회·밴드" },
   { src: "kakao", label: "카카오 채널" },
