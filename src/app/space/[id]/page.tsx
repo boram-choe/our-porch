@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { isLaunchArea } from "@/lib/launchArea";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import Logo from "@/components/Logo";
 
@@ -66,7 +65,6 @@ export default async function SpacePage({ params }: Params) {
   const name = v.landmark || v.address || "이름 없는 공간";
   const floor = v.floor ? (/층|지하/.test(v.floor) ? v.floor : `${v.floor}층`) : null;
   const status = STATUS_LABEL[v.status || "available"] ?? STATUS_LABEL.available;
-  const comingSoon = !!v.neighborhood && !isLaunchArea(v.neighborhood);
   const photo = (v.images ? String(v.images).split(",")[0] : v.image_url) || null;
   const top = categories[0];
   const cardUrl = `${SITE}/space/${id}?src=space_card`;
@@ -94,9 +92,6 @@ export default async function SpacePage({ params }: Params) {
           </p>
           <div className="flex flex-wrap gap-2">
             <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${status.tone}`}>{status.text}</span>
-            {comingSoon && (
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-200 text-slate-700">준비 중인 지역</span>
-            )}
           </div>
         </header>
 

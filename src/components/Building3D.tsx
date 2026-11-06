@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "./MyPage";
 import { saveVote, updateVacancyRemarks, submitDisputeReport } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
-import { isLaunchArea } from "@/lib/launchArea";
 import { fetchNeighborhoodDemand, categoryIdOfLabel } from "@/lib/neighborhood";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "../lib/comments";
 import { getGeneralBuildingFengShui, getPersonaFengShuiTip } from "@/lib/fengShuiEngine";
@@ -639,9 +638,6 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
  <p className="text-amber-200 font-bold text-xs uppercase tracking-widest">{vacancy.floor?.includes('층') || vacancy.floor?.includes('지하') ? vacancy.floor : `${vacancy.floor || '1'}층`} 상상 공간</p>
  </div>
- {vacancy.neighborhood && !isLaunchArea(vacancy.neighborhood) && (
- <p className="mt-2 inline-block bg-slate-700 text-slate-100 text-[11px] font-black px-2 py-0.5 rounded-full">준비 중인 지역 · 정식 집계 제외</p>
- )}
  </div>
  </div>
 
