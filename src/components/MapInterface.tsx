@@ -20,7 +20,7 @@ import SpaceCurator from "./SpaceCurator";
 import SurveyInput from "./SurveyInput";
 import FengShuiTarot from "./FengShuiTarot";
 import { UserProfile, loadSavedProfile } from "./AuthOnboarding";
-import { fetchVacancies, saveVacancy } from "@/lib/db";
+import { fetchVacancies, saveVacancy, fetchVacancyHolds } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { getGeneralBuildingFengShui } from "@/lib/fengShuiEngine";
 
@@ -411,6 +411,11 @@ export default function MapInterface({ userProfile, onProfileUpdate }: { userPro
  };
  });
 
+ // 정보 상이 신고로 투표가 일시 정지된 공실 표시
+ const holdIds = await fetchVacancyHolds();
+ if (holdIds.length > 0) {
+ vacanciesWithVotes.forEach((v) => { (v as any).onHold = holdIds.includes(v.id); });
+ }
  setVacancies(vacanciesWithVotes);
 
  // ─── 공유 링크(딥링크)로 유입되었을 때 해당 공실 검증 및 열기 ─────────

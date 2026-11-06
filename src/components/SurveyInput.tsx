@@ -506,6 +506,11 @@ export default function SurveyInput({ allVacancies, initialData, onClose, onSave
                   <p className="text-[11px] font-bold text-rose-600/80 leading-relaxed mt-0.5">
                     주민분들이 지도에서 보고 수정을 제안한 실시간 제보입니다. 답변을 작성하여 제보를 해결 처리해 주세요.
                   </p>
+                  {pendingReports.some((r) => r.report_type === 'dispute') && (
+                    <p className="text-[11px] font-black text-rose-700 leading-relaxed mt-1">
+                      ⏸ 정보 상이 신고가 있어 이 공실의 투표가 일시 정지되어 있어요. 확인한 뒤 해결 처리하면 투표가 다시 열립니다.
+                    </p>
+                  )}
                 </div>
               </div>
 

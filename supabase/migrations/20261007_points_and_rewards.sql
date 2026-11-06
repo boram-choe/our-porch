@@ -22,3 +22,11 @@
 --   - 등록자는 자기 공실의 status / vacancy_period / registered_by / display_id 등을 직접 바꿀 수 없음 (포인트 자가 승인 방지)
 --   - 공실 확인 500P, 2개월 넘은 공실로 확인되면 +500P (운영팀이 공실 기간을 '오래됐어요'로 확정할 때)
 --   - 입점 제보 300P: 같은 공실에서 가장 먼저 제보한 사람에게만 (처리 순서와 무관)
+--
+-- dispute_vote_hold / dispute_vote_hold_caller_check (2026-11-06)
+--   - moderation_settings: dispute_hold_threshold(기본 1명), max_pending_disputes_per_user(기본 3건)
+--   - 처리 전(pending) '정보 상이'(dispute) 신고를 낸 서로 다른 사용자 수가 기준 이상이면 vacancy_on_hold() = true
+--   - 정지 중에는 votes 새 투표·수정(삭제) 불가 (기존 투표는 보존), 신고를 해결 처리(resolved)하면 자동 해제
+--   - vacancy_holds(): 정지된 공실 아이디 목록 (anon 가능)
+--   - reports 등록은 로그인한 본인 이름으로만 가능 (비로그인·남의 이름 불가)
+--   - 기준 조정 예: update moderation_settings set dispute_hold_threshold = 2 where id = 1;

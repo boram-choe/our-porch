@@ -663,6 +663,13 @@ export interface DbReport {
   address?: string;
 }
 
+/** 정보 상이 신고가 들어와 투표가 일시 정지된 공실 아이디 목록 */
+export async function fetchVacancyHolds(): Promise<string[]> {
+  const { data, error } = await supabase.rpc('vacancy_holds');
+  if (error || !Array.isArray(data)) return [];
+  return data as string[];
+}
+
 export async function submitDisputeReport(report: {
   vacancyId: string;
   userId: string;

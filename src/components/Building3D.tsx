@@ -5,7 +5,7 @@ import { Vacancy, VoteItem } from "@/data/dummyVacancies";
 import { X, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Sparkles, ShoppingBag, Coffee, Utensils, Scissors, Stethoscope, Dumbbell, GraduationCap, Camera as CameraIcon, Gift, Share2, MessageSquare, Heart, Send, Briefcase, MapPin, Maximize, Clock, Star, Info, ShieldCheck, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { recordVote } from "./MyPage";
-import { saveVote, updateVacancyRemarks, submitDisputeReport } from "@/lib/db";
+import { saveVote, updateVacancyRemarks, submitDisputeReport, fetchVacancyHolds } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { fetchNeighborhoodDemand, categoryIdOfLabel } from "@/lib/neighborhood";
 import { Comment, fetchComments, addComment, toggleCommentLike, reportComment } from "../lib/comments";
@@ -90,6 +90,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  const [reportType, setReportType] = useState<"movein" | "dispute" | null>(null);
  const [reportText, setReportText] = useState("");
  const [reportSubmitted, setReportSubmitted] = useState(false);
+ const [reportNotice, setReportNotice] = useState<string | null>(null);
  const [inputValue, setInputValue] = useState("");
  const [showRealtor, setShowRealtor] = useState(false);
  
@@ -346,6 +347,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
 
  const handleVoteSubmit = async (e?: React.FormEvent, customBrand?: string, customCat?: string) => {
  if (userProfile?.isGuest) return; // 게스트: 조용히 차단
+ if ((vacancy as any).onHold) return; // 정보 확인 중인 공실은 투표 정지
  if (e) e.preventDefault();
  const brand = (customBrand || inputValue).trim();
  if (!brand) return;
@@ -398,25 +400,32 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  onVacancyUpdate(updated);
  recordVote(brand, updated.landmark || updated.address);
 
- // 포인트 적립 토스트 활성화
- setShowPointsToast(true);
- setTimeout(() => setShowPointsToast(false), 3500);
-
  try {
  const userId = localStorage.getItem("gongsil_user_id");
  if (userId) {
  const catInfo = CATEGORIES.find(c => c.id === catId);
- await saveVote({
+ const saved = await saveVote({
  vacancyId: vacancy.id,
  userId,
  category: catInfo?.label || brand,
  categoryIcon: catInfo ? undefined : undefined,
  comment: brand,
  });
+ if (!saved) {
+ // 저장되지 않았다: 화면에 먼저 반영한 투표를 되돌린다. 정보 확인 중으로 정지됐으면 안내한다
+ if (prevVotedBrand) localStorage.setItem(prevVoteKey, prevVotedBrand); else localStorage.removeItem(prevVoteKey);
+ const holds = await fetchVacancyHolds();
+ onVacancyUpdate({ ...vacancy, onHold: holds.includes(vacancy.id) } as typeof vacancy);
+ return;
+ }
  }
  } catch (e) {
  console.warn("투표 Supabase 저장 실패:", e);
  }
+
+ // 포인트 적립 토스트 (저장이 끝난 뒤에만)
+ setShowPointsToast(true);
+ setTimeout(() => setShowPointsToast(false), 3500);
  };
 
  const handleCategorySelect = (catId: string) => {
@@ -429,7 +438,28 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  };
 
  const submitReport = async (type: string, content?: string) => {
+ setReportNotice(null);
+ // 제보는 로그인한 본인 이름으로만 접수된다
+ if (userProfile?.isGuest) { setReportNotice("제보는 카카오 로그인 후에 할 수 있어요."); return; }
+ const userId = typeof window !== "undefined" ? localStorage.getItem("gongsil_user_id") : null;
+ if (!userId) { setReportNotice("로그인 정보를 찾지 못했어요. 로그아웃 후 카카오로 다시 로그인해 주세요."); return; }
+
  const reportTextRaw = content || (type === 'dispute' ? '다른 가게가 생겼어요' : '');
+
+ // 1. 구조화된 제보 테이블(reports)에 먼저 저장해서, 저장되지 않았는데 접수됐다고 보이지 않게 한다
+ const saved = await submitDisputeReport({
+ vacancyId: vacancy.id,
+ userId,
+ reportType: type as 'dispute' | 'movein',
+ content: reportTextRaw
+ });
+ if (saved.error) {
+ if (saved.error.includes('too_many_pending_disputes')) setReportNotice("확인 중인 신고가 이미 3건 있어요. 확인이 끝난 뒤에 다시 신고해 주세요.");
+ else if (saved.error.includes('row-level security')) setReportNotice("로그인이 풀렸어요. 로그아웃 후 카카오로 다시 로그인해 주세요.");
+ else setReportNotice("제보를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
+ return;
+ }
+
  const prefix = type === 'movein' ? '[신고접수: 입점소식]' : '[신고접수: 정보상이]';
  const cleanContent = `${prefix} ${reportTextRaw}`;
 
@@ -445,31 +475,23 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  timestamp: Date.now()
  };
 
+ // 정보 상이 신고가 접수되면 이 공실의 투표는 확인이 끝날 때까지 정지된다
+ const holds = type === 'dispute' ? await fetchVacancyHolds() : [];
  const updated = {
  ...vacancy,
  surveyRemarks: newRemarks,
- reports: [...(vacancy.reports || []), newReport]
- };
+ reports: [...(vacancy.reports || []), newReport],
+ onHold: type === 'dispute' ? holds.includes(vacancy.id) : (vacancy as any).onHold,
+ } as typeof vacancy;
 
  onVacancyUpdate(updated);
  setReportSubmitted(true);
 
  try {
- // 1. 공실의 surveyRemarks 업데이트
+ // 2. 공실의 surveyRemarks 업데이트
  await updateVacancyRemarks(vacancy.id, newRemarks);
- 
- // 2. 구조화된 제보 테이블(reports)에 신규 데이터 삽입
- const userId = (typeof window !== "undefined" ? localStorage.getItem("gongsil_user_id") : null) || "anonymous_user";
- await submitDisputeReport({
- vacancyId: vacancy.id,
- userId: userId,
- reportType: type as 'dispute' | 'movein',
- content: reportTextRaw
- });
-
- console.log("Supabase에 제보 정보 및 구조화 데이터가 성공적으로 반영되었습니다.");
  } catch (e) {
- console.warn("제보 Supabase 반영 실패:", e);
+ console.warn("제보 메모 반영 실패:", e);
  }
  };
 
@@ -779,6 +801,14 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </p>
  </div>
  </motion.div>
+ ) : (vacancy as any).onHold && votingStep !== "results" ? (
+ <motion.div key="hold-msg" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-6 bg-white/5 border border-amber-400/30 rounded-[2rem] text-center space-y-3">
+ <p className="text-base font-black text-amber-400">정보를 확인하고 있어요</p>
+ <p className="text-[12px] font-bold text-slate-300 leading-relaxed break-keep">
+ 이 공간에 대한 제보가 들어와서, 확인이 끝날 때까지 투표를 잠시 쉬고 있어요. 지금까지의 투표는 그대로 남아 있어요.
+ </p>
+ <button onClick={() => setVotingStep("results")} className="px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 text-xs font-black">이웃들의 투표 보기</button>
+ </motion.div>
  ) : votingStep === "category" ? (
  <motion.div key="cats" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex flex-col gap-4">
  
@@ -1012,7 +1042,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  <ShieldCheck size={14} /> 상상 참여 권장
  </p>
  <p className="text-[11px] font-bold text-slate-300 leading-relaxed break-keep">
- 지금 <span className="text-amber-400 font-black">카카오 계정으로 로그인</span>하시면 동네 빈 공간 투표와 의견 작성에 참여하고, 오프라인 오픈 매장에서 사용 가능한 <span className="text-amber-400 font-black">상상 할인 포인트(건당 10P)</span>를 바로 모으실 수 있어요! 🔐
+ 지금 <span className="text-amber-400 font-black">카카오 계정으로 로그인</span>하시면 동네 빈 공간 투표와 의견 작성에 참여하고, <span className="text-amber-400 font-black">상상 포인트</span>를 모아 4,500P가 되면 스타벅스 기프티콘으로 바꿀 수 있어요! 🔐
  </p>
  </div>
  )}
@@ -1245,9 +1275,12 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  className="w-full px-6 py-5 bg-slate-950/95 border border-white/10 rounded-3xl focus:outline-none focus:ring-4 focus:ring-amber-400/20 font-bold resize-none mb-6 text-white placeholder-slate-600 text-sm" 
  />
  
+ {reportNotice && (
+ <p className="mb-4 text-[12px] font-black text-rose-400 leading-relaxed break-keep">{reportNotice}</p>
+ )}
  <div className="flex gap-4">
- <button 
- onClick={() => setReportMode("choice")} 
+ <button
+ onClick={() => setReportMode("choice")}
  className="flex-1 py-4.5 bg-white/5 border border-white/10 text-slate-300 font-black rounded-2xl text-sm hover:bg-white/30 transition-all"
  >
  돌아가기
@@ -1492,7 +1525,7 @@ export default function Building3D({ vacancy, onClose, onVacancyUpdate, hasVoted
  </div>
  <div>
  <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-0.5">상상 포인트 적립!</p>
- <p className="text-sm font-black text-white">+10P 상상 포인트가 적립되었습니다! 🎁</p>
+ <p className="text-sm font-black text-white">참여 완료! 포인트는 마이페이지에서 확인해요 🎁</p>
  </div>
  </motion.div>
  )}
